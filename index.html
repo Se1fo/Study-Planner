@@ -147,12 +147,12 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area
 .tabs em{font-style:normal;font-size:.7rem;background:var(--line);border-radius:10px;padding:1px 6px;margin-left:4px}
 #hwCount{background:var(--eng);color:#fff}
 @media(max-width:400px){.tabs button{font-size:.8rem}.tabs em{margin-left:2px;padding:1px 5px}}
-#pWeek,#pHw,#pRem,#pLeft,#pSet{display:none}
+#pWeek,#pTodo,#pSubj,#pSet{display:none}
 body[data-view="set"] #pSet{display:block}
 body[data-view="set"] .tabwrap,body[data-view="search"] .tabwrap{display:none}
 body[data-view="search"] #pSearch{display:block}
 #pSearch{display:none}
-body[data-view="week"] #pWeek,body[data-view="hw"] #pHw,body[data-view="rem"] #pRem,body[data-view="left"] #pLeft{display:block}
+body[data-view="week"] #pWeek,body[data-view="todo"] #pTodo,body[data-view="subj"] #pSubj{display:block}
 .numin{width:3.4ch;border:0;border-bottom:2px dashed transparent;background:transparent;padding:0;font-size:2.2rem;font-weight:700;color:var(--c);line-height:1.1;-moz-appearance:textfield}
 .numin::-webkit-inner-spin-button,.numin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .numin:hover,.numin:focus{border-bottom-color:var(--c);outline:none}
@@ -332,6 +332,57 @@ li.sr .sdot{width:10px;height:10px;border-radius:50%;background:var(--c);flex:no
 li.sr .chev{color:var(--muted);font-size:1.3rem;padding:0 4px}
 li.sr:active{opacity:.6}
 mark{background:color-mix(in srgb,var(--hist) 35%,transparent);color:inherit;border-radius:3px;padding:0 1px}
+.todoseg{display:flex;width:100%;margin-bottom:14px}
+.todoseg button{flex:1;padding:8px 4px;font-size:.85rem}
+.todoseg em{font-style:normal;font-size:.68rem;background:var(--line);border-radius:10px;padding:1px 6px;margin-left:3px}
+.todoseg em[hidden]{display:none}
+#sHw[hidden],#sEx[hidden],#sRem[hidden],#subjList[hidden],#subjDetail[hidden]{display:none}
+.fgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.fgrid>*{min-width:0}
+.due{min-width:0;overflow:hidden}
+.due span{flex:none}
+.due input{flex:1;min-width:0;width:100%;font-size:.9rem;-webkit-appearance:none;appearance:none;text-align:left}
+.due input::-webkit-date-and-time-value{text-align:left}
+.btn.full{width:100%;padding:11px}
+.subj[data-subj]{cursor:pointer}
+.subj .opn{font-size:.75rem;color:var(--muted);margin-left:auto;padding-left:8px;font-weight:600}
+.name{display:flex;align-items:center}
+/* subject page */
+.sdhead{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.sdhead h2{margin:0;font-size:1.5rem;display:flex;align-items:center;gap:8px}
+.sdhead h2 i{width:14px;height:14px;border-radius:50%;background:var(--c)}
+.sdsum{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.sdsum span{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:.85rem;color:var(--muted)}
+.sdsum b{color:var(--ink);font-size:1rem;margin-right:4px}
+.nlist{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.ncard{display:flex;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px;cursor:pointer;box-shadow:var(--shadow)}
+.ncard:active{transform:scale(.98)}
+.ncard .nt{flex:1;min-width:0}
+.ncard b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ncard small{display:block;color:var(--muted);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ncard .thumb{width:52px;height:52px;border-radius:10px;object-fit:cover;flex:none;background:var(--soft)}
+.newnote{width:100%;margin-bottom:12px}
+.neditor{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow)}
+.neditor .ntitle{width:100%;border:0;background:none;color:var(--ink);font:inherit;font-size:1.3rem;font-weight:700;padding:4px 0;outline:none}
+.neditor .ntext{width:100%;min-height:180px;border:0;background:none;color:var(--ink);font:inherit;font-size:1rem;line-height:1.55;resize:none;outline:none;padding:6px 0}
+.neditor .nmeta{font-size:.75rem;color:var(--muted);margin-bottom:4px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:10px}
+.pgrid img,.pgrid .addph{width:100%;aspect-ratio:1;border-radius:12px;object-fit:cover;background:var(--soft);cursor:pointer}
+.addph{border:1.5px dashed var(--line);display:grid;place-items:center;color:var(--muted);font:inherit;font-size:.8rem;font-weight:600;text-align:center}
+.nacts{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.nacts .danger{color:var(--eng)}
+.viewer{position:fixed;inset:0;z-index:45;background:rgba(0,0,0,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:calc(20px + env(safe-area-inset-top,0px)) 16px calc(20px + env(safe-area-inset-bottom,0px))}
+.viewer[hidden]{display:none}
+.viewer img{max-width:100%;max-height:78vh;border-radius:12px;object-fit:contain}
+.vbar{display:flex;gap:10px;width:100%;max-width:420px}
+.vbar .btn{flex:1}
+.viewer .btn.ghost{color:#fff;border-color:rgba(255,255,255,.3)}
+.pgrow{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:.82rem;color:var(--muted);cursor:text}
+.pgrow em{font-style:normal;opacity:.6;font-size:.75rem}
+.pgin{width:4.2em;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:8px;padding:4px 6px;font:inherit;font-size:.9rem;font-weight:600;text-align:center;-moz-appearance:textfield}
+.pgin::-webkit-inner-spin-button,.pgin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.pgin:focus{outline:none;border-color:var(--c)}
+.numin{width:auto;min-width:1.2ch;field-sizing:content;max-width:5.5ch}
 .rep{grid-column:1/-1;display:flex;gap:6px}
 .rep label{flex:1;display:flex;align-items:center;gap:6px;font-size:.85rem;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:7px 8px;cursor:pointer}
 .rep label:has(input:checked){border-color:var(--ink);font-weight:600}
@@ -454,9 +505,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   <div id="banner"></div>
   <div class="tabwrap"><div class="tabs" role="tablist"><span class="tabind" id="tabInd"></span>
     <button data-tab="week" role="tab">Week</button>
-    <button data-tab="hw" role="tab">Homework <em id="hwCount" hidden></em></button>
-    <button data-tab="rem" role="tab">Reminders <em id="remCount" hidden></em></button>
-    <button data-tab="left" role="tab">Lessons <em id="leftTotal"></em></button>
+    <button data-tab="todo" role="tab">To-do <em id="todoCount" hidden></em></button>
+    <button data-tab="subj" role="tab">Subjects <em id="leftTotal"></em></button>
   </div></div>
   <div id="pWeek">
     <div class="todaycard" id="todayCard"></div>
@@ -469,38 +519,50 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     <nav class="strip" id="strip" aria-label="Days"></nav>
     <section class="days" id="days"></section>
   </div>
-  <div id="pHw">
-    <div class="addbar">
-      <input id="hwText" placeholder="New homework, e.g. Essay page 40" maxlength="80">
-      <div class="addrow">
-        <select id="hwSubj" aria-label="Subject"></select>
-        <label class="due"><span>Due</span><input id="hwDue" type="date"></label>
-        <button class="btn" id="hwAdd">Add</button>
+  <div id="pTodo">
+    <div class="seg todoseg">
+      <button data-sub="hw">Homework <em id="hwCount" hidden></em></button>
+      <button data-sub="ex">Exams <em id="exCount" hidden></em></button>
+      <button data-sub="rem">Reminders <em id="remCount" hidden></em></button>
+    </div>
+    <div id="sHw">
+      <div class="addbar">
+        <input id="hwText" placeholder="New homework, e.g. Essay page 40" maxlength="80">
+        <div class="fgrid">
+          <select id="hwSubj" aria-label="Subject"></select>
+          <label class="due"><span>Due</span><input id="hwDue" type="date"></label>
+        </div>
+        <div class="chips"><button data-due="0">Today</button><button data-due="1" class="on">Tomorrow</button><button data-due="2">In 2 days</button><button data-due="7">Next week</button></div>
+        <button class="btn full" id="hwAdd">Add homework</button>
       </div>
-      <div class="chips"><button data-due="0">Today</button><button data-due="1" class="on">Tomorrow</button><button data-due="2">In 2 days</button><button data-due="7">Next week</button></div>
+      <div id="hwList"></div>
     </div>
-    <div id="hwList"></div>
-    <div class="exhead"><h3 class="grp">Exams</h3><button class="lnk" data-exopen>+ Add exam</button></div>
-    <div id="exForm" hidden class="addbar">
-      <input id="exText" placeholder="Exam name, e.g. Arabic midterm" maxlength="60">
-      <div class="addrow"><select id="exSubj" aria-label="Subject"></select><label class="due"><span>Date</span><input id="exDate" type="date"></label><button class="btn" id="exAdd">Add</button></div>
-    </div>
-    <div id="exList"></div>
-  </div>
-  <div id="pRem">
-    <div class="addbar">
-      <input id="remText" placeholder="Remind me to…" maxlength="80">
-      <div class="addrow">
-        <input id="remDate" type="date" aria-label="Date">
-        <input id="remTime" type="time" aria-label="Time">
-        <button class="btn" id="remAdd">Add</button>
+    <div id="sEx">
+      <div class="addbar" id="exForm">
+        <input id="exText" placeholder="Exam name, e.g. Arabic midterm" maxlength="60">
+        <div class="fgrid">
+          <select id="exSubj" aria-label="Subject"></select>
+          <label class="due"><span>Date</span><input id="exDate" type="date"></label>
+        </div>
+        <button class="btn full" id="exAdd">Add exam</button>
       </div>
+      <div id="exList"></div>
     </div>
-    <p class="hint top">Reminders pop up here when their time comes. For a real phone notification, even with the app closed, tap <b>Add to calendar</b>.</p>
-    <div id="remList"></div>
+    <div id="sRem">
+      <div class="addbar">
+        <input id="remText" placeholder="Remind me to…" maxlength="80">
+        <div class="fgrid">
+          <label class="due"><span>Date</span><input id="remDate" type="date"></label>
+          <label class="due"><span>Time</span><input id="remTime" type="time"></label>
+        </div>
+        <button class="btn full" id="remAdd">Add reminder</button>
+      </div>
+      <p class="hint top">Reminders pop up here when their time comes. For a real phone notification, even with the app closed, tap <b>Add to calendar</b>.</p>
+      <div id="remList"></div>
+    </div>
   </div>
   <div id="pSearch">
-    <div class="sbar"><span class="sico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="q" type="search" placeholder="Search homework, exams, notes…" autocomplete="off" enterkeyhint="search"><button class="lnk" data-tab="back">Cancel</button></div>
+    <div class="sbar"><span class="sico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="q" type="search" placeholder="Search notes, homework, exams…" autocomplete="off" enterkeyhint="search"><button class="lnk" data-tab="back">Cancel</button></div>
     <div id="sres"></div>
   </div>
   <div id="pSet">
@@ -512,7 +574,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <div class="setrow wide"><div><b>Week starts on</b><small>The first day of your study week.</small></div>
         <div class="seg"><button data-optws="5">Fri</button><button data-optws="6">Sat</button><button data-optws="0">Sun</button><button data-optws="1">Mon</button><button data-optws="2">Tue</button><button data-optws="3">Wed</button><button data-optws="4">Thu</button></div></div>
       <div class="setrow"><div><b>Open the app on</b></div>
-        <div class="seg"><button data-optopen="last">Last tab</button><button data-optopen="week">Week</button><button data-optopen="hw">Homework</button></div></div>
+        <div class="seg"><button data-optopen="last">Last tab</button><button data-optopen="week">Week</button><button data-optopen="todo">To-do</button></div></div>
       <div class="setrow"><div><b>Focus timer length</b><small>Where the timer starts.</small></div>
         <div class="seg" id="optFocus"><button data-optfocus="15">15 min</button><button data-optfocus="25">25 min</button><button data-optfocus="45">45 min</button><button data-optfocus="60">60 min</button></div></div>
       <div class="setrow"><div><b>Timer sound &amp; vibration</b><small>Beep when a focus session ends.</small></div>
@@ -529,7 +591,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         <div class="seg" id="optTheme"><button data-opttheme="auto">Auto</button><button data-opttheme="light">Light</button><button data-opttheme="dark">Dark</button></div></div>
       <div class="setrow"><div><b>Text size</b></div>
         <div class="seg"><button data-optsize="s">Small</button><button data-optsize="m">Normal</button><button data-optsize="l">Large</button></div></div>
-      <div class="setrow"><div><b>Subject colors</b><small>Change them from the color dot on the Lessons tab.</small></div><button class="btn ghost" data-tab="left">Open</button></div>
+      <div class="setrow"><div><b>Subject colors</b><small>Change them from the color dot on the Lessons tab.</small></div><button class="btn ghost" data-tab="subj">Open</button></div>
     </section>
     <h4 class="setsec">System</h4>
     <section class="setgrp">
@@ -544,11 +606,16 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       </div>
     </section>
   </div>
-  <div id="pLeft">
-    <section class="subjects" id="subjects" aria-label="Lessons remaining"></section>
-    <section class="stats"><div class="sthead"><h3 class="grp">Last 7 days</h3><span id="stTotal"></span></div><div class="bars" id="bars"></div><div class="stfocus" id="stFocus"></div></section>
-    <p class="hint">Tap a number to type how many lessons are left, or use + and −. Tap the color dot to change a subject's color.</p>
+  <div id="pSubj">
+    <div id="subjList">
+      <section class="subjects" id="subjects" aria-label="Your subjects"></section>
+      <section class="stats"><div class="sthead"><h3 class="grp">Last 7 days</h3><span id="stTotal"></span></div><div class="bars" id="bars"></div><div class="stfocus" id="stFocus"></div></section>
+      <p class="hint">Tap a subject to open its notes. Tap a number to type how many lessons are left, and the color dot to change its color.</p>
+    </div>
+    <div id="subjDetail"></div>
   </div>
+  <div class="viewer" id="viewer" hidden><img id="viewImg" alt=""><div class="vbar"><button class="btn ghost" data-view-del>Delete photo</button><button class="btn" data-view-close>Close</button></div></div>
+  <input type="file" id="photoIn" accept="image/*" multiple hidden>
 
   <div class="toast" id="toast" hidden></div>
   <div class="confetti" id="confetti" aria-hidden="true"></div>
@@ -605,7 +672,7 @@ function migrate(s){
       delete k.done;
       if(k.amt!==undefined){const x=dayData(s,iso(dateFor(0,+d)));if(!(k.id in x.amt))x.amt[k.id]=k.amt;delete k.amt}})});
   s.subjects=s.subjects||BASE_SUBJECTS.map(x=>({...x}));
-  s.homework=s.homework||[];s.exams=s.exams||[];s.focusLog=s.focusLog||{};s.created=s.created||Date.now();s.reminders=s.reminders||[];
+  s.homework=s.homework||[];s.exams=s.exams||[];s.notes=s.notes||[];s.pages=s.pages||{};s.focusLog=s.focusLog||{};s.created=s.created||Date.now();s.reminders=s.reminders||[];
   SUBJECTS=[...s.subjects,OTHER];
   s.settings=Object.assign({autoTick:true,focusMin:25,theme:"auto",style:"classic",size:"m",weekStart:5,openOn:"last",confetti:true,sound:true},s.settings||{});
   setOrder(s.settings.weekStart);
@@ -621,7 +688,7 @@ function isComplete(wd,key){return key<todayIso&&tasksOn(wd,key).filter(k=>!k.sk
 
 function load(){try{const r=localStorage.getItem("study-planner");return r?JSON.parse(r):null}catch(e){return null}}
 function subj(id){return SUBJECTS.find(s=>s.id===id)||OTHER}
-function fmt(n){return (Math.round(n*10)/10).toString()}
+function fmt(n){return String(+(+n).toFixed(4))}
 function esc(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function lessonsLabel(a){return a===0?"Study / revise":fmt(a)+(a===1?" lesson":" lessons")}
 
@@ -730,13 +797,14 @@ function renderExams(){
     <div class="tt"><b>${esc(x.title)}</b><small>${esc(sj.name)} · ${relDay(x.date)}</small></div>
     <button class="del" data-exdel="${x.id}" aria-label="Delete exam">×</button></li>`}).join("")}</ul>`:`<div class="emptybig sm">No exams coming up.</div>`;
   const sel=document.getElementById("exSubj");if(!sel.dataset.ready){sel.innerHTML=subjOptions();sel.dataset.ready=1}
+  const exd=document.getElementById("exDate");if(!exd.value)exd.value=addDays(7);
 }
 function classSubjects(txt){const t=" "+txt.toLowerCase()+" ";
   return SUBJECTS.filter(x=>x.id!=="other"&&(t.includes(x.name.toLowerCase())||(x.id==="prog"&&/[^a-z](it|coding|code|computer)[^a-z]/.test(t))||(x.name.length>4&&t.includes(x.name.toLowerCase().slice(0,4)))))}
 function hl(text,q){const t=String(text),i=t.toLowerCase().indexOf(q);if(i<0)return esc(t);return esc(t.slice(0,i))+"<mark>"+esc(t.slice(i,i+q.length))+"</mark>"+esc(t.slice(i+q.length))}
 function renderSearch(){
   const q=document.getElementById("q").value.trim().toLowerCase(),out=document.getElementById("sres");
-  if(!q){out.innerHTML=`<div class="emptybig">Search your homework, exams, reminders, day notes, classes and subjects.</div>`;return}
+  if(!q){out.innerHTML=`<div class="emptybig">Search your notes, homework, exams, reminders, classes and subjects.</div>`;return}
   const has=t=>String(t||"").toLowerCase().includes(q);
   const groups=[];
   const hw=state.homework.filter(h=>has(h.text)||has(subj(h.s).name));
@@ -750,15 +818,101 @@ function renderSearch(){
     if(has(day.session))dy.push({go:"day:"+d,t:hl(day.session,q),m:"Class · "+DAY_NAMES[d]});
     day.tasks.forEach(k=>{if(has(subj(k.s).name))dy.push({go:"day:"+d,c:subj(k.s),t:hl(subj(k.s).name,q),m:"Every "+DAY_NAMES[d]})})});
   if(dy.length)groups.push(["Your week",dy]);
+  const nt=(state.notes||[]).filter(n=>has(n.title)||has(n.text));
+  if(nt.length)groups.push(["Notes",nt.map(n=>{let t=n.title.trim()?hl(n.title,q):"";const tx=n.text,i=tx.toLowerCase().indexOf(q);
+    const snip=i>=0?(i>30?"…":"")+hl(tx.slice(Math.max(0,i-30),i+q.length+50),q):esc(tx.slice(0,60));
+    return{go:"note:"+n.id,c:subj(n.s),t:t||esc(noteTitle(n)),m:esc(subj(n.s).name)+" · "+snip}})]);
   const sj=SUBJECTS.filter(x=>x.id!=="other"&&has(x.name));
-  if(sj.length){const t=totals();groups.push(["Subjects",sj.map(x=>({go:"left",c:x,t:hl(x.name,q),m:(n=>fmt(n)+(n===1?" lesson":" lessons")+" left")(Math.max(0,(state.remaining[x.id]||0)-t[x.id].done))}))])}
+  if(sj.length){const t=totals();groups.push(["Subjects",sj.map(x=>({go:"subj:"+x.id,c:x,t:hl(x.name,q),m:(n=>fmt(n)+(n===1?" lesson":" lessons")+" left")(Math.max(0,(state.remaining[x.id]||0)-t[x.id].done))}))])}
   out.innerHTML=groups.length?groups.map(([g,items])=>`<h3 class="grp">${g}</h3><ul class="card">${items.slice(0,20).map(r=>`<li class="task sr" data-go="${r.go}" style="--c:${r.c?col(r.c):"var(--muted)"}"><i class="sdot"></i><div class="tt"><b>${r.t}</b><small>${r.m}</small></div><span class="chev">›</span></li>`).join("")}</ul>`).join("")
     :`<div class="emptybig">Nothing found for “${esc(q)}”.</div>`;
 }
 document.addEventListener("input",e=>{if(e.target.id==="q")renderSearch()});
 document.addEventListener("click",e=>{const r=e.target.closest("[data-go]");if(!r)return;const g=r.dataset.go;
-  if(g.startsWith("day:")){tab="week";week=0;selDay=+g.slice(4);openForm=null}else tab=g;
+  if(g.startsWith("day:")){tab="week";week=0;selDay=+g.slice(4);openForm=null}
+  else if(g.startsWith("note:")){const n=state.notes.find(x=>x.id===g.slice(5));tab="subj";if(n){subjView=n.s;noteOpen=n.id}}
+  else if(g.startsWith("subj:")){tab="subj";subjView=g.slice(5);noteOpen=null}
+  else tab=g;
   render();scrollTo(0,0);if(g.startsWith("day:"))setTimeout(()=>document.querySelector(".day.sel")?.scrollIntoView({behavior:"smooth",block:"start"}),80)});
+// ===== images (IndexedDB) =====
+const idb=(()=>{let dbp;const open=()=>dbp||(dbp=new Promise((res,rej)=>{const r=indexedDB.open("sp-images",1);r.onupgradeneeded=()=>r.result.createObjectStore("img");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
+  const run=(mode,fn)=>open().then(d=>new Promise((res,rej)=>{const t=d.transaction("img",mode),st=t.objectStore("img");const q=fn(st);t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error)}));
+  return{put:(k,v)=>run("readwrite",st=>st.put(v,k)),get:k=>run("readonly",st=>st.get(k)),del:k=>run("readwrite",st=>st.delete(k)),keys:()=>run("readonly",st=>st.getAllKeys())}})();
+const imgURL={};
+async function loadImgs(root){for(const el of (root||document).querySelectorAll("img[data-img]:not([src])")){const id=el.dataset.img;
+  try{if(!imgURL[id]){const b=await idb.get(id);if(b)imgURL[id]=URL.createObjectURL(b)}if(imgURL[id])el.src=imgURL[id]}catch(e){}}}
+function compress(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();
+  im.onload=()=>{const M=1600,sc=Math.min(1,M/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);
+    c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>b?res(b):rej(),"image/jpeg",.8)};
+  im.onerror=()=>{URL.revokeObjectURL(u);rej()};im.src=u})}
+async function gcImages(){try{const used=new Set((state.notes||[]).flatMap(n=>n.imgs||[]));for(const k of await idb.keys())if(!used.has(k))await idb.del(k)}catch(e){}}
+setTimeout(gcImages,4000);
+
+// ===== subject page & notes =====
+function noteTitle(n){return n.title.trim()||n.text.trim().split("\n")[0].slice(0,60)||"Untitled note"}
+function renderSubjectPage(){
+  const list=document.getElementById("subjList"),det=document.getElementById("subjDetail");
+  if(!subjView||!SUBJECTS.some(x=>x.id===subjView)){subjView=null;noteOpen=null;list.hidden=false;det.hidden=true;return}
+  list.hidden=true;det.hidden=false;
+  const sj=subj(subjView),notes=(state.notes||[]).filter(n=>n.s===subjView).sort((a,b)=>b.updated-a.updated);
+  const t=totals(),left=Math.max(0,(state.remaining[sj.id]||0)-t[sj.id].done);
+  const hw=hwPending().filter(h=>h.s===sj.id).length,ex=state.exams.filter(x=>x.s===sj.id&&x.date>=todayIso).sort((a,b)=>a.date<b.date?-1:1)[0];
+  const n=noteOpen&&notes.find(x=>x.id===noteOpen);
+  if(noteOpen&&!n)noteOpen=null;
+  let body;
+  if(n){
+    body=`<div class="neditor" style="--c:${col(sj)}">
+      <div class="nmeta">Edited ${relDay(iso(new Date(n.updated)))}</div>
+      <input class="ntitle" data-nfield="title" placeholder="Title" value="${esc(n.title)}" maxlength="80">
+      <textarea class="ntext" data-nfield="text" placeholder="Write your notes…">${esc(n.text)}</textarea>
+      <div class="pgrid">${(n.imgs||[]).map(id=>`<img data-img="${id}" data-viewimg="${id}" alt="Note photo">`).join("")}<button class="addph" data-addphoto>＋<br>Add photo</button></div>
+      <div class="nacts"><button class="lnk danger" data-notedel="${n.id}">Delete note</button><button class="btn" data-noteclose>Done</button></div>
+    </div>`;
+  }else{
+    body=`<button class="btn full newnote" data-notenew>＋ New note</button>
+      <div class="nlist">${notes.length?notes.map(x=>`<div class="ncard" data-noteopen="${x.id}">
+        <div class="nt"><b>${esc(noteTitle(x))}</b><small>${relDay(iso(new Date(x.updated)))}${x.imgs&&x.imgs.length?" · "+x.imgs.length+" photo"+(x.imgs.length>1?"s":""):""}${x.text.trim()?" · "+esc(x.text.trim().replace(/\s+/g," ").slice(0,60)):""}</small></div>
+        ${x.imgs&&x.imgs.length?`<img class="thumb" data-img="${x.imgs[0]}" alt="">`:""}</div>`).join(""):`<div class="emptybig">No notes for ${esc(sj.name)} yet.</div>`}</div>`;
+  }
+  det.innerHTML=`<div class="sdhead" style="--c:${col(sj)}"><button class="lnk" data-subjback>‹ ${n?esc(sj.name):"Subjects"}</button>${n?"":`<h2><i></i>${esc(sj.name)}</h2>`}</div>
+    ${n?"":`<div class="sdsum"><span><b>${fmt(left)}</b>lesson${left===1?"":"s"} left</span>${state.pages&&state.pages[sj.id]!=null?`<span><b>${fmt(state.pages[sj.id])}</b>page${state.pages[sj.id]===1?"":"s"} left</span>`:""}<span><b>${hw}</b>homework</span>${ex?`<span><b>${daysUntil(ex.date)}</b>days to ${esc(ex.title)}</span>`:""}</div>`}
+    ${body}`;
+  loadImgs(det);
+  const ta=det.querySelector(".ntext");if(ta){const fit=()=>{ta.style.height="auto";ta.style.height=Math.max(180,ta.scrollHeight)+"px"};fit();ta.addEventListener("input",fit)}
+}
+document.addEventListener("click",async e=>{
+  const card=e.target.closest(".subj[data-subj]");
+  if(card&&!e.target.closest("button,input,label,.cpal")){subjView=card.dataset.subj;noteOpen=null;render();scrollTo(0,0);return}
+  const b=e.target.closest("[data-subjback],[data-notenew],[data-noteopen],[data-noteclose],[data-notedel],[data-addphoto],[data-viewimg],[data-view-close],[data-view-del]");
+  if(!b)return;const ds=b.dataset;
+  if(ds.subjback!==undefined){if(noteOpen)noteOpen=null;else subjView=null;render();scrollTo(0,0);return}
+  if(ds.notenew!==undefined){const n={id:uid(),s:subjView,title:"",text:"",imgs:[],created:Date.now(),updated:Date.now()};
+    change(()=>{state.notes=state.notes||[];state.notes.push(n);noteOpen=n.id});scrollTo(0,0);setTimeout(()=>document.querySelector(".ntitle")?.focus(),60);return}
+  if(ds.noteopen){noteOpen=ds.noteopen;render();scrollTo(0,0);return}
+  if(ds.noteclose!==undefined){const n=state.notes.find(x=>x.id===noteOpen);
+    if(n&&!n.title.trim()&&!n.text.trim()&&!(n.imgs||[]).length)state.notes=state.notes.filter(x=>x!==n);
+    noteOpen=null;save();render();return}
+  if(ds.notedel){snap();change(()=>{state.notes=state.notes.filter(x=>x.id!==ds.notedel);noteOpen=null});undoToast("Note deleted");return}
+  if(ds.addphoto!==undefined){document.getElementById("photoIn").click();return}
+  if(ds.viewimg){const v=document.getElementById("viewer");v.dataset.id=ds.viewimg;document.getElementById("viewImg").src=imgURL[ds.viewimg]||"";v.hidden=false;return}
+  if(ds.viewClose!==undefined){document.getElementById("viewer").hidden=true;return}
+  if(ds.viewDel!==undefined){const v=document.getElementById("viewer"),id=v.dataset.id;
+    if(!b.dataset.confirm){b.dataset.confirm=1;b.textContent="Tap again to delete";setTimeout(()=>{delete b.dataset.confirm;b.textContent="Delete photo"},3000);return}
+    delete b.dataset.confirm;b.textContent="Delete photo";v.hidden=true;
+    change(()=>{const n=state.notes.find(x=>x.id===noteOpen);if(n){n.imgs=n.imgs.filter(i=>i!==id);n.updated=Date.now()}});
+    idb.del(id).catch(()=>{});return}
+});
+document.getElementById("photoIn").addEventListener("change",async e=>{
+  const files=[...e.target.files];e.target.value="";if(!files.length||!noteOpen)return;
+  alertMsg(files.length>1?"Adding "+files.length+" photos…":"Adding photo…");
+  for(const f of files){try{const blob=await compress(f),id="img"+uid()+Date.now().toString(36);await idb.put(id,blob);
+    const n=state.notes.find(x=>x.id===noteOpen);if(n){n.imgs=n.imgs||[];n.imgs.push(id);n.updated=Date.now()}}
+    catch(err){alertMsg("Couldn't add that photo")}}
+  state.editedAt=Date.now();save();render();
+});
+document.addEventListener("input",e=>{const f=e.target.dataset&&e.target.dataset.nfield;if(!f||!noteOpen)return;
+  const n=state.notes.find(x=>x.id===noteOpen);if(!n)return;n[f]=e.target.value;n.updated=Date.now();state.editedAt=Date.now();save()});
+
 function renderStats(){
   const days=[];for(let i=6;i>=0;i--)days.push(addDays(-i));
   const per=days.map(k=>{const x=state.dates[k],by={};if(x)Object.entries(x.done).forEach(([id,a])=>{const sid=(x.doneS&&x.doneS[id])||findSubj(id)||"other";by[sid]=(by[sid]||0)+a});return by});
@@ -814,14 +968,14 @@ function renderHeader(){
   document.getElementById("greet").textContent=h<5?"Good night":h<12?"Good morning":h<17?"Good afternoon":"Good evening";
   const d=new Date();document.getElementById("sub").textContent=DAY_NAMES[d.getDay()]+", "+d.getDate()+" "+["January","February","March","April","May","June","July","August","September","October","November","December"][d.getMonth()];
 }
-let prevTab="week";
+let prevTab="week",todoSub="hw",subjView=null,noteOpen=null;
 let lastTab=null,lastSel=null,justTicked=null;
 function moveInd(){
   const on=document.querySelector(".tabs button.on"),ind=document.getElementById("tabInd");
   if(!on||!ind||!on.offsetWidth)return;const first=!ind.dataset.ok;if(first)ind.style.transition="none";ind.style.width=on.offsetWidth+"px";ind.style.transform=`translateX(${on.offsetLeft-4}px)`;if(first){ind.dataset.ok=1;requestAnimationFrame(()=>requestAnimationFrame(()=>ind.style.transition=""))}
 }
 function afterRender(){
-  if(tab!==lastTab){const pnl=document.getElementById({week:"pWeek",hw:"pHw",rem:"pRem",left:"pLeft",set:"pSet",search:"pSearch"}[tab]);
+  if(tab!==lastTab){const pnl=document.getElementById({week:"pWeek",todo:"pTodo",subj:"pSubj",set:"pSet",search:"pSearch"}[tab]);
     if(pnl&&lastTab!==null){pnl.classList.remove("enter");void pnl.offsetWidth;pnl.classList.add("enter")}lastTab=tab}
   if(selDay!==lastSel){const d=document.querySelector(".day.sel");if(d&&lastSel!==null)d.classList.add("enter");
     document.querySelector(".strip button.sel")?.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});lastSel=selDay}
@@ -829,7 +983,12 @@ function afterRender(){
   requestAnimationFrame(moveInd);
 }
 addEventListener("resize",()=>requestAnimationFrame(moveInd));
+function normTab(){
+  if(tab==="hw"||tab==="rem"||tab==="ex"){todoSub=tab;tab="todo"}
+  if(tab==="left")tab="subj";
+}
 function render(){
+  normTab();
   renderHeader();
   applySettings();
   const t=totals();
@@ -838,21 +997,27 @@ function render(){
   const tl=SUBJECTS.reduce((a,s)=>a+Math.max(0,(state.remaining[s.id]||0)-t[s.id].done),0);
   document.getElementById("leftTotal").textContent=fmt(tl);
   const hp=hwPending().length;document.getElementById("hwCount").textContent=hp||"";document.getElementById("hwCount").hidden=!hp;
+  const exn=state.exams.filter(x=>x.date>=todayIso).length;document.getElementById("exCount").textContent=exn||"";document.getElementById("exCount").hidden=!exn;
+  const tdn=hp;document.getElementById("todoCount").textContent=tdn||"";document.getElementById("todoCount").hidden=!tdn;
+  document.querySelectorAll("[data-sub]").forEach(b=>b.classList.toggle("on",b.dataset.sub===todoSub));
+  document.getElementById("sHw").hidden=todoSub!=="hw";document.getElementById("sEx").hidden=todoSub!=="ex";document.getElementById("sRem").hidden=todoSub!=="rem";
   const ru=state.reminders.filter(r=>(r.date+"T"+r.time)>nowStamp()).length;document.getElementById("remCount").textContent=ru||"";document.getElementById("remCount").hidden=!ru;
-  renderBanner();renderToday();renderHomework();renderExams();renderReminders();renderStats();
+  renderBanner();renderToday();renderHomework();renderExams();renderReminders();renderStats();renderSubjectPage();
 
   document.getElementById("subjects").innerHTML=SUBJECTS.filter(s=>s.id!=="other").map(s=>{
     const base=state.remaining[s.id]||0, left=Math.max(0,base-t[s.id].done);
     const pct=base>0?Math.min(100,t[s.id].done/base*100):0;
     const unplanned=left-t[s.id].planned;
     const note=left===0&&base>0?"All done":unplanned>0?`<span class="warn">${fmt(unplanned)} not planned this week</span>`:"Planned this week";
-    return `<div class="subj" style="--c:${col(s)}">
-      <div class="name"><button class="cdot" data-color="${s.id}" aria-label="Change ${esc(s.name)} color"></button>${esc(s.name)}${BASE_SUBJECTS.some(b=>b.id===s.id)?"":`<button class="del sm" data-subjdel="${s.id}" aria-label="Remove ${esc(s.name)}">×</button>`}</div>
+    const nn=(state.notes||[]).filter(n=>n.s===s.id).length;
+    return `<div class="subj" data-subj="${s.id}" style="--c:${col(s)}">
+      <div class="name"><button class="cdot" data-color="${s.id}" aria-label="Change ${esc(s.name)} color"></button>${esc(s.name)}${BASE_SUBJECTS.some(b=>b.id===s.id)?"":`<button class="del sm" data-subjdel="${s.id}" aria-label="Remove ${esc(s.name)}">×</button>`}<span class="opn">${nn?nn+" note"+(nn>1?"s":""):"Notes"} ›</span></div>
       ${colorOpen===s.id?`<div class="cpal">${SWATCHES.map(h=>`<button style="background:${h}" data-setc="${s.id}:${h}" aria-label="Color ${h}" class="${s.c===h?"on":""}"></button>`).join("")}<label class="cpick" aria-label="Custom color"><input type="color" data-cpick="${s.id}" value="${s.c.startsWith("#")?s.c:"#3b82f6"}">+</label></div>`:""}
-      <div class="row"><input class="numin" data-left="${s.id}" type="number" min="0" step="0.5" inputmode="decimal" value="${fmt(left)}" aria-label="${s.name} lessons left"><span class="of">left</span>
+      <div class="row"><input class="numin" data-left="${s.id}" type="number" min="0" step="any" inputmode="decimal" value="${fmt(left)}" aria-label="${s.name} lessons left"><span class="of">lesson${left===1?"":"s"} left</span>
         <span class="step">
         <button aria-label="Fewer ${s.name} lessons" data-step="${s.id}" data-by="-1">−</button>
         <button aria-label="More ${s.name} lessons" data-step="${s.id}" data-by="1">+</button></span></div>
+      <label class="pgrow"><input class="pgin" data-pages="${s.id}" type="number" min="0" step="any" inputmode="decimal" placeholder="–" value="${state.pages&&state.pages[s.id]!=null?fmt(state.pages[s.id]):""}" aria-label="${s.name} pages left"><span>pages left <em>(optional)</em></span></label>
     </div>`}).join("");
   document.getElementById("subjects").innerHTML+=addingSubj
     ?`<div class="subj addsubj"><input id="newSubj" placeholder="Subject name" maxlength="24"><div class="acts"><button class="btn ghost" data-subjcancel>Cancel</button><button class="btn" data-subjsave>Add</button></div></div>`
@@ -893,11 +1058,11 @@ function render(){
           :`<button class="danger" data-delextra="${key}:${k.id}">Remove</button>`}</li>`:"";
       return `<li class="task ${k.done?"done":""}" style="--c:${col(s)}">
         <input type="checkbox" class="chk" data-tick="${key}:${k.id}:${k.s}:${k.amt||0}" ${k.done?"checked":""} aria-label="Done: ${s.name}">
-        <div class="tt"><b>${s.name}</b><small class="amtrow"><input class="amtin" data-amt="${key}:${k.id}:${k.kind}" type="number" min="0" step="0.5" inputmode="decimal" value="${k.amt??""}" placeholder="?" aria-label="${s.name} lessons on ${dLabel(dt)}"> lessons <i class="kind ${k.kind}">${tag}</i></small></div>${acts}</li>${menu}`}).join("")}</ul>`
+        <div class="tt"><b>${s.name}</b><small class="amtrow"><input class="amtin" data-amt="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.amt??""}" placeholder="?" aria-label="${s.name} lessons on ${dLabel(dt)}"> lessons <i class="kind ${k.kind}">${tag}</i></small></div>${acts}</li>${menu}`}).join("")}</ul>`
       :`<div class="empty">Nothing planned. Free day.</div>`;
     const form=openForm===d?`<div class="form" data-form="${d}">
         <select name="s">${subjOptions()}</select>
-        <input name="amt" type="number" min="0" step="0.5" placeholder="Lessons" inputmode="decimal" aria-label="Lessons on ${dLabel(dt)}">
+        <input name="amt" type="number" min="0" step="any" placeholder="Lessons" inputmode="decimal" aria-label="Lessons on ${dLabel(dt)}">
         <div class="rep" role="radiogroup">
           <label><input type="radio" name="rep${d}" value="every" checked> Every ${DAY_NAMES[d]}</label>
           <label><input type="radio" name="rep${d}" value="once"> Only ${dLabel(dt)}</label>
@@ -921,10 +1086,10 @@ function change(fn){fn();state.editedAt=Date.now();save();render()}
 function prune(key){const x=state.dates[key];if(x&&!x.skip.length&&!x.extra.length&&!Object.keys(x.done).length&&!Object.keys(x.amt||{}).length)delete state.dates[key]}
 
 document.addEventListener("click",e=>{
-  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-optstyle],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-newl],[data-bknow],[data-bklater],[data-exopen],[data-exdel],#exAdd,[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#remAdd,#reset");
+  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-optstyle],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-sub],[data-newl],[data-bknow],[data-bklater],[data-exopen],[data-exdel],#exAdd,[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#remAdd,#reset");
   if(!b)return;
   const ds=b.dataset;
-  if(ds.tab){if(ds.tab==="back"){tab=prevTab||"week"}else{if(tab!=="set"&&tab!=="search")prevTab=tab;tab=ds.tab}
+  if(ds.tab){if(ds.tab==="subj"&&tab==="subj"){subjView=null;noteOpen=null}if(ds.tab==="back"){tab=prevTab||"week"}else{if(tab!=="set"&&tab!=="search")prevTab=tab;tab=ds.tab}
     if(tab!=="set"&&tab!=="search")try{localStorage.setItem("sp-tab",tab)}catch(err){}
     render();scrollTo(0,0);if(tab==="search"){const q=document.getElementById("q");q.value="";renderSearch();setTimeout(()=>q.focus(),60)}return}
   if(b.id==="hwAdd"){const t=document.getElementById("hwText"),text=t.value.trim();if(!text){t.focus();return}
@@ -935,10 +1100,11 @@ document.addEventListener("click",e=>{
     const t=totals(),left=Math.max(0,(state.remaining[id]||0)-t[id].done);undoToast(subj(id).name+": "+fmt(left)+" left now");return}
   if(ds.bknow!==undefined){tab="set";render();scrollTo(0,0);setTimeout(()=>document.getElementById("mv")?.scrollIntoView({block:"center",behavior:"smooth"}),150);return}
   if(ds.bklater!==undefined){state.bkSnooze=Date.now()+3*864e5;save();renderBanner();return}
+  if(ds.sub){todoSub=ds.sub;render();return}
   if(ds.exopen!==undefined){const f=document.getElementById("exForm");f.hidden=!f.hidden;if(!f.hidden){const d=document.getElementById("exDate");if(!d.value)d.value=addDays(7);document.getElementById("exText").focus()}return}
   if(b.id==="exAdd"){const t=document.getElementById("exText"),title=t.value.trim();if(!title){t.focus();return}
     const date=document.getElementById("exDate").value||addDays(7);
-    change(()=>state.exams.push({id:uid(),title,s:document.getElementById("exSubj").value,date}));t.value="";document.getElementById("exForm").hidden=true;alertMsg("Exam added");return}
+    change(()=>state.exams.push({id:uid(),title,s:document.getElementById("exSubj").value,date}));t.value="";alertMsg("Exam added");return}
   if(ds.exdel){snap();change(()=>state.exams=state.exams.filter(x=>x.id!==ds.exdel));undoToast("Exam deleted");return}
   if(ds.hwdel){snap();change(()=>state.homework=state.homework.filter(h=>h.id!==ds.hwdel));undoToast("Homework deleted");return}
   if(ds.hwshow!==undefined){hwShowDone=!hwShowDone;render();return}
@@ -1012,8 +1178,9 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("change",e=>{
   const t=e.target;
+  if(t.dataset.pages){const v=parseFloat(t.value);change(()=>{state.pages=state.pages||{};if(isNaN(v)||v<0)delete state.pages[t.dataset.pages];else state.pages[t.dataset.pages]=v});return}
   if(t.dataset.left){const v=parseFloat(t.value);if(isNaN(v)||v<0){render();return}
-    change(()=>{state.remaining[t.dataset.left]=Math.round((v+totals()[t.dataset.left].done)*2)/2});return}
+    change(()=>{state.remaining[t.dataset.left]=+(v+totals()[t.dataset.left].done).toFixed(4)});return}
   if(t.dataset.amt){const[key,id,kind]=t.dataset.amt.split(":");const v=parseFloat(t.value),amt=isNaN(v)?null:Math.max(0,v);
     change(()=>{const x=dayData(state,key);
       if(kind==="fixed"){if(amt===null)delete x.amt[id];else x.amt[id]=amt}
@@ -1134,7 +1301,7 @@ document.addEventListener("focusout",e=>{if(e.target.dataset?.session!==undefine
 render();
 if(focus)showFocus();
 
-const APP_VERSION="0.31";
+const APP_VERSION="0.33";
 (function(){const st=document.getElementById("offst");
   if(!("serviceWorker" in navigator)){st.textContent="Not supported on this browser";return}
   navigator.serviceWorker.register("sw.js").then(()=>navigator.serviceWorker.ready).then(()=>{st.textContent="Ready ✓ The app opens even without internet."})
