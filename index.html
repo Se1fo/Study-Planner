@@ -34,7 +34,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.5 Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
 .wrap{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
 h1,h2,.num{font-family:"Bricolage Grotesque",Figtree,system-ui,sans-serif}
-header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;padding-top:6px}
 h1{font-size:2.1rem;font-weight:800;letter-spacing:-.03em;line-height:1;margin:0}
 .sub{color:var(--muted);font-size:.9rem;margin-top:6px}
 .sync{font-size:.78rem;color:var(--muted);white-space:nowrap}
@@ -116,9 +116,10 @@ footer .btn{flex:none;padding:9px 14px}
 .imp p{margin:0 0 8px;font-size:.88rem;color:var(--muted)}
 .imp textarea{width:100%;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:9px;padding:8px;font:inherit;font-size:.85rem}
 .imp .acts{display:flex;gap:8px;margin-top:8px}
+.imp .acts .btn{flex:1;padding:9px 6px}
 .msg{font-size:.85rem;margin-top:8px;color:var(--arab)}
 .tabwrap{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;margin:0 -16px 16px;padding:8px 16px 10px;background:var(--bg)}
-.tabwrap::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:calc(env(safe-area-inset-top,0px) + 1px);background:var(--bg)}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:6;pointer-events:none}
 .tabwrap::after{content:"";position:absolute;left:0;right:0;top:100%;height:14px;background:linear-gradient(var(--bg),transparent);pointer-events:none}
 .tabs{display:flex;background:var(--soft);border-radius:14px;padding:4px;gap:2px}
 .tabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-weight:600;font-size:.88rem;padding:9px 4px;white-space:nowrap;border-radius:10px;cursor:pointer}
@@ -247,7 +248,7 @@ li.tmenu button.danger,li.tmenu button.confirm{color:var(--eng)}
 .setgrp .imp{margin:0 0 10px}
 .setsec{font-family:"Bricolage Grotesque",Figtree,sans-serif;font-size:1rem;font-weight:700;margin:18px 4px 8px;color:var(--ink)}
 .sethead+.setsec{margin-top:4px}
-.seg{display:flex;background:var(--soft);border-radius:10px;padding:3px;flex:none}
+.seg{display:flex;background:var(--soft);border-radius:10px;padding:3px;flex:none;max-width:100%;min-width:0}
 .seg button{border:0;background:none;color:var(--muted);font:inherit;font-size:.8rem;font-weight:600;padding:6px 8px;border-radius:8px;cursor:pointer;white-space:nowrap}
 .seg button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.15)}
 .sw{position:relative;width:48px;height:28px;flex:none;cursor:pointer}
@@ -257,9 +258,9 @@ li.tmenu button.danger,li.tmenu button.confirm{color:var(--eng)}
 .sw input:checked+span{background:var(--arab)}
 .sw input:checked+span::after{transform:translateX(20px)}
 .sw input:focus-visible+span{outline:2px solid var(--prog);outline-offset:2px}
-.setrow.wide{flex-wrap:wrap}.setrow.wide .seg{width:100%}
+.setrow.wide{flex-wrap:wrap}.setrow.wide .seg{width:100%;display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
 @media(max-width:480px){.setrow{flex-wrap:wrap}.setrow .seg{width:100%}}
-.setrow .seg button{flex:1}
+.setrow .seg button{flex:1;min-width:0;padding:6px 2px;overflow:hidden;text-overflow:ellipsis}
 .rep{grid-column:1/-1;display:flex;gap:6px}
 .rep label{flex:1;display:flex;align-items:center;gap:6px;font-size:.85rem;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:7px 8px;cursor:pointer}
 .rep label:has(input:checked){border-color:var(--ink);font-weight:600}
@@ -355,7 +356,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <div class="setrow"><div><b>Load a backup</b><small>Paste a data link or an old backup code.</small></div><button class="btn ghost" id="imp">Load</button></div>
       <div class="imp" id="impbox" hidden>
         <textarea id="impcode" rows="3" placeholder="Paste link or code here"></textarea>
-        <div class="acts"><button class="btn ghost" id="impcancel">Cancel</button><button class="btn" id="impgo">Load backup</button></div>
+        <div class="acts"><button class="btn ghost" id="impcancel">Cancel</button><button class="btn ghost" id="impPaste">Paste &amp; load</button><button class="btn" id="impgo">Load</button></div>
         <div class="msg" id="impmsg"></div>
       </div>
     </section>
@@ -829,7 +830,7 @@ document.addEventListener("focusout",e=>{if(e.target.dataset?.session!==undefine
 render();
 if(focus)showFocus();
 
-const APP_VERSION="0.22";
+const APP_VERSION="0.23";
 document.getElementById("ver").textContent="Version "+APP_VERSION;
 function hardReload(){location.replace(location.pathname+"?v="+Date.now())}
 async function checkUpdate(manual){
@@ -856,14 +857,27 @@ document.getElementById("mv").onclick=async e=>{
   catch(err){alertMsg("Couldn't copy the link")}};
 
 function toCode(){return btoa(unescape(encodeURIComponent(JSON.stringify(state))))}
-document.getElementById("imp").onclick=()=>{const bx=document.getElementById("impbox");bx.hidden=false;document.getElementById("impcode").value="";document.getElementById("impmsg").textContent="";document.getElementById("impcode").focus()};
-document.getElementById("impcancel").onclick=()=>document.getElementById("impbox").hidden=true;
-document.getElementById("impgo").onclick=()=>{
+function openImport(){const bx=document.getElementById("impbox");bx.hidden=false;document.getElementById("impcode").value="";document.getElementById("impmsg").textContent="";bx.scrollIntoView({behavior:"smooth",block:"center"})}
+async function pasteImport(){try{const t=await navigator.clipboard.readText();document.getElementById("impcode").value=t;doImport()}catch(e){const m=document.getElementById("impmsg");m.style.color="var(--muted)";m.textContent="Couldn't read the clipboard. Tap and hold the box above and choose Paste.";document.getElementById("impcode").focus()}}
+function doImport(){
   const m=document.getElementById("impmsg");
-  try{let raw=document.getElementById("impcode").value.trim();const i=raw.indexOf("#data=");if(i>=0)raw=decodeURIComponent(raw.slice(i+6));const s=JSON.parse(decodeURIComponent(escape(atob(raw))));
-    if(!s.days||!s.remaining)throw 0;state=migrate(s);autoTick();save();render();m.style.color="var(--arab)";m.textContent="Backup loaded.";
-    setTimeout(()=>document.getElementById("impbox").hidden=true,1200)}
-  catch(err){m.style.color="var(--eng)";m.textContent="That didn't work. Copy the whole link or code again and paste it."}};
+  try{let raw=document.getElementById("impcode").value.trim();
+    const i=raw.indexOf("#data=");if(i>=0)raw=decodeURIComponent(raw.slice(i+6).split(/\s/)[0]);
+    raw=raw.replace(/[\s"']/g,"");if(!raw)throw 0;
+    const s=JSON.parse(decodeURIComponent(escape(atob(raw))));
+    if(!s.days||!s.remaining)throw 0;
+    state=migrate(s);state.editedAt=Date.now();autoTick();save();
+    document.getElementById("hwSubj").dataset.ready="";
+    document.getElementById("impbox").hidden=true;
+    tab="week";render();scrollTo(0,0);alertMsg("Backup loaded ✓")}
+  catch(err){m.style.color="var(--eng)";m.textContent="That didn't work. Copy the whole link or code again and paste it."}}
+document.addEventListener("click",e=>{
+  const b=e.target.closest("#imp,#impcancel,#impgo,#impPaste");if(!b)return;
+  if(b.id==="imp")openImport();
+  if(b.id==="impcancel")document.getElementById("impbox").hidden=true;
+  if(b.id==="impgo")doImport();
+  if(b.id==="impPaste")pasteImport();
+});
 </script>
 </body>
 </html>
