@@ -149,7 +149,9 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area
 @media(max-width:400px){.tabs button{font-size:.8rem}.tabs em{margin-left:2px;padding:1px 5px}}
 #pWeek,#pHw,#pRem,#pLeft,#pSet{display:none}
 body[data-view="set"] #pSet{display:block}
-body[data-view="set"] .tabwrap{display:none}
+body[data-view="set"] .tabwrap,body[data-view="search"] .tabwrap{display:none}
+body[data-view="search"] #pSearch{display:block}
+#pSearch{display:none}
 body[data-view="week"] #pWeek,body[data-view="hw"] #pHw,body[data-view="rem"] #pRem,body[data-view="left"] #pLeft{display:block}
 .numin{width:3.4ch;border:0;border-bottom:2px dashed transparent;background:transparent;padding:0;font-size:2.2rem;font-weight:700;color:var(--c);line-height:1.1;-moz-appearance:textfield}
 .numin::-webkit-inner-spin-button,.numin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
@@ -309,6 +311,27 @@ li.tmenu button.danger,li.tmenu button.confirm{color:var(--eng)}
 #toast{display:flex;align-items:center;gap:12px}
 #toast[hidden]{display:none}
 #undoBtn{border:0;background:none;color:inherit;font:inherit;font-weight:700;text-decoration:underline;cursor:pointer;padding:0}
+.tmr{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:.86rem;color:var(--muted)}
+.tmr em{font-style:normal;font-weight:700;color:var(--ink);margin-right:6px}
+.newl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-4px 0 12px;font-size:.8rem;color:var(--muted)}
+.newl.tc{margin:8px 0 0}
+.newl button{border:1px solid color-mix(in srgb,var(--c) 45%,transparent);background:color-mix(in srgb,var(--c) 12%,transparent);color:var(--ink);border-radius:20px;padding:4px 10px;font:inherit;font-size:.78rem;font-weight:600;cursor:pointer}
+.newl button:active{transform:scale(.95)}
+.stfocus{margin-top:10px;padding-top:8px;border-top:1px solid var(--line);font-size:.82rem;color:var(--muted);font-weight:600}
+.bnr .ghostlnk{background:none!important;color:inherit!important;opacity:.7}
+.hbtns{display:flex;gap:8px}
+.gear{display:grid;place-items:center}
+.sbar{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:4px 6px 4px 12px;margin-bottom:12px;box-shadow:var(--shadow)}
+.sbar .sico{color:var(--muted);display:grid}
+.sbar input{flex:1;min-width:0;border:0;background:none;color:var(--ink);font:inherit;font-size:1rem;padding:9px 0;outline:none;-webkit-appearance:none}
+.sbar input::-webkit-search-cancel-button{-webkit-appearance:none}
+.sbar input:focus-visible{outline:none}
+.sbar:focus-within{border-color:var(--prog)}
+li.sr{cursor:pointer}
+li.sr .sdot{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none;margin:0 4px}
+li.sr .chev{color:var(--muted);font-size:1.3rem;padding:0 4px}
+li.sr:active{opacity:.6}
+mark{background:color-mix(in srgb,var(--hist) 35%,transparent);color:inherit;border-radius:3px;padding:0 1px}
 .rep{grid-column:1/-1;display:flex;gap:6px}
 .rep label{flex:1;display:flex;align-items:center;gap:6px;font-size:.85rem;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:7px 8px;cursor:pointer}
 .rep label:has(input:checked){border-color:var(--ink);font-weight:600}
@@ -424,7 +447,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <h1 id="greet">Hello</h1>
       <div class="sub" id="sub"></div>
     </div>
-    <button class="gear" data-tab="set" aria-label="Settings">⚙︎</button>
+    <div class="hbtns"><button class="gear" data-tab="search" aria-label="Search"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button><button class="gear" data-tab="set" aria-label="Settings">⚙︎</button></div>
   </header>
 
   <div id="updBanner" class="bnr upd" hidden><span class="bell">✨</span><div class="bt"><b>New version available</b><small>Your data stays as it is.</small></div><button class="lnk" id="updNow">Update</button></div>
@@ -476,8 +499,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     <p class="hint top">Reminders pop up here when their time comes. For a real phone notification, even with the app closed, tap <b>Add to calendar</b>.</p>
     <div id="remList"></div>
   </div>
+  <div id="pSearch">
+    <div class="sbar"><span class="sico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input id="q" type="search" placeholder="Search homework, exams, notes…" autocomplete="off" enterkeyhint="search"><button class="lnk" data-tab="back">Cancel</button></div>
+    <div id="sres"></div>
+  </div>
   <div id="pSet">
-    <div class="sethead"><button class="lnk" data-tab="week">‹ Back</button><h2>Settings</h2></div>
+    <div class="sethead"><button class="lnk" data-tab="back">‹ Back</button><h2>Settings</h2></div>
     <h4 class="setsec">Planner</h4>
     <section class="setgrp">
       <div class="setrow"><div><b>Auto-tick past days</b><small>After midnight, the day's tasks tick themselves.</small></div>
@@ -506,6 +533,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     </section>
     <h4 class="setsec">System</h4>
     <section class="setgrp">
+      <div class="setrow"><div><b>Works offline</b><small id="offst">Checking…</small></div></div>
       <div class="setrow"><div><b>Updates</b><small id="ver"></small></div><button class="btn" id="upd">Check</button></div>
       <div class="setrow"><div><b>Move or back up your data</b><small>Makes a link with all your data. Open it in Safari to bring everything into a new app. Also works as a backup.</small></div><button class="btn" id="mv">Share link</button></div>
       <div class="setrow"><div><b>Load a backup</b><small>Paste a data link or an old backup code.</small></div><button class="btn ghost" id="imp">Load</button></div>
@@ -518,7 +546,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   </div>
   <div id="pLeft">
     <section class="subjects" id="subjects" aria-label="Lessons remaining"></section>
-    <section class="stats"><div class="sthead"><h3 class="grp">Last 7 days</h3><span id="stTotal"></span></div><div class="bars" id="bars"></div></section>
+    <section class="stats"><div class="sthead"><h3 class="grp">Last 7 days</h3><span id="stTotal"></span></div><div class="bars" id="bars"></div><div class="stfocus" id="stFocus"></div></section>
     <p class="hint">Tap a number to type how many lessons are left, or use + and −. Tap the color dot to change a subject's color.</p>
   </div>
 
@@ -577,7 +605,7 @@ function migrate(s){
       delete k.done;
       if(k.amt!==undefined){const x=dayData(s,iso(dateFor(0,+d)));if(!(k.id in x.amt))x.amt[k.id]=k.amt;delete k.amt}})});
   s.subjects=s.subjects||BASE_SUBJECTS.map(x=>({...x}));
-  s.homework=s.homework||[];s.exams=s.exams||[];s.reminders=s.reminders||[];
+  s.homework=s.homework||[];s.exams=s.exams||[];s.focusLog=s.focusLog||{};s.created=s.created||Date.now();s.reminders=s.reminders||[];
   SUBJECTS=[...s.subjects,OTHER];
   s.settings=Object.assign({autoTick:true,focusMin:25,theme:"auto",style:"classic",size:"m",weekStart:5,openOn:"last",confetti:true,sound:true},s.settings||{});
   setOrder(s.settings.weekStart);
@@ -586,7 +614,7 @@ function dayData(s,key){const x=s.dates[key]||(s.dates[key]={skip:[],extra:[],do
 function peek(key){const x=state.dates[key]||{skip:[],extra:[],done:{}};return {...x,amt:x.amt||{}}}
 
 let state=migrate(load()||structuredClone(DEFAULT));
-let tab=(()=>{const o=state.settings.openOn;if(o&&o!=="last")return o;try{const t=localStorage.getItem("sp-tab");return t&&t!=="set"?t:"week"}catch(e){return "week"}})();
+let tab=(()=>{const o=state.settings.openOn;if(o&&o!=="last")return o;try{const t=localStorage.getItem("sp-tab");return t&&t!=="set"&&t!=="search"?t:"week"}catch(e){return "week"}})();
 let week=0, selDay=today, openForm=null, openMenu=null;
 const expanded=new Set();
 function isComplete(wd,key){return key<todayIso&&tasksOn(wd,key).filter(k=>!k.skipped).every(k=>k.done)}
@@ -637,7 +665,9 @@ let hwShowDone=false,remShowPast=false,addingSubj=false;
 
 function renderBanner(){
   const due=remDue(),el=document.getElementById("banner");
-  el.innerHTML=due.map(r=>`<div class="bnr"><span class="bell">🔔</span><div class="bt"><b>${esc(r.text)}</b><small>${relDay(r.date)}, ${r.time}</small></div><button class="lnk" data-remseen="${r.id}">Dismiss</button></div>`).join("");
+  const last=state.lastBackup||state.created||Date.now(),snooze=state.bkSnooze||0;
+  const needBk=Date.now()-last>7*864e5&&Date.now()>snooze&&(state.editedAt||0)>0;
+  el.innerHTML=(needBk?`<div class="bnr bk"><span class="bell">🛟</span><div class="bt"><b>Back up your planner</b><small>It's been a week. Save your data link somewhere safe.</small></div><button class="lnk" data-bknow>Back up</button><button class="lnk ghostlnk" data-bklater>Later</button></div>`:"")+due.map(r=>`<div class="bnr"><span class="bell">🔔</span><div class="bt"><b>${esc(r.text)}</b><small>${relDay(r.date)}, ${r.time}</small></div><button class="lnk" data-remseen="${r.id}">Dismiss</button></div>`).join("");
 }
 
 function renderToday(){
@@ -656,8 +686,21 @@ function renderToday(){
     if(tod)parts.push(`${tod} homework due today`);
     if(tom)parts.push(`${tom} due tomorrow`);}
   let wk=0;DAY_ORDER.forEach(d=>{const x=state.dates[iso(dateFor(0,d))];if(x)Object.values(x.done).forEach(a=>wk+=a)});
+  const fm=(state.focusLog||{})[todayIso]||0;
+  const yk=addDays(-1),ywd=new Date(yk+"T12:00:00").getDay();
+  const cls=[[state.days[today].session,"today"],[state.days[ywd].session,"yesterday"]].filter(c=>c[0]);
+  const hitIds=[...new Set(cls.flatMap(c=>classSubjects(c[0]).map(x=>x.id)))];
+  const newl=hitIds.length?`<div class="newl tc"><span>New lessons from ${cls.map(c=>c[1]).join(" / ")}'s class?</span>${hitIds.map(id=>{const x=subj(id);return `<button data-newl="${id}" style="--c:${col(x)}">+1 ${esc(x.name)}</button>`}).join("")}</div>`:"";
+  let tmr="";
+  if(new Date().getHours()>=18){const tk=addDays(1),twd=new Date(tk+"T12:00:00").getDay();
+    const tt=tasksOn(twd,tk).filter(k=>!k.skipped).map(k=>esc(subj(k.s).name)+(k.amt?" "+fmt(k.amt):""));
+    const th=state.homework.filter(h=>!h.done&&h.due===tk).map(h=>esc(h.text)+" due");
+    const tx=state.exams.filter(x=>x.date===tk).map(x=>`<b class="red">${esc(x.title)}</b>`);
+    const cls=state.days[twd].session?"Class: "+esc(state.days[twd].session):"";
+    const all=[...tx,cls,...tt,...th].filter(Boolean);
+    tmr=`<div class="tmr"><em>Tomorrow</em>${all.length?all.join(" · "):"Nothing planned"}</div>`}
   el.innerHTML=`<div class="tc-top"><b>${DAY_NAMES[today]}, ${dLabel(new Date())}</b><button class="btn ghost sm" id="focusStart">⏱ Focus timer</button></div>
-    <span>${parts.join(" · ")}</span>${wk?`<span class="wkdone">${fmt(wk)} lesson${wk===1?"":"s"} done this week</span>`:""}`;
+    <span>${parts.join(" · ")}</span>${wk||fm?`<span class="wkdone">${[wk?fmt(wk)+" lesson"+(wk===1?"":"s")+" done this week":"",fm?fmtMin(fm)+" focused today":""].filter(Boolean).join(" · ")}</span>`:""}${newl}${tmr}`;
 }
 
 function renderHomework(){
@@ -688,11 +731,41 @@ function renderExams(){
     <button class="del" data-exdel="${x.id}" aria-label="Delete exam">×</button></li>`}).join("")}</ul>`:`<div class="emptybig sm">No exams coming up.</div>`;
   const sel=document.getElementById("exSubj");if(!sel.dataset.ready){sel.innerHTML=subjOptions();sel.dataset.ready=1}
 }
+function classSubjects(txt){const t=" "+txt.toLowerCase()+" ";
+  return SUBJECTS.filter(x=>x.id!=="other"&&(t.includes(x.name.toLowerCase())||(x.id==="prog"&&/[^a-z](it|coding|code|computer)[^a-z]/.test(t))||(x.name.length>4&&t.includes(x.name.toLowerCase().slice(0,4)))))}
+function hl(text,q){const t=String(text),i=t.toLowerCase().indexOf(q);if(i<0)return esc(t);return esc(t.slice(0,i))+"<mark>"+esc(t.slice(i,i+q.length))+"</mark>"+esc(t.slice(i+q.length))}
+function renderSearch(){
+  const q=document.getElementById("q").value.trim().toLowerCase(),out=document.getElementById("sres");
+  if(!q){out.innerHTML=`<div class="emptybig">Search your homework, exams, reminders, day notes, classes and subjects.</div>`;return}
+  const has=t=>String(t||"").toLowerCase().includes(q);
+  const groups=[];
+  const hw=state.homework.filter(h=>has(h.text)||has(subj(h.s).name));
+  if(hw.length)groups.push(["Homework",hw.map(h=>({go:"hw",c:subj(h.s),t:hl(h.text,q),m:esc(subj(h.s).name)+" · "+(h.done?"done":"due "+relDay(h.due))}))]);
+  const ex=state.exams.filter(x=>has(x.title)||has(subj(x.s).name));
+  if(ex.length)groups.push(["Exams",ex.map(x=>({go:"hw",c:subj(x.s),t:hl(x.title,q),m:esc(subj(x.s).name)+" · "+relDay(x.date)}))]);
+  const rm=state.reminders.filter(r=>has(r.text));
+  if(rm.length)groups.push(["Reminders",rm.map(r=>({go:"rem",t:hl(r.text,q),m:relDay(r.date)+", "+r.time}))]);
+  const dy=[];DAY_ORDER.forEach(d=>{const day=state.days[d];
+    if(has(day.notes)){const n=day.notes,i=n.toLowerCase().indexOf(q),a=Math.max(0,i-30);dy.push({go:"day:"+d,t:(a?"…":"")+hl(n.slice(a,i+q.length+50),q),m:"Notes · "+DAY_NAMES[d]})}
+    if(has(day.session))dy.push({go:"day:"+d,t:hl(day.session,q),m:"Class · "+DAY_NAMES[d]});
+    day.tasks.forEach(k=>{if(has(subj(k.s).name))dy.push({go:"day:"+d,c:subj(k.s),t:hl(subj(k.s).name,q),m:"Every "+DAY_NAMES[d]})})});
+  if(dy.length)groups.push(["Your week",dy]);
+  const sj=SUBJECTS.filter(x=>x.id!=="other"&&has(x.name));
+  if(sj.length){const t=totals();groups.push(["Subjects",sj.map(x=>({go:"left",c:x,t:hl(x.name,q),m:(n=>fmt(n)+(n===1?" lesson":" lessons")+" left")(Math.max(0,(state.remaining[x.id]||0)-t[x.id].done))}))])}
+  out.innerHTML=groups.length?groups.map(([g,items])=>`<h3 class="grp">${g}</h3><ul class="card">${items.slice(0,20).map(r=>`<li class="task sr" data-go="${r.go}" style="--c:${r.c?col(r.c):"var(--muted)"}"><i class="sdot"></i><div class="tt"><b>${r.t}</b><small>${r.m}</small></div><span class="chev">›</span></li>`).join("")}</ul>`).join("")
+    :`<div class="emptybig">Nothing found for “${esc(q)}”.</div>`;
+}
+document.addEventListener("input",e=>{if(e.target.id==="q")renderSearch()});
+document.addEventListener("click",e=>{const r=e.target.closest("[data-go]");if(!r)return;const g=r.dataset.go;
+  if(g.startsWith("day:")){tab="week";week=0;selDay=+g.slice(4);openForm=null}else tab=g;
+  render();scrollTo(0,0);if(g.startsWith("day:"))setTimeout(()=>document.querySelector(".day.sel")?.scrollIntoView({behavior:"smooth",block:"start"}),80)});
 function renderStats(){
   const days=[];for(let i=6;i>=0;i--)days.push(addDays(-i));
   const per=days.map(k=>{const x=state.dates[k],by={};if(x)Object.entries(x.done).forEach(([id,a])=>{const sid=(x.doneS&&x.doneS[id])||findSubj(id)||"other";by[sid]=(by[sid]||0)+a});return by});
   const tot=per.map(b=>Object.values(b).reduce((a,c)=>a+c,0)),mx=Math.max(1,...tot),sum=tot.reduce((a,c)=>a+c,0);
   document.getElementById("stTotal").textContent=fmt(sum)+" lesson"+(sum===1?"":"s");
+  const fmins=days.reduce((a,k)=>a+((state.focusLog||{})[k]||0),0);
+  document.getElementById("stFocus").textContent=fmins?"⏱ "+fmtMin(fmins)+" of focus time":"Use the focus timer to track study time";
   document.getElementById("bars").innerHTML=days.map((k,i)=>{const d=new Date(k+"T12:00:00");
     return `<div class="bar1"><div class="stack" title="${fmt(tot[i])}">${Object.entries(per[i]).map(([sid,a])=>`<i style="height:${a/mx*100}%;background:${col(subj(sid))}"></i>`).join("")}</div>
       <small class="${k===todayIso?"on":""}">${DAY_NAMES[d.getDay()][0]}</small><span>${tot[i]?fmt(tot[i]):""}</span></div>`}).join("");
@@ -741,13 +814,14 @@ function renderHeader(){
   document.getElementById("greet").textContent=h<5?"Good night":h<12?"Good morning":h<17?"Good afternoon":"Good evening";
   const d=new Date();document.getElementById("sub").textContent=DAY_NAMES[d.getDay()]+", "+d.getDate()+" "+["January","February","March","April","May","June","July","August","September","October","November","December"][d.getMonth()];
 }
+let prevTab="week";
 let lastTab=null,lastSel=null,justTicked=null;
 function moveInd(){
   const on=document.querySelector(".tabs button.on"),ind=document.getElementById("tabInd");
   if(!on||!ind||!on.offsetWidth)return;const first=!ind.dataset.ok;if(first)ind.style.transition="none";ind.style.width=on.offsetWidth+"px";ind.style.transform=`translateX(${on.offsetLeft-4}px)`;if(first){ind.dataset.ok=1;requestAnimationFrame(()=>requestAnimationFrame(()=>ind.style.transition=""))}
 }
 function afterRender(){
-  if(tab!==lastTab){const pnl=document.getElementById({week:"pWeek",hw:"pHw",rem:"pRem",left:"pLeft",set:"pSet"}[tab]);
+  if(tab!==lastTab){const pnl=document.getElementById({week:"pWeek",hw:"pHw",rem:"pRem",left:"pLeft",set:"pSet",search:"pSearch"}[tab]);
     if(pnl&&lastTab!==null){pnl.classList.remove("enter");void pnl.offsetWidth;pnl.classList.add("enter")}lastTab=tab}
   if(selDay!==lastSel){const d=document.querySelector(".day.sel");if(d&&lastSel!==null)d.classList.add("enter");
     document.querySelector(".strip button.sel")?.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});lastSel=selDay}
@@ -833,6 +907,8 @@ function render(){
     return `<article class="day ${d===selDay?"sel":""} ${isToday?"today":""}">
       <div class="dayhead"><h2>${DAY_NAMES[d]} <span class="dnum">${dLabel(dt)}</span></h2>${isToday?'<span class="tag">Today</span>':""}</div>
       <label class="session"><span>Class</span><input data-session="${d}" value="${esc(day.session)}" placeholder="No class"></label>
+      ${(()=>{if(!day.session||key>todayIso||week!==0)return "";const hit=classSubjects(day.session);if(!hit.length)return "";
+        return `<div class="newl"><span>New lessons from class?</span>${hit.map(x=>`<button data-newl="${x.id}" style="--c:${col(x)}">+1 ${esc(x.name)}</button>`).join("")}</div>`})()}
       ${expanded.has(key)?`<button class="lnk hide" data-expand="${key}">Hide finished day</button>`:""}
       ${list}${(ex=>ex.length?`<div class="hwday">${ex.map(x=>`<div class="exday" style="--c:${col(subj(x.s))}"><i></i>${esc(x.title)} <small>exam</small></div>`).join("")}</div>`:"")(state.exams.filter(x=>x.date===key))}${(hw=>hw.length?`<div class="hwday">${hw.map(h=>`<div style="--c:${col(subj(h.s))}"><i></i>${esc(h.text)} <small>homework due</small></div>`).join("")}</div>`:"")(state.homework.filter(h=>!h.done&&h.due===key))}
       <div class="add">${form}</div>
@@ -845,14 +921,20 @@ function change(fn){fn();state.editedAt=Date.now();save();render()}
 function prune(key){const x=state.dates[key];if(x&&!x.skip.length&&!x.extra.length&&!Object.keys(x.done).length&&!Object.keys(x.amt||{}).length)delete state.dates[key]}
 
 document.addEventListener("click",e=>{
-  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-optstyle],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-exopen],[data-exdel],#exAdd,[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#remAdd,#reset");
+  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-optstyle],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-newl],[data-bknow],[data-bklater],[data-exopen],[data-exdel],#exAdd,[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#remAdd,#reset");
   if(!b)return;
   const ds=b.dataset;
-  if(ds.tab){tab=ds.tab;if(tab!=="set")try{localStorage.setItem("sp-tab",tab)}catch(err){}render();scrollTo(0,0);return}
+  if(ds.tab){if(ds.tab==="back"){tab=prevTab||"week"}else{if(tab!=="set"&&tab!=="search")prevTab=tab;tab=ds.tab}
+    if(tab!=="set"&&tab!=="search")try{localStorage.setItem("sp-tab",tab)}catch(err){}
+    render();scrollTo(0,0);if(tab==="search"){const q=document.getElementById("q");q.value="";renderSearch();setTimeout(()=>q.focus(),60)}return}
   if(b.id==="hwAdd"){const t=document.getElementById("hwText"),text=t.value.trim();if(!text){t.focus();return}
     const due=document.getElementById("hwDue").value||addDays(1);
     change(()=>state.homework.push({id:uid(),text,s:document.getElementById("hwSubj").value,due,done:false}));
     t.value="";return}
+  if(ds.newl){const id=ds.newl;snap();change(()=>state.remaining[id]=(state.remaining[id]||0)+1);
+    const t=totals(),left=Math.max(0,(state.remaining[id]||0)-t[id].done);undoToast(subj(id).name+": "+fmt(left)+" left now");return}
+  if(ds.bknow!==undefined){tab="set";render();scrollTo(0,0);setTimeout(()=>document.getElementById("mv")?.scrollIntoView({block:"center",behavior:"smooth"}),150);return}
+  if(ds.bklater!==undefined){state.bkSnooze=Date.now()+3*864e5;save();renderBanner();return}
   if(ds.exopen!==undefined){const f=document.getElementById("exForm");f.hidden=!f.hidden;if(!f.hidden){const d=document.getElementById("exDate");if(!d.value)d.value=addDays(7);document.getElementById("exText").focus()}return}
   if(b.id==="exAdd"){const t=document.getElementById("exText"),title=t.value.trim();if(!title){t.focus();return}
     const date=document.getElementById("exDate").value||addDays(7);
@@ -976,6 +1058,8 @@ function celebrate(){
 
 // ---- focus timer ----
 let focus=(()=>{try{return JSON.parse(localStorage.getItem("sp-focus"))}catch(e){return null}})(),fTick=null;
+function logFocus(min){min=Math.round(min);if(min<1)return;state.focusLog=state.focusLog||{};state.focusLog[todayIso]=(state.focusLog[todayIso]||0)+min;save();setTimeout(render,0)}
+function fmtMin(m){m=Math.round(m);return m<60?m+" min":Math.floor(m/60)+"h"+(m%60?" "+(m%60)+"m":"")}
 function saveFocus(){try{focus?localStorage.setItem("sp-focus",JSON.stringify(focus)):localStorage.removeItem("sp-focus")}catch(e){}}
 function startFocus(task,min){min=min||state.settings.focusMin||25;focus={task,dur:min*60000,end:Date.now()+min*60000,left:null,phase:"study"};saveFocus();showFocus()}
 function fLeft(){return focus.left!=null?focus.left:Math.max(0,focus.end-Date.now())}
@@ -990,7 +1074,7 @@ function showFocus(){
   const draw=()=>{
     if(!focus)return;
     const left=fLeft();
-    if(left<=0&&focus.phase!=="done"&&focus.left==null){const wasBreak=focus.phase==="break";focus.phase=wasBreak?"breakdone":"done";saveFocus();beep()}
+    if(left<=0&&(focus.phase==="study"||focus.phase==="break")&&focus.left==null){const wasBreak=focus.phase==="break";if(!wasBreak)logFocus(focus.dur/60000);focus.phase=wasBreak?"breakdone":"done";saveFocus();beep()}
     const m=Math.floor(left/60000),sc=Math.floor(left%60000/1000),pct=1-left/focus.dur;
     const C=2*Math.PI*88;
     const doneView=focus.phase==="done"||focus.phase==="breakdone";
@@ -1018,7 +1102,7 @@ function focusAction(a){
   else if(a==="again"){startFocus(focus.taskDone?null:focus.task);return}
   else if(a==="markdone"){const k=focus.task,x=dayData(state,k.key);x.done[k.id]=k.amt||0;x.doneS=x.doneS||{};x.doneS[k.id]=k.s;
     const wasDone=false;save();render();focus.taskDone=true;if(k.key===todayIso&&dayAllDone())celebrate();focus=null}
-  else if(a==="close"){focus=null}
+  else if(a==="close"){if(focus.phase==="study")logFocus((focus.dur-fLeft())/60000);focus=null}
   saveFocus();showFocus()}
 
 function setColor(id,h){change(()=>{const x=state.subjects.find(x=>x.id===id);if(x)x.c=h;SUBJECTS=[...state.subjects,OTHER];colorOpen=null})}
@@ -1050,7 +1134,11 @@ document.addEventListener("focusout",e=>{if(e.target.dataset?.session!==undefine
 render();
 if(focus)showFocus();
 
-const APP_VERSION="0.29";
+const APP_VERSION="0.31";
+(function(){const st=document.getElementById("offst");
+  if(!("serviceWorker" in navigator)){st.textContent="Not supported on this browser";return}
+  navigator.serviceWorker.register("sw.js").then(()=>navigator.serviceWorker.ready).then(()=>{st.textContent="Ready ✓ The app opens even without internet."})
+    .catch(()=>{st.textContent="Not set up. Make sure sw.js is uploaded to GitHub next to index.html."})})();
 document.getElementById("ver").textContent="Version "+APP_VERSION;
 function hardReload(){const u=location.pathname+"?v="+Date.now();try{location.replace(u)}catch(e){location.href=u}setTimeout(()=>location.reload(),1500)}
 async function checkUpdate(manual){
@@ -1063,7 +1151,7 @@ async function checkUpdate(manual){
     if(m&&m[1]!==APP_VERSION){document.getElementById("updBanner").hidden=false;
       if(manual){b.textContent="Updating…";alertMsg("Updating to "+m[1]+"…");setTimeout(hardReload,600);return}}
     else if(manual)alertMsg("You're on the latest version ("+APP_VERSION+")")}
-  catch(e){if(manual)alertMsg("Couldn't check. Are you online?")}
+  catch(e){if(manual)alertMsg(navigator.onLine===false?"You're offline. Connect to check for updates.":"Couldn't check. Are you online?")}
   if(manual){b.textContent="Check";b.disabled=false}}
 document.addEventListener("click",e=>{
   const b=e.target.closest("#upd,#updNow,#mv");if(!b)return;
@@ -1079,7 +1167,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdat
   try{const s=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(h.slice(6))))));
     if(s.days&&s.remaining&&(s.editedAt||s.updatedAt||0)>(state.editedAt||0)){s.editedAt=s.editedAt||s.updatedAt||1;state=migrate(s);autoTick();try{localStorage.setItem("study-planner",JSON.stringify(state))}catch(e){}render();alertMsg("Your data was moved over ✓")}}
   catch(e){}})();
-async function shareLink(b){save();
+async function shareLink(b){state.lastBackup=Date.now();state.bkSnooze=0;save();renderBanner();
   const url=location.origin+location.pathname+"#data="+encodeURIComponent(toCode());
   try{if(navigator.share){await navigator.share({title:"Study Planner",url});return}}catch(err){if(err&&err.name==="AbortError")return}
   try{await navigator.clipboard.writeText(url);b.textContent="Link copied ✓";setTimeout(()=>b.textContent="Share link",2500)}
