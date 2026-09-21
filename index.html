@@ -31,7 +31,7 @@
 }
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.5 Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
 .wrap{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
 h1,h2,.num{font-family:"Bricolage Grotesque",Figtree,system-ui,sans-serif}
 header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
@@ -117,13 +117,18 @@ footer .btn{flex:none;padding:9px 14px}
 .imp textarea{width:100%;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:9px;padding:8px;font:inherit;font-size:.85rem}
 .imp .acts{display:flex;gap:8px;margin-top:8px}
 .msg{font-size:.85rem;margin-top:8px;color:var(--arab)}
-.tabs{display:flex;background:var(--soft);border-radius:14px;padding:4px;margin-bottom:18px;max-width:620px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.tabwrap{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;margin:0 -16px 16px;padding:8px 16px 10px;background:var(--bg)}
+.tabwrap::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:calc(env(safe-area-inset-top,0px) + 1px);background:var(--bg)}
+.tabwrap::after{content:"";position:absolute;left:0;right:0;top:100%;height:14px;background:linear-gradient(var(--bg),transparent);pointer-events:none}
+.tabs{display:flex;background:var(--soft);border-radius:14px;padding:4px;gap:2px}
 .tabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-weight:600;font-size:.88rem;padding:9px 4px;white-space:nowrap;border-radius:10px;cursor:pointer}
 .tabs button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .tabs em{font-style:normal;font-size:.7rem;background:var(--line);border-radius:10px;padding:1px 6px;margin-left:4px}
 #hwCount{background:var(--eng);color:#fff}
 @media(max-width:400px){.tabs button{font-size:.8rem}.tabs em{margin-left:2px;padding:1px 5px}}
-#pWeek,#pHw,#pRem,#pLeft{display:none}
+#pWeek,#pHw,#pRem,#pLeft,#pSet{display:none}
+body[data-view="set"] #pSet{display:block}
+body[data-view="set"] .tabwrap{display:none}
 body[data-view="week"] #pWeek,body[data-view="hw"] #pHw,body[data-view="rem"] #pRem,body[data-view="left"] #pLeft{display:block}
 .numin{width:3.4ch;border:0;border-bottom:2px dashed transparent;background:transparent;padding:0;font-size:2.2rem;font-weight:700;color:var(--c);line-height:1.1;-moz-appearance:textfield}
 .numin::-webkit-inner-spin-button,.numin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
@@ -179,6 +184,8 @@ ul.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;
 .hint.top{margin:-6px 0 14px 4px}
 .bnr{display:flex;align-items:center;gap:10px;background:var(--hist);color:#1a1200;border-radius:14px;padding:10px 12px;margin-bottom:10px}
 .bnr .bt{flex:1}.bnr b{display:block}.bnr small{opacity:.8}
+.bnr[hidden]{display:none}
+.bnr.upd{background:var(--prog);color:#fff}.bnr.upd .lnk{color:#fff}
 .bnr .lnk{color:#1a1200;background:rgba(255,255,255,.35)}
 .hwday{margin-top:8px;display:grid;gap:4px}
 .hwday div{display:flex;align-items:center;gap:8px;font-size:.88rem;background:var(--soft);border-radius:8px;padding:5px 8px}
@@ -226,6 +233,33 @@ li.tmenu button.danger,li.tmenu button.confirm{color:var(--eng)}
 .cpal button.on{box-shadow:0 0 0 2px var(--ink)}
 .cpick{display:grid;place-items:center;background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);color:#fff;font-weight:700;position:relative;overflow:hidden;text-shadow:0 0 3px #000}
 .cpick input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.gear{border:1px solid var(--line);background:var(--panel);color:var(--ink);width:40px;height:40px;border-radius:12px;font-size:1.2rem;cursor:pointer;flex:none}
+.sethead{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.sethead h2{margin:0;font-size:1.4rem}
+.setgrp{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:6px 14px;margin-bottom:14px}
+.setgrp h3{font-size:.78rem;text-transform:none;color:var(--muted);margin:8px 0 2px;font-weight:600}
+.setrow{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.setgrp h3+.setrow,.setgrp>.setrow:first-child{border-top:0}
+.setrow>div{flex:1;min-width:0}
+.setrow b{display:block;font-weight:600}
+.setrow small{color:var(--muted);font-size:.8rem;line-height:1.35;display:block}
+.setrow .btn{flex:none;padding:8px 14px;font-size:.88rem}
+.setgrp .imp{margin:0 0 10px}
+.setsec{font-family:"Bricolage Grotesque",Figtree,sans-serif;font-size:1rem;font-weight:700;margin:18px 4px 8px;color:var(--ink)}
+.sethead+.setsec{margin-top:4px}
+.seg{display:flex;background:var(--soft);border-radius:10px;padding:3px;flex:none}
+.seg button{border:0;background:none;color:var(--muted);font:inherit;font-size:.8rem;font-weight:600;padding:6px 8px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.seg button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.sw{position:relative;width:48px;height:28px;flex:none;cursor:pointer}
+.sw input{opacity:0;width:0;height:0;position:absolute}
+.sw span{position:absolute;inset:0;background:var(--line);border-radius:20px;transition:background .2s}
+.sw span::after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+.sw input:checked+span{background:var(--arab)}
+.sw input:checked+span::after{transform:translateX(20px)}
+.sw input:focus-visible+span{outline:2px solid var(--prog);outline-offset:2px}
+.setrow.wide{flex-wrap:wrap}.setrow.wide .seg{width:100%}
+@media(max-width:480px){.setrow{flex-wrap:wrap}.setrow .seg{width:100%}}
+.setrow .seg button{flex:1}
 .rep{grid-column:1/-1;display:flex;gap:6px}
 .rep label{flex:1;display:flex;align-items:center;gap:6px;font-size:.85rem;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:7px 8px;cursor:pointer}
 .rep label:has(input:checked){border-color:var(--ink);font-weight:600}
@@ -242,16 +276,17 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <h1>Study planner</h1>
       <div class="sub" id="sub">Your usual week, with room for changes</div>
     </div>
-    <div class="sync on" id="sync">Saved on this device</div>
+    <button class="gear" data-tab="set" aria-label="Settings">⚙︎</button>
   </header>
 
+  <div id="updBanner" class="bnr upd" hidden><span class="bell">✨</span><div class="bt"><b>New version available</b><small>Your data stays as it is.</small></div><button class="lnk" id="updNow">Update</button></div>
   <div id="banner"></div>
-  <div class="tabs" role="tablist">
+  <div class="tabwrap"><div class="tabs" role="tablist">
     <button data-tab="week" role="tab">Week</button>
     <button data-tab="hw" role="tab">Homework <em id="hwCount" hidden></em></button>
     <button data-tab="rem" role="tab">Reminders <em id="remCount" hidden></em></button>
     <button data-tab="left" role="tab">Lessons <em id="leftTotal"></em></button>
-  </div>
+  </div></div>
   <div id="pWeek">
     <div class="todaycard" id="todayCard"></div>
     <div class="wknav">
@@ -287,25 +322,49 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     <p class="hint top">Reminders pop up here when their time comes. For a real phone notification, even with the app closed, tap <b>Add to calendar</b>.</p>
     <div id="remList"></div>
   </div>
+  <div id="pSet">
+    <div class="sethead"><button class="lnk" data-tab="week">‹ Back</button><h2>Settings</h2></div>
+    <h4 class="setsec">Planner</h4>
+    <section class="setgrp">
+      <div class="setrow"><div><b>Auto-tick past days</b><small>After midnight, the day's tasks tick themselves.</small></div>
+        <label class="sw"><input type="checkbox" id="optAuto"><span></span></label></div>
+      <div class="setrow wide"><div><b>Week starts on</b><small>The first day of your study week.</small></div>
+        <div class="seg"><button data-optws="5">Fri</button><button data-optws="6">Sat</button><button data-optws="0">Sun</button><button data-optws="1">Mon</button><button data-optws="2">Tue</button><button data-optws="3">Wed</button><button data-optws="4">Thu</button></div></div>
+      <div class="setrow"><div><b>Open the app on</b></div>
+        <div class="seg"><button data-optopen="last">Last tab</button><button data-optopen="week">Week</button><button data-optopen="hw">Homework</button></div></div>
+      <div class="setrow"><div><b>Focus timer length</b><small>Where the timer starts.</small></div>
+        <div class="seg" id="optFocus"><button data-optfocus="15">15 min</button><button data-optfocus="25">25 min</button><button data-optfocus="45">45 min</button><button data-optfocus="60">60 min</button></div></div>
+      <div class="setrow"><div><b>Timer sound &amp; vibration</b><small>Beep when a focus session ends.</small></div>
+        <label class="sw"><input type="checkbox" id="optSound"><span></span></label></div>
+      <div class="setrow"><div><b>Confetti</b><small>When you finish all of today's study.</small></div>
+        <label class="sw"><input type="checkbox" id="optConf"><span></span></label></div>
+      <div class="setrow"><div><b>Clear ticks</b><small>Unticks every task in the week you're viewing.</small></div><button class="btn ghost" id="reset">Clear</button></div>
+    </section>
+    <h4 class="setsec">Appearance</h4>
+    <section class="setgrp">
+      <div class="setrow"><div><b>Theme</b><small>Auto follows your phone.</small></div>
+        <div class="seg" id="optTheme"><button data-opttheme="auto">Auto</button><button data-opttheme="light">Light</button><button data-opttheme="dark">Dark</button></div></div>
+      <div class="setrow"><div><b>Text size</b></div>
+        <div class="seg"><button data-optsize="s">Small</button><button data-optsize="m">Normal</button><button data-optsize="l">Large</button></div></div>
+      <div class="setrow"><div><b>Subject colors</b><small>Change them from the color dot on the Lessons tab.</small></div><button class="btn ghost" data-tab="left">Open</button></div>
+    </section>
+    <h4 class="setsec">System</h4>
+    <section class="setgrp">
+      <div class="setrow"><div><b>Updates</b><small id="ver"></small></div><button class="btn" id="upd">Check</button></div>
+      <div class="setrow"><div><b>Move or back up your data</b><small>Makes a link with all your data. Open it in Safari to bring everything into a new app. Also works as a backup.</small></div><button class="btn" id="mv">Share link</button></div>
+      <div class="setrow"><div><b>Load a backup</b><small>Paste a data link or an old backup code.</small></div><button class="btn ghost" id="imp">Load</button></div>
+      <div class="imp" id="impbox" hidden>
+        <textarea id="impcode" rows="3" placeholder="Paste link or code here"></textarea>
+        <div class="acts"><button class="btn ghost" id="impcancel">Cancel</button><button class="btn" id="impgo">Load backup</button></div>
+        <div class="msg" id="impmsg"></div>
+      </div>
+    </section>
+  </div>
   <div id="pLeft">
     <section class="subjects" id="subjects" aria-label="Lessons remaining"></section>
     <p class="hint">Tap a number to type how many lessons are left, or use + and −. Tap the color dot to change a subject's color.</p>
   </div>
 
-  <footer>
-    <p>Subjects marked "Every" repeat each week; type how many lessons for each day. After midnight, a day's tasks tick themselves; untick anything you missed. Tap Skip to drop one for a single week, or add a task for one day only.</p>
-    <div class="bk">
-      <button class="btn ghost" id="exp">Copy backup code</button>
-      <button class="btn ghost" id="imp">Load backup code</button>
-      <button class="btn ghost" id="reset">Clear this week's ticks</button>
-    </div>
-  </footer>
-  <div class="imp" id="impbox" hidden>
-    <p>Paste a backup code from your other device. This replaces what's on this device.</p>
-    <textarea id="impcode" rows="3" placeholder="Paste backup code here"></textarea>
-    <div class="acts"><button class="btn ghost" id="impcancel">Cancel</button><button class="btn" id="impgo">Load backup</button></div>
-    <div class="msg" id="impmsg"></div>
-  </div>
   <div class="toast" id="toast" hidden></div>
   <div class="confetti" id="confetti" aria-hidden="true"></div>
   <div class="focus" id="focus" hidden role="dialog" aria-label="Focus timer"><div class="fbox"></div></div>
@@ -314,7 +373,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 </div>
 
 <script>
-const DAY_ORDER=[5,6,0,1,2,3,4];
+let DAY_ORDER=[5,6,0,1,2,3,4];
+function setOrder(st){DAY_ORDER=Array.from({length:7},(_,i)=>(st+i)%7)}
 const DAY_NAMES={0:"Sunday",1:"Monday",2:"Tuesday",3:"Wednesday",4:"Thursday",5:"Friday",6:"Saturday"};
 const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const BASE_SUBJECTS=[
@@ -345,7 +405,7 @@ const DEFAULT={
 
 // ---- dates ----
 function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
-function weekStart(offset){const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-((d.getDay()-5+7)%7)+offset*7);return d}
+function weekStart(offset){const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-((d.getDay()-DAY_ORDER[0]+7)%7)+offset*7);return d}
 function dateFor(offset,wd){const d=weekStart(offset);d.setDate(d.getDate()+DAY_ORDER.indexOf(wd));return d}
 function dLabel(d){return d.getDate()+" "+MONTHS[d.getMonth()]}
 let todayIso=iso(new Date());
@@ -362,12 +422,14 @@ function migrate(s){
   s.subjects=s.subjects||BASE_SUBJECTS.map(x=>({...x}));
   s.homework=s.homework||[];s.reminders=s.reminders||[];
   SUBJECTS=[...s.subjects,OTHER];
+  s.settings=Object.assign({autoTick:true,focusMin:25,theme:"auto",size:"m",weekStart:5,openOn:"last",confetti:true,sound:true},s.settings||{});
+  setOrder(s.settings.weekStart);
   s.v=4;return s}
 function dayData(s,key){const x=s.dates[key]||(s.dates[key]={skip:[],extra:[],done:{}});x.amt=x.amt||{};return x}
 function peek(key){const x=state.dates[key]||{skip:[],extra:[],done:{}};return {...x,amt:x.amt||{}}}
 
 let state=migrate(load()||structuredClone(DEFAULT));
-let tab=(()=>{try{return localStorage.getItem("sp-tab")||"week"}catch(e){return "week"}})();
+let tab=(()=>{const o=state.settings.openOn;if(o&&o!=="last")return o;try{const t=localStorage.getItem("sp-tab");return t&&t!=="set"?t:"week"}catch(e){return "week"}})();
 let week=0, selDay=today, openForm=null, openMenu=null;
 const expanded=new Set();
 function isComplete(wd,key){return key<todayIso&&tasksOn(wd,key).filter(k=>!k.skipped).every(k=>k.done)}
@@ -480,7 +542,21 @@ function nextFor(sid){
       return i===0?"today":i===1?"tomorrow":DAY_NAMES[wd].slice(0,3)+" "+dLabel(d);
     d.setDate(d.getDate()+1)}
   return null}
+function applySettings(){
+  const st=state.settings;
+  if(st.theme==="auto")delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=st.theme;
+  const a=document.getElementById("optAuto");if(a)a.checked=st.autoTick!==false;
+  const sd=document.getElementById("optSound");if(sd)sd.checked=st.sound!==false;
+  const cf=document.getElementById("optConf");if(cf)cf.checked=st.confetti!==false;
+  document.documentElement.style.fontSize=({s:"14px",m:"16px",l:"18px"})[st.size||"m"];
+  document.querySelectorAll("[data-optsize]").forEach(b=>b.classList.toggle("on",b.dataset.optsize===(st.size||"m")));
+  document.querySelectorAll("[data-optws]").forEach(b=>b.classList.toggle("on",+b.dataset.optws===st.weekStart));
+  document.querySelectorAll("[data-optopen]").forEach(b=>b.classList.toggle("on",b.dataset.optopen===st.openOn));
+  document.querySelectorAll("[data-optfocus]").forEach(b=>b.classList.toggle("on",+b.dataset.optfocus===st.focusMin));
+  document.querySelectorAll("[data-opttheme]").forEach(b=>b.classList.toggle("on",b.dataset.opttheme===st.theme));
+}
 function render(){
+  applySettings();
   const t=totals();
   document.body.dataset.view=tab;
   document.querySelectorAll("button[data-tab]").forEach(b=>{b.classList.toggle("on",b.dataset.tab===tab);b.setAttribute("aria-selected",b.dataset.tab===tab)});
@@ -508,7 +584,7 @@ function render(){
     :`<button class="subj addsubj" data-subjadd>+ Add subject</button>`;
 
   // week nav
-  const ws=weekStart(week),we=dateFor(week,4);
+  const ws=weekStart(week),we=dateFor(week,DAY_ORDER[6]);
   document.getElementById("wkLabel").textContent=(week===0?"This week":week===1?"Next week":week===-1?"Last week":"Week of "+dLabel(ws));
   document.getElementById("wkDates").textContent=dLabel(ws)+" – "+dLabel(we);
   document.getElementById("wkToday").hidden=week===0;
@@ -563,14 +639,14 @@ function render(){
 }
 
 function save(){state.updatedAt=Date.now();try{localStorage.setItem("study-planner",JSON.stringify(state))}catch(e){}}
-function change(fn){fn();save();render()}
+function change(fn){fn();state.editedAt=Date.now();save();render()}
 function prune(key){const x=state.dates[key];if(x&&!x.skip.length&&!x.extra.length&&!Object.keys(x.done).length&&!Object.keys(x.amt||{}).length)delete state.dates[key]}
 
 document.addEventListener("click",e=>{
-  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#remAdd,#reset");
+  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#remAdd,#reset");
   if(!b)return;
   const ds=b.dataset;
-  if(ds.tab){tab=ds.tab;try{localStorage.setItem("sp-tab",tab)}catch(err){}render();return}
+  if(ds.tab){tab=ds.tab;if(tab!=="set")try{localStorage.setItem("sp-tab",tab)}catch(err){}render();scrollTo(0,0);return}
   if(b.id==="hwAdd"){const t=document.getElementById("hwText"),text=t.value.trim();if(!text){t.focus();return}
     const due=document.getElementById("hwDue").value||addDays(1);
     change(()=>state.homework.push({id:uid(),text,s:document.getElementById("hwSubj").value,due,done:false}));
@@ -599,6 +675,11 @@ document.addEventListener("click",e=>{
     if(DAY_ORDER.some(d=>state.days[d].tasks.some(k=>k.s===id))){alertMsg("Remove this subject from your week first.");return}
     if(!b.dataset.confirm){b.dataset.confirm="1";b.textContent="Remove?";b.classList.add("confirm");setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent="×";b.classList.remove("confirm")}},3000);return}
     change(()=>{state.subjects=state.subjects.filter(x=>x.id!==id);delete state.remaining[id];SUBJECTS=[...state.subjects,OTHER];document.getElementById("hwSubj").dataset.ready=""});return}
+  if(ds.optsize){change(()=>state.settings.size=ds.optsize);return}
+  if(ds.optws!==undefined){change(()=>{state.settings.weekStart=+ds.optws;setOrder(+ds.optws)});week=0;selDay=today;return}
+  if(ds.optopen){change(()=>state.settings.openOn=ds.optopen);return}
+  if(ds.optfocus){change(()=>state.settings.focusMin=+ds.optfocus);return}
+  if(ds.opttheme){change(()=>state.settings.theme=ds.opttheme);return}
   if(ds.color){colorOpen=colorOpen===ds.color?null:ds.color;render();return}
   if(ds.setc){const[id,h]=ds.setc.split(":");setColor(id,h);return}
   if(ds.menu){openMenu=openMenu===ds.menu?null:ds.menu;render();return}
@@ -635,8 +716,8 @@ document.addEventListener("click",e=>{
       else{state.days[d].tasks.push({id,s:sj});if(amt!==null)dayData(state,key).amt[id]=amt}openForm=null});
     return}
   if(b.id==="reset"){
-    if(b.dataset.confirm){delete b.dataset.confirm;change(()=>DAY_ORDER.forEach(d=>{const key=iso(dateFor(week,d));if(state.dates[key]){state.dates[key].done={};prune(key)}}))}
-    else{b.dataset.confirm="1";b.textContent="Tap again to clear";setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent="Clear this week's ticks"}},3000)}
+    if(b.dataset.confirm){delete b.dataset.confirm;b.textContent="Clear";alertMsg("Ticks cleared");change(()=>DAY_ORDER.forEach(d=>{const key=iso(dateFor(week,d));if(state.dates[key]){state.dates[key].done={};prune(key)}}))}
+    else{b.dataset.confirm="1";b.textContent="Tap again";setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent="Clear"}},3000)}
   }
 });
 document.addEventListener("change",e=>{
@@ -648,6 +729,9 @@ document.addEventListener("change",e=>{
       if(kind==="fixed"){if(amt===null)delete x.amt[id];else x.amt[id]=amt}
       else{const k=x.extra.find(k=>k.id===id);if(k)k.amt=amt}
       if(id in x.done)x.done[id]=amt||0;prune(key)});return}
+  if(t.id==="optSound"){change(()=>state.settings.sound=t.checked);return}
+  if(t.id==="optConf"){change(()=>state.settings.confetti=t.checked);return}
+  if(t.id==="optAuto"){change(()=>{state.settings.autoTick=t.checked;if(t.checked)state.autoThrough=iso(new Date(Date.now()-864e5))});return}
   if(t.dataset.cpick){setColor(t.dataset.cpick,t.value);return}
   if(t.dataset.hwtick){change(()=>{const h=state.homework.find(h=>h.id===t.dataset.hwtick);if(h)h.done=t.checked});return}
   if(t.dataset.tick){const[key,id,s,amt]=t.dataset.tick.split(":");
@@ -658,12 +742,13 @@ document.addEventListener("change",e=>{
 });
 document.addEventListener("input",e=>{
   const t=e.target;
-  if(t.dataset.session!==undefined){state.days[t.dataset.session].session=t.value;save()}
-  if(t.dataset.notes!==undefined){state.days[t.dataset.notes].notes=t.value;save()}
+  if(t.dataset.session!==undefined){state.days[t.dataset.session].session=t.value;state.editedAt=Date.now();save()}
+  if(t.dataset.notes!==undefined){state.days[t.dataset.notes].notes=t.value;state.editedAt=Date.now();save()}
 });
 // auto-tick: once a day has passed (after midnight), its tasks count as done
 function nextDay(k){const d=new Date(k+"T12:00:00");d.setDate(d.getDate()+1);return iso(d)}
 function autoTick(){
+  if(state.settings&&state.settings.autoTick===false){state.autoThrough=iso(new Date(Date.now()-864e5));return}
   let from=state.autoThrough?nextDay(state.autoThrough):[iso(weekStart(0)),...Object.keys(state.dates)].sort()[0];
   let changed=false;
   for(let k=from;k<todayIso;k=nextDay(k)){
@@ -676,7 +761,7 @@ function autoTick(){
 function dayAllDone(){const t=tasksOn(today,todayIso).filter(k=>!k.skipped);return t.length>0&&t.every(k=>k.done)}
 function celebrate(){
   alertMsg("All of today's study done 🎉");
-  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  if(state.settings.confetti===false||matchMedia("(prefers-reduced-motion: reduce)").matches)return;
   const box=document.getElementById("confetti"),cols=["--prog","--arab","--hist","--eng"];
   box.innerHTML=Array.from({length:40},(_,i)=>`<i style="left:${Math.random()*100}%;background:var(${cols[i%4]});animation-delay:${Math.random()*.3}s;animation-duration:${1.2+Math.random()*.8}s;transform:rotate(${Math.random()*360}deg)"></i>`).join("");
   setTimeout(()=>box.innerHTML="",2400)}
@@ -684,9 +769,9 @@ function celebrate(){
 // ---- focus timer ----
 let focus=(()=>{try{return JSON.parse(localStorage.getItem("sp-focus"))}catch(e){return null}})(),fTick=null;
 function saveFocus(){try{focus?localStorage.setItem("sp-focus",JSON.stringify(focus)):localStorage.removeItem("sp-focus")}catch(e){}}
-function startFocus(task,min){focus={task,dur:(min||25)*60000,end:Date.now()+(min||25)*60000,left:null,phase:"study"};saveFocus();showFocus()}
+function startFocus(task,min){min=min||state.settings.focusMin||25;focus={task,dur:min*60000,end:Date.now()+min*60000,left:null,phase:"study"};saveFocus();showFocus()}
 function fLeft(){return focus.left!=null?focus.left:Math.max(0,focus.end-Date.now())}
-function beep(){try{const a=new (window.AudioContext||window.webkitAudioContext)();[0,.35,.7].forEach(t=>{const o=a.createOscillator(),g=a.createGain();o.frequency.value=880;o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(.2,a.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+t+.3);o.start(a.currentTime+t);o.stop(a.currentTime+t+.3)})}catch(e){}
+function beep(){if(state.settings.sound===false)return;try{const a=new (window.AudioContext||window.webkitAudioContext)();[0,.35,.7].forEach(t=>{const o=a.createOscillator(),g=a.createGain();o.frequency.value=880;o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(.2,a.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+t+.3);o.start(a.currentTime+t);o.stop(a.currentTime+t+.3)})}catch(e){}
   try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
 function showFocus(){
   const el=document.getElementById("focus");
@@ -744,20 +829,41 @@ document.addEventListener("focusout",e=>{if(e.target.dataset?.session!==undefine
 render();
 if(focus)showFocus();
 
+const APP_VERSION="0.22";
+document.getElementById("ver").textContent="Version "+APP_VERSION;
+function hardReload(){location.replace(location.pathname+"?v="+Date.now())}
+async function checkUpdate(manual){
+  try{const r=await fetch(location.pathname+"?check="+Date.now(),{cache:"no-store"});const t=await r.text();
+    const m=t.match(/const APP_VERSION="([^"]+)"/);
+    if(m&&m[1]!==APP_VERSION){document.getElementById("updBanner").hidden=false;if(manual)hardReload()}
+    else if(manual)alertMsg("You have the latest version")}
+  catch(e){if(manual)alertMsg("Couldn't check. Are you online?")}}
+document.getElementById("upd").onclick=()=>checkUpdate(true);
+document.getElementById("updNow").onclick=hardReload;
+checkUpdate(false);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate(false)});
+
+// transfer via link: #data=... imports if newer than what's here
+(()=>{const h=location.hash;if(!h.startsWith("#data="))return;
+  try{const s=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(h.slice(6))))));
+    if(s.days&&s.remaining&&(s.editedAt||s.updatedAt||0)>(state.editedAt||0)){s.editedAt=s.editedAt||s.updatedAt||1;state=migrate(s);autoTick();try{localStorage.setItem("study-planner",JSON.stringify(state))}catch(e){}render();alertMsg("Your data was moved over ✓")}}
+  catch(e){}})();
+document.getElementById("mv").onclick=async e=>{
+  const b=e.currentTarget;save();
+  const url=location.origin+location.pathname+"#data="+encodeURIComponent(toCode());
+  try{if(navigator.share){await navigator.share({title:"Study Planner",url});return}}catch(err){if(err&&err.name==="AbortError")return}
+  try{await navigator.clipboard.writeText(url);b.textContent="Link copied ✓";setTimeout(()=>b.textContent="Share link",2500)}
+  catch(err){alertMsg("Couldn't copy the link")}};
+
 function toCode(){return btoa(unescape(encodeURIComponent(JSON.stringify(state))))}
-document.getElementById("exp").onclick=async e=>{
-  const b=e.currentTarget,code=toCode();
-  try{await navigator.clipboard.writeText(code);b.textContent="Copied. Paste it on your other device"}
-  catch(err){document.getElementById("impbox").hidden=false;const t=document.getElementById("impcode");t.value=code;t.select();document.getElementById("impmsg").textContent="Copy this code by hand."}
-  setTimeout(()=>b.textContent="Copy backup code",3000)};
 document.getElementById("imp").onclick=()=>{const bx=document.getElementById("impbox");bx.hidden=false;document.getElementById("impcode").value="";document.getElementById("impmsg").textContent="";document.getElementById("impcode").focus()};
 document.getElementById("impcancel").onclick=()=>document.getElementById("impbox").hidden=true;
 document.getElementById("impgo").onclick=()=>{
   const m=document.getElementById("impmsg");
-  try{const s=JSON.parse(decodeURIComponent(escape(atob(document.getElementById("impcode").value.trim()))));
+  try{let raw=document.getElementById("impcode").value.trim();const i=raw.indexOf("#data=");if(i>=0)raw=decodeURIComponent(raw.slice(i+6));const s=JSON.parse(decodeURIComponent(escape(atob(raw))));
     if(!s.days||!s.remaining)throw 0;state=migrate(s);autoTick();save();render();m.style.color="var(--arab)";m.textContent="Backup loaded.";
     setTimeout(()=>document.getElementById("impbox").hidden=true,1200)}
-  catch(err){m.style.color="var(--eng)";m.textContent="That code didn't work. Copy the whole code again and paste it."}};
+  catch(err){m.style.color="var(--eng)";m.textContent="That didn't work. Copy the whole link or code again and paste it."}};
 </script>
 </body>
 </html>
