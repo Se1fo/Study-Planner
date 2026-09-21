@@ -121,7 +121,7 @@ footer .btn{flex:none;padding:9px 14px}
 .tabs button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-weight:600;font-size:.95rem;padding:9px 8px;border-radius:10px;cursor:pointer}
 .tabs button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .tabs em{font-style:normal;font-size:.75rem;background:var(--line);border-radius:10px;padding:1px 7px;margin-left:6px}
-body[data-tab="week"] #pLeft,body[data-tab="left"] #pWeek{display:none}
+body[data-view="week"] #pLeft,body[data-view="left"] #pWeek{display:none}
 .numin{width:3.4ch;border:0;border-bottom:2px dashed transparent;background:transparent;padding:0;font-size:2.2rem;font-weight:700;color:var(--c);line-height:1.1;-moz-appearance:textfield}
 .numin::-webkit-inner-spin-button,.numin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .numin:hover,.numin:focus{border-bottom-color:var(--c);outline:none}
@@ -224,8 +224,8 @@ function totals(){
 
 function render(){
   const t=totals();
-  document.body.dataset.tab=tab;
-  document.querySelectorAll("[data-tab]").forEach(b=>{b.classList.toggle("on",b.dataset.tab===tab);b.setAttribute("aria-selected",b.dataset.tab===tab)});
+  document.body.dataset.view=tab;
+  document.querySelectorAll("button[data-tab]").forEach(b=>{b.classList.toggle("on",b.dataset.tab===tab);b.setAttribute("aria-selected",b.dataset.tab===tab)});
   const tl=SUBJECTS.reduce((a,s)=>a+Math.max(0,(state.remaining[s.id]||0)-t[s.id].done),0);
   document.getElementById("leftTotal").textContent=fmt(tl);
   // subjects
@@ -293,7 +293,7 @@ function _unused(on){const el=document.getElementById("sync");el.className="sync
 function change(fn){fn();save();render()}
 
 document.addEventListener("click",e=>{
-  const b=e.target.closest("[data-tab],[data-sel],[data-step],[data-del],[data-open],[data-cancel],[data-save],#reset");
+  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-del],[data-open],[data-cancel],[data-save],#reset");
   if(!b)return;
   if(b.dataset.tab){tab=b.dataset.tab;try{localStorage.setItem("sp-tab",tab)}catch(err){}render();return}
   if(b.dataset.sel!==undefined){selDay=+b.dataset.sel;openForm=null;render();return}
