@@ -147,6 +147,14 @@ li.skipped .tt b{text-decoration:line-through}
 .amtin{width:3.2em;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:7px;padding:2px 4px;font:inherit;font-size:.85rem;text-align:center;-moz-appearance:textfield}
 .amtin::-webkit-inner-spin-button,.amtin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .amtin:focus{outline:none;border-color:var(--c)}
+.donecard{opacity:.8}
+.donecard .dayhead{margin-bottom:4px}
+.okmark{width:28px;height:28px;border-radius:50%;background:var(--arab);color:#fff;display:grid;place-items:center;font-weight:700}
+.donerow{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:.9rem}
+.hide{display:block;margin:-4px 0 6px -6px}
+.done-n .ok{color:var(--arab);font-weight:600}
+.subj .row .step{margin-left:auto;align-self:center}
+.done-n{font-size:.8rem;color:var(--muted);margin-top:-2px}
 .rep{grid-column:1/-1;display:flex;gap:6px}
 .rep label{flex:1;display:flex;align-items:center;gap:6px;font-size:.85rem;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:7px 8px;cursor:pointer}
 .rep label:has(input:checked){border-color:var(--ink);font-weight:600}
@@ -182,11 +190,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   </div>
   <div id="pLeft">
     <section class="subjects" id="subjects" aria-label="Lessons remaining"></section>
-    <p class="hint">Tap a number to type how many lessons are left, or use + and −.</p>
+    <p class="hint">Tap a number to type how many lessons are left, or use + and −. Ticking a lesson takes it off automatically.</p>
   </div>
 
   <footer>
-    <p>Subjects marked "Every" repeat each week; type how many lessons for each day. Tap Skip to drop one for a single week, or add a task for one day only.</p>
+    <p>Subjects marked "Every" repeat each week; type how many lessons for each day. After midnight, a day's tasks tick themselves; untick anything you missed. Tap Skip to drop one for a single week, or add a task for one day only.</p>
     <div class="bk">
       <button class="btn ghost" id="exp">Copy backup code</button>
       <button class="btn ghost" id="imp">Load backup code</button>
@@ -235,8 +243,8 @@ function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"
 function weekStart(offset){const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-((d.getDay()-5+7)%7)+offset*7);return d}
 function dateFor(offset,wd){const d=weekStart(offset);d.setDate(d.getDate()+DAY_ORDER.indexOf(wd));return d}
 function dLabel(d){return d.getDate()+" "+MONTHS[d.getMonth()]}
-const todayIso=iso(new Date());
-const today=new Date().getDay();
+let todayIso=iso(new Date());
+let today=new Date().getDay();
 
 function migrate(s){
   s.dates=s.dates||{};
@@ -253,6 +261,8 @@ function peek(key){const x=state.dates[key]||{skip:[],extra:[],done:{}};return {
 let state=migrate(load()||structuredClone(DEFAULT));
 let tab=(()=>{try{return localStorage.getItem("sp-tab")||"week"}catch(e){return "week"}})();
 let week=0, selDay=today, openForm=null;
+const expanded=new Set();
+function isComplete(wd,key){return key<todayIso&&tasksOn(wd,key).filter(k=>!k.skipped).every(k=>k.done)}
 
 function load(){try{const r=localStorage.getItem("study-planner");return r?JSON.parse(r):null}catch(e){return null}}
 function subj(id){return SUBJECTS.find(s=>s.id===id)||SUBJECTS[4]}
@@ -279,6 +289,13 @@ function totals(){
   return t;
 }
 
+function nextFor(sid){
+  const d=new Date();d.setHours(12,0,0,0);
+  for(let i=0;i<28;i++){const key=iso(d),wd=d.getDay();
+    if(tasksOn(wd,key).some(k=>k.s===sid&&!k.skipped&&!k.done))
+      return i===0?"today":i===1?"tomorrow":DAY_NAMES[wd].slice(0,3)+" "+dLabel(d);
+    d.setDate(d.getDate()+1)}
+  return null}
 function render(){
   const t=totals();
   document.body.dataset.view=tab;
@@ -293,11 +310,10 @@ function render(){
     const note=left===0&&base>0?"All done":unplanned>0?`<span class="warn">${fmt(unplanned)} not planned this week</span>`:"Planned this week";
     return `<div class="subj" style="--c:var(${s.c})">
       <div class="name">${s.name}</div>
-      <div class="row"><input class="numin" data-left="${s.id}" type="number" min="0" step="0.5" inputmode="decimal" value="${fmt(left)}" aria-label="${s.name} lessons left"><span class="of">of ${fmt(base)} left</span></div>
-      <div class="bar"><i style="width:${pct}%"></i></div>
-      <div class="foot"><span>${note}</span><span class="step">
-        <button aria-label="Fewer ${s.name} lessons" data-step="${s.id}" data-by="-0.5">−</button>
-        <button aria-label="More ${s.name} lessons" data-step="${s.id}" data-by="0.5">+</button></span></div>
+      <div class="row"><input class="numin" data-left="${s.id}" type="number" min="0" step="0.5" inputmode="decimal" value="${fmt(left)}" aria-label="${s.name} lessons left"><span class="of">left</span>
+        <span class="step">
+        <button aria-label="Fewer ${s.name} lessons" data-step="${s.id}" data-by="-1">−</button>
+        <button aria-label="More ${s.name} lessons" data-step="${s.id}" data-by="1">+</button></span></div>
     </div>`}).join("");
 
   // week nav
@@ -305,16 +321,20 @@ function render(){
   document.getElementById("wkLabel").textContent=(week===0?"This week":week===1?"Next week":week===-1?"Last week":"Week of "+dLabel(ws));
   document.getElementById("wkDates").textContent=dLabel(ws)+" – "+dLabel(we);
   document.getElementById("wkToday").hidden=week===0;
+  if(week<0&&DAY_ORDER.every(d=>isComplete(d,iso(dateFor(week,d)))))document.getElementById("wkLabel").textContent+=" ✓";
 
   document.getElementById("strip").innerHTML=DAY_ORDER.map(d=>{
     const dt=dateFor(week,d),key=iso(dt),tasks=tasksOn(d,key).filter(k=>!k.skipped);
     return `<button data-sel="${d}" class="${d===selDay?"sel":""}" aria-pressed="${d===selDay}">
-      <b>${DAY_NAMES[d].slice(0,3)}</b><small>${key===todayIso?"Today":dt.getDate()}</small>
+      <b>${DAY_NAMES[d].slice(0,3)}</b><small>${key===todayIso?"Today":isComplete(d,key)?"✓":dt.getDate()}</small>
       <div class="dots">${tasks.map(k=>`<span class="${k.done?"d":""}" style="--c:var(${subj(k.s).c})"></span>`).join("")}</div></button>`}).join("");
 
   document.getElementById("days").innerHTML=DAY_ORDER.map(d=>{
     const day=state.days[d],dt=dateFor(week,d),key=iso(dt),isToday=key===todayIso;
     const tasks=tasksOn(d,key);
+    if(isComplete(d,key)&&!expanded.has(key))return `<article class="day donecard ${d===selDay?"sel":""}">
+      <div class="dayhead"><h2>${DAY_NAMES[d]} <span class="dnum">${dLabel(dt)}</span></h2><span class="okmark" aria-label="Done">✓</span></div>
+      <div class="donerow"><span>Day done</span><button class="lnk" data-expand="${key}">Show</button></div></article>`;
     const list=tasks.length?`<ul>${tasks.map(k=>{const s=subj(k.s);
       if(k.skipped)return `<li class="task skipped" style="--c:var(${s.c})">
         <span class="chk off"></span>
@@ -340,6 +360,7 @@ function render(){
     return `<article class="day ${d===selDay?"sel":""} ${isToday?"today":""}">
       <div class="dayhead"><h2>${DAY_NAMES[d]} <span class="dnum">${dLabel(dt)}</span></h2>${isToday?'<span class="tag">Today</span>':""}</div>
       <label class="session"><span>Class</span><input data-session="${d}" value="${esc(day.session)}" placeholder="No class"></label>
+      ${expanded.has(key)?`<button class="lnk hide" data-expand="${key}">Hide finished day</button>`:""}
       ${list}<div class="add">${form}</div>
       <label class="dnotes"><span>Notes</span><textarea data-notes="${d}" rows="2" placeholder="Anything to remember for ${DAY_NAMES[d]}">${esc(day.notes||"")}</textarea></label></article>`}).join("");
 }
@@ -349,13 +370,14 @@ function change(fn){fn();save();render()}
 function prune(key){const x=state.dates[key];if(x&&!x.skip.length&&!x.extra.length&&!Object.keys(x.done).length&&!Object.keys(x.amt||{}).length)delete state.dates[key]}
 
 document.addEventListener("click",e=>{
-  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],#reset");
+  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],#reset");
   if(!b)return;
   const ds=b.dataset;
   if(ds.tab){tab=ds.tab;try{localStorage.setItem("sp-tab",tab)}catch(err){}render();return}
+  if(ds.expand){expanded.has(ds.expand)?expanded.delete(ds.expand):expanded.add(ds.expand);render();return}
   if(ds.wk!==undefined){week=ds.wk==="0"?0:week+ +ds.wk;openForm=null;if(week===0)selDay=today;render();return}
   if(ds.sel!==undefined){selDay=+ds.sel;openForm=null;render();return}
-  if(ds.step){change(()=>{state.remaining[ds.step]=Math.max(0,(state.remaining[ds.step]||0)+ +ds.by)});return}
+  if(ds.step){change(()=>{const done=totals()[ds.step].done,cur=state.remaining[ds.step]||0;state.remaining[ds.step]=Math.max(done,cur+ +ds.by)});return}
   if(ds.delfix){const[d,id]=ds.delfix.split(":");
     if(!b.dataset.confirm){b.dataset.confirm="1";b.textContent="Remove every week?";b.classList.add("confirm");setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent="×";b.classList.remove("confirm")}},3000);return}
     change(()=>{state.days[d].tasks=state.days[d].tasks.filter(k=>k.id!==id)});return}
@@ -396,6 +418,23 @@ document.addEventListener("input",e=>{
   if(t.dataset.session!==undefined){state.days[t.dataset.session].session=t.value;save()}
   if(t.dataset.notes!==undefined){state.days[t.dataset.notes].notes=t.value;save()}
 });
+// auto-tick: once a day has passed (after midnight), its tasks count as done
+function nextDay(k){const d=new Date(k+"T12:00:00");d.setDate(d.getDate()+1);return iso(d)}
+function autoTick(){
+  let from=state.autoThrough?nextDay(state.autoThrough):[iso(weekStart(0)),...Object.keys(state.dates)].sort()[0];
+  let changed=false;
+  for(let k=from;k<todayIso;k=nextDay(k)){
+    const wd=new Date(k+"T12:00:00").getDay();
+    tasksOn(wd,k).forEach(t=>{if(!t.skipped&&!t.done){const x=dayData(state,k);x.done[t.id]=t.amt||0;x.doneS=x.doneS||{};x.doneS[t.id]=t.s;changed=true}});
+    state.autoThrough=k;changed=true;
+  }
+  if(changed)save();
+}
+function checkDay(){const n=iso(new Date());if(n!==todayIso){todayIso=n;today=new Date().getDay();if(week===0)selDay=today;autoTick();render()}}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkDay()});
+setInterval(checkDay,60000);
+autoTick();
+
 document.addEventListener("focusout",e=>{if(e.target.dataset?.session!==undefined)render()});
 
 render();
@@ -411,7 +450,7 @@ document.getElementById("impcancel").onclick=()=>document.getElementById("impbox
 document.getElementById("impgo").onclick=()=>{
   const m=document.getElementById("impmsg");
   try{const s=JSON.parse(decodeURIComponent(escape(atob(document.getElementById("impcode").value.trim()))));
-    if(!s.days||!s.remaining)throw 0;state=migrate(s);save();render();m.style.color="var(--arab)";m.textContent="Backup loaded.";
+    if(!s.days||!s.remaining)throw 0;state=migrate(s);autoTick();save();render();m.style.color="var(--arab)";m.textContent="Backup loaded.";
     setTimeout(()=>document.getElementById("impbox").hidden=true,1200)}
   catch(err){m.style.color="var(--eng)";m.textContent="That code didn't work. Copy the whole code again and paste it."}};
 </script>
