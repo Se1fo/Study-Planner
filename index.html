@@ -129,6 +129,28 @@ body[data-view="week"] #pLeft,body[data-view="left"] #pWeek{display:none}
 .dnotes span{display:block;font-size:.8rem;font-weight:600;color:var(--muted);margin-bottom:6px}
 .dnotes textarea{width:100%;min-height:58px;resize:vertical;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:10px;padding:8px 10px;font:inherit;font-size:.9rem;line-height:1.45}
 .dnotes textarea:focus{outline:none;border-color:var(--prog)}
+.wknav{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.wkbtn{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:1.4rem;line-height:1;cursor:pointer}
+.wkmid{min-width:150px;text-align:center}
+.wkmid b{display:block;font-family:"Bricolage Grotesque",Figtree,sans-serif;font-size:1.1rem}
+.wkmid small{color:var(--muted);font-size:.8rem}
+.lnk{border:0;background:none;color:var(--prog);font:inherit;font-size:.82rem;font-weight:600;cursor:pointer;padding:4px 6px;border-radius:6px}
+.dnum{font-family:Figtree,system-ui,sans-serif;font-size:.85rem;font-weight:500;color:var(--muted);letter-spacing:0;margin-left:4px}
+.kind{font-style:normal;font-size:.7rem;border-radius:5px;padding:1px 6px;margin-left:4px;white-space:nowrap}
+.kind.fixed{background:var(--soft);color:var(--muted)}
+.kind.extra{background:var(--c);color:#fff}
+li.skipped .tt{opacity:.45}
+li.skipped .tt b{text-decoration:line-through}
+.chk.off{border-style:dashed;opacity:.5;display:block}
+.del.confirm{font-size:.75rem;color:var(--eng);font-weight:600}
+.amtrow{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.amtin{width:3.2em;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:7px;padding:2px 4px;font:inherit;font-size:.85rem;text-align:center;-moz-appearance:textfield}
+.amtin::-webkit-inner-spin-button,.amtin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.amtin:focus{outline:none;border-color:var(--c)}
+.rep{grid-column:1/-1;display:flex;gap:6px}
+.rep label{flex:1;display:flex;align-items:center;gap:6px;font-size:.85rem;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:7px 8px;cursor:pointer}
+.rep label:has(input:checked){border-color:var(--ink);font-weight:600}
+.rep input{accent-color:var(--ink);margin:0}
 footer p{margin:0;color:var(--muted);font-size:.8rem;max-width:46ch}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--prog);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -139,7 +161,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   <header>
     <div>
       <h1>Study planner</h1>
-      <div class="sub" id="sub">Week runs Friday to Thursday</div>
+      <div class="sub" id="sub">Your usual week, with room for changes</div>
     </div>
     <div class="sync on" id="sync">Saved on this device</div>
   </header>
@@ -149,6 +171,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     <button data-tab="left" role="tab">Lessons left <em id="leftTotal"></em></button>
   </div>
   <div id="pWeek">
+    <div class="wknav">
+      <button class="wkbtn" data-wk="-1" aria-label="Previous week">‹</button>
+      <div class="wkmid"><b id="wkLabel"></b><small id="wkDates"></small></div>
+      <button class="wkbtn" data-wk="1" aria-label="Next week">›</button>
+      <button class="lnk" data-wk="0" id="wkToday" hidden>Back to this week</button>
+    </div>
     <nav class="strip" id="strip" aria-label="Days"></nav>
     <section class="days" id="days"></section>
   </div>
@@ -158,11 +186,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   </div>
 
   <footer>
-    <p>Ticking a task takes its lessons off the Lessons left count.</p>
+    <p>Subjects marked "Every" repeat each week; type how many lessons for each day. Tap Skip to drop one for a single week, or add a task for one day only.</p>
     <div class="bk">
       <button class="btn ghost" id="exp">Copy backup code</button>
       <button class="btn ghost" id="imp">Load backup code</button>
-      <button class="btn ghost" id="reset">Clear all ticks</button>
+      <button class="btn ghost" id="reset">Clear this week's ticks</button>
     </div>
   </footer>
   <div class="imp" id="impbox" hidden>
@@ -178,6 +206,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <script>
 const DAY_ORDER=[5,6,0,1,2,3,4];
 const DAY_NAMES={0:"Sunday",1:"Monday",2:"Tuesday",3:"Wednesday",4:"Thursday",5:"Friday",6:"Saturday"};
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const SUBJECTS=[
   {id:"prog",name:"Programming",c:"--prog"},
   {id:"arab",name:"Arabic",c:"--arab"},
@@ -187,27 +216,43 @@ const SUBJECTS=[
 ];
 const uid=()=>Math.random().toString(36).slice(2,9);
 const DEFAULT={
-  v:1,updatedAt:0,
+  v:2,updatedAt:0,
   remaining:{prog:1,arab:1,hist:0.5,eng:3},
   days:{
-    5:{session:"IT + Arabic",tasks:[{id:"a1",s:"eng",amt:2,note:"",done:false}]},
-    6:{session:"English",tasks:[{id:"a2",s:"prog",amt:1,note:"",done:false}]},
-    0:{session:"",tasks:[{id:"a3",s:"hist",amt:0,done:false}]},
-    1:{session:"",tasks:[{id:"a4",s:"hist",amt:0.5,done:false}],notes:"History: 0.5 lesson + revision"},
-    2:{session:"History",tasks:[]},
-    3:{session:"",tasks:[{id:"a5",s:"arab",amt:1,done:false}],notes:"Arabic: 1P lesson"},
-    4:{session:"",tasks:[]}
-  }
+    5:{session:"IT + Arabic",tasks:[{id:"a1",s:"eng",amt:2}],notes:""},
+    6:{session:"English",tasks:[{id:"a2",s:"prog",amt:1}],notes:""},
+    0:{session:"",tasks:[{id:"a3",s:"hist",amt:0}],notes:""},
+    1:{session:"",tasks:[{id:"a4",s:"hist",amt:0.5}],notes:"History: 0.5 lesson + revision"},
+    2:{session:"History",tasks:[],notes:""},
+    3:{session:"",tasks:[{id:"a5",s:"arab",amt:1}],notes:"Arabic: 1P lesson"},
+    4:{session:"",tasks:[],notes:""}
+  },
+  dates:{}
 };
+
+// ---- dates ----
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function weekStart(offset){const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-((d.getDay()-5+7)%7)+offset*7);return d}
+function dateFor(offset,wd){const d=weekStart(offset);d.setDate(d.getDate()+DAY_ORDER.indexOf(wd));return d}
+function dLabel(d){return d.getDate()+" "+MONTHS[d.getMonth()]}
+const todayIso=iso(new Date());
+const today=new Date().getDay();
+
 function migrate(s){
+  s.dates=s.dates||{};
   DAY_ORDER.forEach(d=>{const day=s.days[d];if(!day)return;day.notes=day.notes||"";
-    day.tasks.forEach(k=>{if(k.note){day.notes+=(day.notes?"\n":"")+subj(k.s).name+": "+k.note}delete k.note})});
-  return s}
+    day.tasks.forEach(k=>{
+      if(k.note){day.notes+=(day.notes?"\n":"")+subj(k.s).name+": "+k.note}delete k.note;
+      if(k.done){const x=dayData(s,iso(dateFor(0,+d)));x.done[k.id]=k.amt}
+      delete k.done;
+      if(k.amt!==undefined){const x=dayData(s,iso(dateFor(0,+d)));if(!(k.id in x.amt))x.amt[k.id]=k.amt;delete k.amt}})});
+  s.v=3;return s}
+function dayData(s,key){const x=s.dates[key]||(s.dates[key]={skip:[],extra:[],done:{}});x.amt=x.amt||{};return x}
+function peek(key){const x=state.dates[key]||{skip:[],extra:[],done:{}};return {...x,amt:x.amt||{}}}
+
 let state=migrate(load()||structuredClone(DEFAULT));
 let tab=(()=>{try{return localStorage.getItem("sp-tab")||"week"}catch(e){return "week"}})();
-const today=new Date().getDay();
-let selDay=today;
-let openForm=null;
+let week=0, selDay=today, openForm=null;
 
 function load(){try{const r=localStorage.getItem("study-planner");return r?JSON.parse(r):null}catch(e){return null}}
 function subj(id){return SUBJECTS.find(s=>s.id===id)||SUBJECTS[4]}
@@ -215,10 +260,22 @@ function fmt(n){return (Math.round(n*10)/10).toString()}
 function esc(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function lessonsLabel(a){return a===0?"Study / revise":fmt(a)+(a===1?" lesson":" lessons")}
 
+// tasks shown on a date: fixed (minus skipped) + extras
+function tasksOn(wd,key){
+  const x=peek(key);
+  const fixed=state.days[wd].tasks.map(k=>({...k,amt:x.amt[k.id],kind:"fixed",skipped:x.skip.includes(k.id),done:k.id in x.done}));
+  const extra=x.extra.map(k=>({...k,kind:"extra",skipped:false,done:k.id in x.done}));
+  return fixed.concat(extra);
+}
 function totals(){
-  const t={};
-  SUBJECTS.forEach(s=>t[s.id]={done:0,planned:0});
-  DAY_ORDER.forEach(d=>state.days[d].tasks.forEach(k=>{t[k.s].planned+=k.amt;if(k.done)t[k.s].done+=k.amt}));
+  const t={};SUBJECTS.forEach(s=>t[s.id]={done:0,planned:0});
+  const amts={};
+  DAY_ORDER.forEach(d=>state.days[d].tasks.forEach(k=>amts[k.id]=k.s));
+  Object.values(state.dates).forEach(x=>{x.extra.forEach(k=>amts[k.id]=k.s)});
+  Object.values(state.dates).forEach(x=>Object.entries(x.done).forEach(([id,amt])=>{const s=amts[id]||x.doneS?.[id]||"other";t[s].done+=amt}));
+  // still to do this week (from today onward)
+  DAY_ORDER.forEach(d=>{const dt=dateFor(0,d),key=iso(dt);if(key<todayIso)return;
+    tasksOn(d,key).forEach(k=>{if(!k.skipped&&!k.done)t[k.s].planned+=(k.amt||0)})});
   return t;
 }
 
@@ -228,12 +285,12 @@ function render(){
   document.querySelectorAll("button[data-tab]").forEach(b=>{b.classList.toggle("on",b.dataset.tab===tab);b.setAttribute("aria-selected",b.dataset.tab===tab)});
   const tl=SUBJECTS.reduce((a,s)=>a+Math.max(0,(state.remaining[s.id]||0)-t[s.id].done),0);
   document.getElementById("leftTotal").textContent=fmt(tl);
-  // subjects
+
   document.getElementById("subjects").innerHTML=SUBJECTS.filter(s=>s.id!=="other").map(s=>{
     const base=state.remaining[s.id]||0, left=Math.max(0,base-t[s.id].done);
     const pct=base>0?Math.min(100,t[s.id].done/base*100):0;
-    const unplanned=base-t[s.id].planned;
-    const note=left===0&&base>0?"All done":unplanned>0?`<span class="warn">${fmt(unplanned)} not scheduled</span>`:"All scheduled";
+    const unplanned=left-t[s.id].planned;
+    const note=left===0&&base>0?"All done":unplanned>0?`<span class="warn">${fmt(unplanned)} not planned this week</span>`:"Planned this week";
     return `<div class="subj" style="--c:var(${s.c})">
       <div class="name">${s.name}</div>
       <div class="row"><input class="numin" data-left="${s.id}" type="number" min="0" step="0.5" inputmode="decimal" value="${fmt(left)}" aria-label="${s.name} lessons left"><span class="of">of ${fmt(base)} left</span></div>
@@ -243,79 +300,96 @@ function render(){
         <button aria-label="More ${s.name} lessons" data-step="${s.id}" data-by="0.5">+</button></span></div>
     </div>`}).join("");
 
-  // strip
+  // week nav
+  const ws=weekStart(week),we=dateFor(week,4);
+  document.getElementById("wkLabel").textContent=(week===0?"This week":week===1?"Next week":week===-1?"Last week":"Week of "+dLabel(ws));
+  document.getElementById("wkDates").textContent=dLabel(ws)+" – "+dLabel(we);
+  document.getElementById("wkToday").hidden=week===0;
+
   document.getElementById("strip").innerHTML=DAY_ORDER.map(d=>{
-    const tasks=state.days[d].tasks;
+    const dt=dateFor(week,d),key=iso(dt),tasks=tasksOn(d,key).filter(k=>!k.skipped);
     return `<button data-sel="${d}" class="${d===selDay?"sel":""}" aria-pressed="${d===selDay}">
-      <b>${DAY_NAMES[d].slice(0,3)}</b><small>${d===today?"Today":""}</small>
+      <b>${DAY_NAMES[d].slice(0,3)}</b><small>${key===todayIso?"Today":dt.getDate()}</small>
       <div class="dots">${tasks.map(k=>`<span class="${k.done?"d":""}" style="--c:var(${subj(k.s).c})"></span>`).join("")}</div></button>`}).join("");
 
-  // days
   document.getElementById("days").innerHTML=DAY_ORDER.map(d=>{
-    const day=state.days[d];
-    const list=day.tasks.length?`<ul>${day.tasks.map(k=>{const s=subj(k.s);return `
-      <li class="task ${k.done?"done":""}" style="--c:var(${s.c})">
-        <input type="checkbox" class="chk" data-tick="${d}:${k.id}" ${k.done?"checked":""} aria-label="Done: ${s.name}">
-        <div class="tt"><b>${s.name}</b><small>${lessonsLabel(k.amt)}</small></div>
-        <button class="del" data-del="${d}:${k.id}" aria-label="Remove task">×</button>
-      </li>`}).join("")}</ul>`:`<div class="empty">Nothing planned. Free day.</div>`;
+    const day=state.days[d],dt=dateFor(week,d),key=iso(dt),isToday=key===todayIso;
+    const tasks=tasksOn(d,key);
+    const list=tasks.length?`<ul>${tasks.map(k=>{const s=subj(k.s);
+      if(k.skipped)return `<li class="task skipped" style="--c:var(${s.c})">
+        <span class="chk off"></span>
+        <div class="tt"><b>${s.name}</b><small>Skipped this week</small></div>
+        <button class="lnk" data-unskip="${key}:${k.id}">Undo</button></li>`;
+      const tag=k.kind==="fixed"?`Every ${DAY_NAMES[d]}`:"This week only";
+      const acts=k.kind==="fixed"
+        ?`<button class="lnk" data-skip="${key}:${k.id}">Skip</button><button class="del" data-delfix="${d}:${k.id}" aria-label="Remove from every ${DAY_NAMES[d]}">×</button>`
+        :`<button class="del" data-delextra="${key}:${k.id}" aria-label="Remove">×</button>`;
+      return `<li class="task ${k.done?"done":""}" style="--c:var(${s.c})">
+        <input type="checkbox" class="chk" data-tick="${key}:${k.id}:${k.s}:${k.amt||0}" ${k.done?"checked":""} aria-label="Done: ${s.name}">
+        <div class="tt"><b>${s.name}</b><small class="amtrow"><input class="amtin" data-amt="${key}:${k.id}:${k.kind}" type="number" min="0" step="0.5" inputmode="decimal" value="${k.amt??""}" placeholder="?" aria-label="${s.name} lessons on ${dLabel(dt)}"> lessons <i class="kind ${k.kind}">${tag}</i></small></div>${acts}</li>`}).join("")}</ul>`
+      :`<div class="empty">Nothing planned. Free day.</div>`;
     const form=openForm===d?`<div class="form" data-form="${d}">
         <select name="s">${SUBJECTS.map(s=>`<option value="${s.id}">${s.name}</option>`).join("")}</select>
-        <input name="amt" type="number" min="0" step="0.5" value="1" inputmode="decimal" aria-label="Lessons">
+        <input name="amt" type="number" min="0" step="0.5" placeholder="Lessons" inputmode="decimal" aria-label="Lessons on ${dLabel(dt)}">
+        <div class="rep" role="radiogroup">
+          <label><input type="radio" name="rep${d}" value="every" checked> Every ${DAY_NAMES[d]}</label>
+          <label><input type="radio" name="rep${d}" value="once"> Only ${dLabel(dt)}</label>
+        </div>
         <div class="acts"><button class="btn ghost" data-cancel>Cancel</button><button class="btn" data-save="${d}">Add task</button></div>
       </div>`:`<button class="addbtn" data-open="${d}">+ Add task</button>`;
-    return `<article class="day ${d===selDay?"sel":""} ${d===today?"today":""}">
-      <div class="dayhead"><h2>${DAY_NAMES[d]}</h2>${d===today?'<span class="tag">Today</span>':""}</div>
+    return `<article class="day ${d===selDay?"sel":""} ${isToday?"today":""}">
+      <div class="dayhead"><h2>${DAY_NAMES[d]} <span class="dnum">${dLabel(dt)}</span></h2>${isToday?'<span class="tag">Today</span>':""}</div>
       <label class="session"><span>Class</span><input data-session="${d}" value="${esc(day.session)}" placeholder="No class"></label>
       ${list}<div class="add">${form}</div>
       <label class="dnotes"><span>Notes</span><textarea data-notes="${d}" rows="2" placeholder="Anything to remember for ${DAY_NAMES[d]}">${esc(day.notes||"")}</textarea></label></article>`}).join("");
 }
 
-// saving
-let db=null,userId=null,saveTimer=null,lastSent=0;
-function save(){
-  state.updatedAt=Date.now();
-  try{localStorage.setItem("study-planner",JSON.stringify(state))}catch(e){}
-  clearTimeout(saveTimer);
-  saveTimer=setTimeout(pushRemote,700);
-}
-let writing=false;
-async function pushRemote(){
-  if(!db||!userId)return;
-  if(writing){saveTimer=setTimeout(pushRemote,500);return}
-  writing=true;
-  try{lastSent=state.updatedAt;await db.doc(`data/users/${userId}/planner`).set(JSON.parse(JSON.stringify(state)));setSync(true)}
-  catch(e){setSync(false)}
-  finally{writing=false}
-}
-function setSync(){}
-function _unused(on){const el=document.getElementById("sync");el.className="sync"+(on?" on":"");el.textContent=on?"Synced across devices":"Saved on this device"}
+function save(){state.updatedAt=Date.now();try{localStorage.setItem("study-planner",JSON.stringify(state))}catch(e){}}
 function change(fn){fn();save();render()}
+function prune(key){const x=state.dates[key];if(x&&!x.skip.length&&!x.extra.length&&!Object.keys(x.done).length&&!Object.keys(x.amt||{}).length)delete state.dates[key]}
 
 document.addEventListener("click",e=>{
-  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-del],[data-open],[data-cancel],[data-save],#reset");
+  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],#reset");
   if(!b)return;
-  if(b.dataset.tab){tab=b.dataset.tab;try{localStorage.setItem("sp-tab",tab)}catch(err){}render();return}
-  if(b.dataset.sel!==undefined){selDay=+b.dataset.sel;openForm=null;render();return}
-  if(b.dataset.step){change(()=>{const id=b.dataset.step;state.remaining[id]=Math.max(0,(state.remaining[id]||0)+ +b.dataset.by)});return}
-  if(b.dataset.del){const[d,id]=b.dataset.del.split(":");change(()=>{state.days[d].tasks=state.days[d].tasks.filter(k=>k.id!==id)});return}
-  if(b.dataset.open!==undefined){openForm=+b.dataset.open;render();document.querySelector(`[data-form="${openForm}"] select`)?.focus();return}
-  if(b.dataset.cancel!==undefined){openForm=null;render();return}
-  if(b.dataset.save!==undefined){
-    const f=document.querySelector(`[data-form="${b.dataset.save}"]`);
-    const amt=Math.max(0,parseFloat(f.querySelector("[name=amt]").value)||0);
-    change(()=>{state.days[b.dataset.save].tasks.push({id:uid(),s:f.querySelector("[name=s]").value,amt,done:false});openForm=null});
+  const ds=b.dataset;
+  if(ds.tab){tab=ds.tab;try{localStorage.setItem("sp-tab",tab)}catch(err){}render();return}
+  if(ds.wk!==undefined){week=ds.wk==="0"?0:week+ +ds.wk;openForm=null;if(week===0)selDay=today;render();return}
+  if(ds.sel!==undefined){selDay=+ds.sel;openForm=null;render();return}
+  if(ds.step){change(()=>{state.remaining[ds.step]=Math.max(0,(state.remaining[ds.step]||0)+ +ds.by)});return}
+  if(ds.delfix){const[d,id]=ds.delfix.split(":");
+    if(!b.dataset.confirm){b.dataset.confirm="1";b.textContent="Remove every week?";b.classList.add("confirm");setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent="×";b.classList.remove("confirm")}},3000);return}
+    change(()=>{state.days[d].tasks=state.days[d].tasks.filter(k=>k.id!==id)});return}
+  if(ds.delextra){const[key,id]=ds.delextra.split(":");change(()=>{const x=dayData(state,key);x.extra=x.extra.filter(k=>k.id!==id);delete x.done[id];prune(key)});return}
+  if(ds.skip){const[key,id]=ds.skip.split(":");change(()=>{const x=dayData(state,key);x.skip.push(id);delete x.done[id]});return}
+  if(ds.unskip){const[key,id]=ds.unskip.split(":");change(()=>{const x=dayData(state,key);x.skip=x.skip.filter(i=>i!==id);prune(key)});return}
+  if(ds.open!==undefined){openForm=+ds.open;render();document.querySelector(`[data-form="${openForm}"] select`)?.focus();return}
+  if(ds.cancel!==undefined){openForm=null;render();return}
+  if(ds.save!==undefined){
+    const d=+ds.save,f=document.querySelector(`[data-form="${d}"]`);
+    const raw=parseFloat(f.querySelector("[name=amt]").value);
+    const amt=isNaN(raw)?null:Math.max(0,raw);
+    const id=uid(),sj=f.querySelector("[name=s]").value,key=iso(dateFor(week,d));
+    const once=f.querySelector(`input[name=rep${d}]:checked`).value==="once";
+    change(()=>{if(once)dayData(state,key).extra.push({id,s:sj,amt});
+      else{state.days[d].tasks.push({id,s:sj});if(amt!==null)dayData(state,key).amt[id]=amt}openForm=null});
     return}
   if(b.id==="reset"){
-    if(b.dataset.confirm){delete b.dataset.confirm;change(()=>DAY_ORDER.forEach(d=>state.days[d].tasks.forEach(k=>k.done=false)))}
-    else{b.dataset.confirm="1";b.textContent="Tap again to clear";setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent="Clear all ticks"}},3000)}
+    if(b.dataset.confirm){delete b.dataset.confirm;change(()=>DAY_ORDER.forEach(d=>{const key=iso(dateFor(week,d));if(state.dates[key]){state.dates[key].done={};prune(key)}}))}
+    else{b.dataset.confirm="1";b.textContent="Tap again to clear";setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent="Clear this week's ticks"}},3000)}
   }
 });
 document.addEventListener("change",e=>{
   const t=e.target;
   if(t.dataset.left){const v=parseFloat(t.value);if(isNaN(v)||v<0){render();return}
     change(()=>{state.remaining[t.dataset.left]=Math.round((v+totals()[t.dataset.left].done)*2)/2});return}
-  if(t.dataset.tick){const[d,id]=t.dataset.tick.split(":");change(()=>{const k=state.days[d].tasks.find(k=>k.id===id);if(k)k.done=t.checked})}
+  if(t.dataset.amt){const[key,id,kind]=t.dataset.amt.split(":");const v=parseFloat(t.value),amt=isNaN(v)?null:Math.max(0,v);
+    change(()=>{const x=dayData(state,key);
+      if(kind==="fixed"){if(amt===null)delete x.amt[id];else x.amt[id]=amt}
+      else{const k=x.extra.find(k=>k.id===id);if(k)k.amt=amt}
+      if(id in x.done)x.done[id]=amt||0;prune(key)});return}
+  if(t.dataset.tick){const[key,id,s,amt]=t.dataset.tick.split(":");
+    change(()=>{const x=dayData(state,key);x.doneS=x.doneS||{};
+      if(t.checked){x.done[id]=+amt;x.doneS[id]=s}else{delete x.done[id];delete x.doneS[id];if(!Object.keys(x.doneS).length)delete x.doneS;prune(key)}})}
 });
 document.addEventListener("input",e=>{
   const t=e.target;
