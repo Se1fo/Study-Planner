@@ -258,9 +258,10 @@ li.tmenu button.danger,li.tmenu button.confirm{color:var(--eng)}
 .sw input:checked+span{background:var(--arab)}
 .sw input:checked+span::after{transform:translateX(20px)}
 .sw input:focus-visible+span{outline:2px solid var(--prog);outline-offset:2px}
-.setrow.wide{flex-wrap:wrap}.setrow.wide .seg{width:100%;display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
-@media(max-width:480px){.setrow{flex-wrap:wrap}.setrow .seg{width:100%}}
-.setrow .seg button{flex:1;min-width:0;padding:6px 2px;overflow:hidden;text-overflow:ellipsis}
+.setrow .seg{flex:0 0 auto}
+.setrow.wide{flex-wrap:wrap}.setrow.wide .seg{flex:1 1 100%;width:100%;display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+@media(max-width:480px){.setrow{flex-wrap:wrap}.setrow .seg{flex:1 1 100%;width:100%}}
+.setrow .seg button{flex:1;min-width:0;padding:7px 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rep{grid-column:1/-1;display:flex;gap:6px}
 .rep label{flex:1;display:flex;align-items:center;gap:6px;font-size:.85rem;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:7px 8px;cursor:pointer}
 .rep label:has(input:checked){border-color:var(--ink);font-weight:600}
@@ -830,7 +831,7 @@ document.addEventListener("focusout",e=>{if(e.target.dataset?.session!==undefine
 render();
 if(focus)showFocus();
 
-const APP_VERSION="0.24";
+const APP_VERSION="0.25";
 document.getElementById("ver").textContent="Version "+APP_VERSION;
 function hardReload(){const u=location.pathname+"?v="+Date.now();try{location.replace(u)}catch(e){location.href=u}setTimeout(()=>location.reload(),1500)}
 async function checkUpdate(manual){
