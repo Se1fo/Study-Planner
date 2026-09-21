@@ -830,17 +830,27 @@ document.addEventListener("focusout",e=>{if(e.target.dataset?.session!==undefine
 render();
 if(focus)showFocus();
 
-const APP_VERSION="0.23";
+const APP_VERSION="0.24";
 document.getElementById("ver").textContent="Version "+APP_VERSION;
-function hardReload(){location.replace(location.pathname+"?v="+Date.now())}
+function hardReload(){const u=location.pathname+"?v="+Date.now();try{location.replace(u)}catch(e){location.href=u}setTimeout(()=>location.reload(),1500)}
 async function checkUpdate(manual){
-  try{const r=await fetch(location.pathname+"?check="+Date.now(),{cache:"no-store"});const t=await r.text();
-    const m=t.match(/const APP_VERSION="([^"]+)"/);
-    if(m&&m[1]!==APP_VERSION){document.getElementById("updBanner").hidden=false;if(manual)hardReload()}
-    else if(manual)alertMsg("You have the latest version")}
-  catch(e){if(manual)alertMsg("Couldn't check. Are you online?")}}
-document.getElementById("upd").onclick=()=>checkUpdate(true);
-document.getElementById("updNow").onclick=hardReload;
+  const b=document.getElementById("upd");
+  if(manual){b.textContent="Checking…";b.disabled=true}
+  try{
+    const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),8000);
+    const r=await fetch(location.pathname+"?check="+Date.now(),{cache:"no-store",signal:ctl.signal});clearTimeout(to);
+    const t=await r.text();const m=t.match(/const APP_VERSION="([^"]+)"/);
+    if(m&&m[1]!==APP_VERSION){document.getElementById("updBanner").hidden=false;
+      if(manual){b.textContent="Updating…";alertMsg("Updating to "+m[1]+"…");setTimeout(hardReload,600);return}}
+    else if(manual)alertMsg("You're on the latest version ("+APP_VERSION+")")}
+  catch(e){if(manual)alertMsg("Couldn't check. Are you online?")}
+  if(manual){b.textContent="Check";b.disabled=false}}
+document.addEventListener("click",e=>{
+  const b=e.target.closest("#upd,#updNow,#mv");if(!b)return;
+  if(b.id==="upd")checkUpdate(true);
+  if(b.id==="updNow")hardReload();
+  if(b.id==="mv")shareLink(b);
+});
 checkUpdate(false);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate(false)});
 
@@ -849,8 +859,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdat
   try{const s=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(h.slice(6))))));
     if(s.days&&s.remaining&&(s.editedAt||s.updatedAt||0)>(state.editedAt||0)){s.editedAt=s.editedAt||s.updatedAt||1;state=migrate(s);autoTick();try{localStorage.setItem("study-planner",JSON.stringify(state))}catch(e){}render();alertMsg("Your data was moved over ✓")}}
   catch(e){}})();
-document.getElementById("mv").onclick=async e=>{
-  const b=e.currentTarget;save();
+async function shareLink(b){save();
   const url=location.origin+location.pathname+"#data="+encodeURIComponent(toCode());
   try{if(navigator.share){await navigator.share({title:"Study Planner",url});return}}catch(err){if(err&&err.name==="AbortError")return}
   try{await navigator.clipboard.writeText(url);b.textContent="Link copied ✓";setTimeout(()=>b.textContent="Share link",2500)}
