@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Study Planner">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAALwklEQVR4nO3dX4xU1R3A8fM75947MzvLMsP+GZaVBXYFK8S0Wm0blIS0qdUHbRoxmAaQlCWlsY0mbR9srFoSm1h8sDXtkxBWTUHbSGJRIcZAa21aQhW0aG0FXf4sO/sPZmZnZ+bee87pwzYmyvxmBtm5Z+7s7xNeCBP2zsx375177jl3oCt1FSOkHG56A0jjojgIiuIgKIqDoCgOgqI4CIriICiKg6AoDoKiOAiK4iAoioOgKA6CojgIiuIgKIqDoCgOgqI4CIriICiKg6AoDoKiOAiK4iAoioOgKA6CojgIiuIgKIqDoCgOgqI4CIriICiKg6AoDoKiOAiK4iAoioOgKA6CojgIiuIgKMvoT9f4P0FwW0EQxuKQfolzi0H5CLTyGWNc2MFuFPkUM3FIv7h45Z0rvrbFclov3X0AsHz2zInDv54897awoyY2kDDGGAR/e2vpl/q/vPEr3/4V50IjBxYu2HRm7C+/3zxx9igXTtX/Uymlsf8rtACAc5MfCoOOQylvfuc139z6iuXEtar0SMtm42ffe33XHdIvAXL0YYxprYvFYltbW2trazP1AQCu646PjzuOI4Qwsg1BH1a0lInUqkhL3HerPFL6rK1zRUvbwuzEKYDy26mUAoD169dv3TqwaFGPUnL2t9gQznk+n9+79/nBwcFMJmNZBj4AGPiRWssaf8O1kpV3BkqpRx55+L77fuB5Ukq/yc5xFixY8PDDD65Zs2bLli1TU1PBH2LMnspeEdd1V69ePTAwUCiUlKp4iAqtXM5fu/aWTZs2Pfnkk9Fo0J/NQzwIppTauHGjZVnNWsaMYtG75571yWQy+KcZ4jgAIJlMNNOH0LK01q2trbZtYMgnxHForYeGhsye7AVACDEyMlIoFCqcstVJiF9ZIcSuXbtzuayRT/LBAADbFjt37srlcsHHEeKX1bbtDz7496OP/mL79u3xeFzK5jmPncE511rv3Ll73759kUgk+A0wE0eNvwMAVXZsjuM8++xzx44dHxgY6Otb1kx9cM6z2ezg4OChQ4dn/hr8NgQ9Qqq1jLambh14pSXZrfxKj7Qcdva9w2/s3cAYqzyA4Xme1trUMGL9KKWUUo7jBH9AmWHi2op0u5asvuWep1va2sueagBjwNno0PG/7tlcyI0AD/GxL9QMxMEYk34pkVrZd8N37UjrpX0AZ/kLZz48+mwpP05X7Q0yEwdjTClPSR+b7wMMuHCAN9uRIlyM7bE5tzmnvUJDC/E4B6k3ioOgKA6CojgIiuIgKIqDoCgOgqI4CIriIChz17SU1j46uRw4gGU112Ty8DETh/Ylj0fn3bScxxx2aR+c+2PZ/FsnmdKMUyDGmFi34ku7K9Hzs7tjKxczVu7SG4CWKvP68ZHfvMSkqnVqEJltgcehNW+J9Dy4LnZtryriq96AJb51vSqU0r99Gawq12aVUq7rKqXCsKhJA4BtO1a1J9UIAl8O6fnxm1ZEr+1VpYrrITVTJW/+2usm//imN5oBgX5wdl03mUyuW7euv7+/8acJCsHHx8eff/6F06dPG5kWelkMHFbAqe2HasYEVMiCMea67s03r96x44mrr+6fnY2rPwC2efPmxx57bM+evY5T/QYCBpn4QFr7MqSKD5RSdnd3P/XUUz09PYVC4cq3KzDJZPLxxx8/efLUkSNHGrmPEI9zeJ63YcOGxYuvKhaLprfl8vi+H4lEtm37vhCikVfshTgOALjhhuulDOVCWd/3V61aFY/HKY56cV3X1LT9K+d5XoMvAQ93HC++uI8xFsY+IhF7//792Wy2kdf6Nu6WVeU4zoEDBw4ePNjaGm3kl/gzACAej5048f7u3YNG1s7XzsTZCodaBz0rPhIAfN+///4HPvrogbvvviuRMHAHi8sFAKVS8YUX9u/Y8cTIyEgjn6owA3Fw7o9mtOsBQOXPYiC4P56XuUKFPoQQuVzuoYd+Pjg4mEqlQhFHLpc7ceIE57zBy2BGFjVpKbu+d2v7+jXa89GrsoJrX51/Yl/m0Du8hkEz3/cbv4wZANDgR5NPmBgh5Xx012uqUErcfiPYosxIFweZyY89dzh36B0eqel1bOJbdBhkaDmk1tqT1oJWZpWJA4CpgitzhVoH2kl9GHr1AcCxZLagy46QawYAVIZxRt8ADhCCi+xzV2iGB0jwKA6CojgIiuIgKIqDoCgOgqI4CIriICiTg2BKo1OIoear+qR+DC2HZMz1dCLOLQFl7kMKrODqfFFFbArEJCNf48V8pbfd2nbv2nlRm6tL6hAAY1m546WLB45NxxzqwxgDV2U9qX98R+KndyZ8yS4tY4YlYLqk7nt6/NW3p2vZfzTCHO4wTmWtLOg9h+frLy2L/PC2+SVPK/wNlUrHHP7QXcl//LeYKyheaa29VkpFIjHbtk0FAoz50i8WCgDQTIkEHYfUbGmnFXOg4FZ5K32pU0mxoFVkphV2TqW15kIs7lnSmeq2LJPTq6SUE+Pp4XNnPC/EqyU+w8CprFS1LohU1R4JAH1911zV22fbhudjWpbVvah3+YqVzfTNHiEe51BKJZLt7e2dUqJzUQOjtZbSnzc/0dG5MCyzWasKcRyMsY7OVEPNFtJKdXSmQrSIprJwP40GfBsacJM+t3A/k+n8lOlN+BQAmJ7Oa02HFdMAID0y7Llug/yyAoBSamT4TBjuPlUTE+tWan7pKj9wZmnhyZMf9PWtcCLRKrd6qTvwPPfM0KmpqVyDxHrlDMTh+bqWPoAxpVnlu29wzi9emPjXu291di2MxVpMnbMAgOuWRtPni8VC05TBgo/DEfC3/5SOf+x+calTeRwsFuF/+Hvu9IRni0opcc49zz13dmi2t/SyAUAzlcFMXVtZ1mU/va3zut6IZuWWNQHTmv3paP6B3RNFT9Ntak0xsxzS83V7m7j9+pZ4hF96LOAchif9g8emPckq3kyQ1JfBrw5lJb/8YUUzJoA5VtNcowgrg18dymiuRoOjvTZBURwERXEQFMVBUBQHQVEcBEVxEBTFQVAUB0EZGyH1lXKVj/0rMIgIi9P4uVFm4ihJv7+tY33/jfPsSJnVB8BPT03uPXk04xZs3jwz/UPHQByulDd29D7z9c2L5nWg61IA7lxy3b2Hn5ks5QXQsc+MoK/KSq3ao/HXbvtR7/xOJtHDCmOM2ZFXT7216c/PAFSZ0aG11rqm2WWXS8/cLneuHt2C3nO4St6c6utNpJhf8atDGWO++41FX+idt+Dj7KSFz7BSSsVaWlKpnlmfJgjASqVSeuTcdH4KmmuKV41MTDCemelVA8105VscK6U6OlNLly23LLs+E4yhvaPr9NDJ0fQwzL2jW4jvL661jsVali5bLoSlVL2+bphz3rvk6vxULp/PzbU+QvxstdaphT2WZdV1EZHWWgiR6jYzX86sEMfBGIvGYgH8FM10NBprmqVKtQt3HIF9eX1gP6ihhDuOsfT5ABYyAWNjo8PG7/IQvBDHwTnPZC6Mps8LIf4/FDFzh8rZ+sMAAISwxsdGL0xONNmCpVoYOFsRwGtcLyuAV728MvTxh9PTU6mFPY4Tme2zWfA9L50eHk0Pa63n4FBY0HFYwN+/OFJ0C1Fhs8pnGdw6dTGdns5W6GPmDUuPnJsYH7Msq/yXgn1ewEBK3/M8zvkcLIMFH4fNxbuTw9v/+fIvv/odxi10NIyLi8XcT47sy3pFh1fZSM6FUn6pVHEw/vOag0eTTxg4rDjC+t37b1x0C1uvXdNq2WX64PxMPrPj+ME306diosZ7BM7N3+36MrYcsij9mLA4MuboKelrWXWfQerK2KsfFZZiWuny4wcA4ACVYZjJN4C+N7TBzd1PW6QqioOgKA6CojgIiuIgKIqDoCgOgqI4CIriICiKg6AoDoKiOAiK4iAoioOgKA6CojgIiuIgKIqDoCgOgqI4CIriICiKg6AoDoKiOAiK4iAoioOgKA6CojgIiuIgKIqDoCgOgqI4CIriICiKg6AoDoKiOAiK4iAoioOg/geiPxzSoGBlwAAAAABJRU5ErkJggg==">
+<title>Study Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f4f8; --panel:#ffffff; --ink:#161a24; --muted:#6a7185; --line:#e2e5ee; --soft:#eceef5;
+  --prog:#3b6fe0; --arab:#15936a; --hist:#c4820f; --eng:#d4467a; --other:#7b7f8f;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#000000; --panel:#16171c; --ink:#f1f2f6; --muted:#9097a8; --line:#2a2c35; --soft:#22242c;
+    --prog:#6b93ff; --arab:#3cc596; --hist:#f0a93a; --eng:#ff72a3; --other:#a2a6b4;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#000000; --panel:#16171c; --ink:#f1f2f6; --muted:#9097a8; --line:#2a2c35; --soft:#22242c;
+  --prog:#6b93ff; --arab:#3cc596; --hist:#f0a93a; --eng:#ff72a3; --other:#a2a6b4;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
+h1,h2,.num{font-family:"Bricolage Grotesque",Figtree,system-ui,sans-serif}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+h1{font-size:2.1rem;font-weight:800;letter-spacing:-.03em;line-height:1;margin:0}
+.sub{color:var(--muted);font-size:.9rem;margin-top:6px}
+.sync{font-size:.78rem;color:var(--muted);white-space:nowrap}
+.sync::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--muted);margin-right:6px;vertical-align:1px}
+.sync.on::before{background:var(--arab)}
+
+/* Remaining lessons */
+.subjects{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:22px}
+@media(min-width:760px){.subjects{grid-template-columns:repeat(4,1fr)}}
+.subj{background:var(--panel);border-radius:16px;padding:14px 14px 12px;border:1px solid var(--line);position:relative;overflow:hidden}
+.subj::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--c)}
+.subj .name{font-weight:600;font-size:.95rem}
+.subj .row{display:flex;align-items:baseline;gap:6px;margin-top:2px}
+.subj .num{font-size:2.2rem;font-weight:700;color:var(--c);line-height:1.1}
+.subj .of{color:var(--muted);font-size:.85rem}
+.bar{height:6px;border-radius:3px;background:var(--soft);margin:8px 0 8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--c);border-radius:3px;transition:width .3s}
+.subj .foot{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}
+.warn{color:var(--hist);font-weight:600}
+.step{display:flex;gap:4px}
+.step button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:var(--soft);color:var(--ink);font-size:1rem;line-height:1;cursor:pointer}
+
+/* Day strip (mobile) */
+.strip{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.strip button{flex:1 0 44px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:8px 4px 6px;cursor:pointer;font:inherit;text-align:center}
+.strip b{display:block;font-size:.82rem;font-weight:600}
+.strip small{display:block;font-size:.7rem;color:var(--muted);min-height:1em}
+.strip button.sel{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.strip button.sel small{color:inherit;opacity:.75}
+.dots{display:flex;gap:3px;justify-content:center;margin-top:3px;min-height:6px}
+.dots span{width:6px;height:6px;border-radius:50%;background:var(--c)}
+.dots span.d{opacity:.3}
+@media(min-width:900px){.strip{display:none}}
+
+/* Days */
+.days{display:grid;gap:12px}
+.day{display:none;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}
+.day.sel{display:block}
+@media(min-width:900px){
+  .days{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+  .day{display:block}
+}
+.day.today{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.dayhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.day h2{font-size:1.35rem;font-weight:700;letter-spacing:-.02em;margin:0}
+.tag{font-size:.72rem;font-weight:600;background:var(--ink);color:var(--bg);border-radius:6px;padding:2px 7px}
+.session{display:flex;align-items:center;gap:8px;background:var(--soft);border-radius:10px;padding:6px 10px;margin-bottom:12px}
+.session span{font-size:.78rem;color:var(--muted);white-space:nowrap}
+.session input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;font-weight:600;font-size:.92rem;padding:2px 0}
+.session input:focus{outline:none}
+.session:focus-within{box-shadow:0 0 0 2px var(--prog)}
+ul{list-style:none;margin:0;padding:0}
+li.task{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+li.task:first-child{border-top:0}
+.chk{appearance:none;-webkit-appearance:none;width:26px;height:26px;border-radius:8px;border:2px solid var(--c);flex:none;cursor:pointer;display:grid;place-items:center;margin:0;background:transparent}
+.chk:checked{background:var(--c)}
+.chk:checked::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:translateY(-1px) rotate(45deg)}
+.tt{flex:1;min-width:0}
+.tt b{font-weight:600;display:block}
+.tt small{color:var(--muted);font-size:.8rem}
+li.done .tt{opacity:.45}
+li.done .tt b{text-decoration:line-through}
+.del{border:0;background:none;color:var(--muted);font-size:1.3rem;line-height:1;cursor:pointer;padding:4px 6px;border-radius:6px}
+.empty{color:var(--muted);font-size:.88rem;padding:6px 0 4px}
+.add{margin-top:10px}
+.addbtn{width:100%;border:1.5px dashed var(--line);background:none;color:var(--muted);border-radius:10px;padding:8px;font:inherit;font-size:.88rem;cursor:pointer}
+.form{display:grid;grid-template-columns:1fr 84px;gap:8px}
+.form select,.form input{width:100%;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:9px;padding:8px;font:inherit;font-size:.9rem}
+.form .note{grid-column:1/-1}
+.form .acts{grid-column:1/-1;display:flex;gap:8px}
+.btn{flex:1;border:0;border-radius:9px;padding:9px;font:inherit;font-weight:600;cursor:pointer;background:var(--ink);color:var(--bg)}
+.btn.ghost{background:var(--soft);color:var(--ink)}
+footer{margin-top:26px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+footer .btn{flex:none;padding:9px 14px}
+.bk{display:flex;gap:8px;flex-wrap:wrap}
+.imp{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.imp p{margin:0 0 8px;font-size:.88rem;color:var(--muted)}
+.imp textarea{width:100%;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:9px;padding:8px;font:inherit;font-size:.85rem}
+.imp .acts{display:flex;gap:8px;margin-top:8px}
+.msg{font-size:.85rem;margin-top:8px;color:var(--arab)}
+footer p{margin:0;color:var(--muted);font-size:.8rem;max-width:46ch}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--prog);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Study planner</h1>
+      <div class="sub" id="sub">Week runs Friday to Thursday</div>
+    </div>
+    <div class="sync on" id="sync">Saved on this device</div>
+  </header>
+
+  <section class="subjects" id="subjects" aria-label="Lessons remaining"></section>
+  <nav class="strip" id="strip" aria-label="Days"></nav>
+  <section class="days" id="days"></section>
+
+  <footer>
+    <p>Tick a task and its lessons come off the count above. Use + and − on a subject when you get new lessons.</p>
+    <div class="bk">
+      <button class="btn ghost" id="exp">Copy backup code</button>
+      <button class="btn ghost" id="imp">Load backup code</button>
+      <button class="btn ghost" id="reset">Clear all ticks</button>
+    </div>
+  </footer>
+  <div class="imp" id="impbox" hidden>
+    <p>Paste a backup code from your other device. This replaces what's on this device.</p>
+    <textarea id="impcode" rows="3" placeholder="Paste backup code here"></textarea>
+    <div class="acts"><button class="btn ghost" id="impcancel">Cancel</button><button class="btn" id="impgo">Load backup</button></div>
+    <div class="msg" id="impmsg"></div>
+  </div>
+  <footer hidden>
+  </footer>
+</div>
+
+<script>
+const DAY_ORDER=[5,6,0,1,2,3,4];
+const DAY_NAMES={0:"Sunday",1:"Monday",2:"Tuesday",3:"Wednesday",4:"Thursday",5:"Friday",6:"Saturday"};
+const SUBJECTS=[
+  {id:"prog",name:"Programming",c:"--prog"},
+  {id:"arab",name:"Arabic",c:"--arab"},
+  {id:"hist",name:"History",c:"--hist"},
+  {id:"eng",name:"English",c:"--eng"},
+  {id:"other",name:"Other",c:"--other"}
+];
+const uid=()=>Math.random().toString(36).slice(2,9);
+const DEFAULT={
+  v:1,updatedAt:0,
+  remaining:{prog:1,arab:1,hist:0.5,eng:3},
+  days:{
+    5:{session:"IT + Arabic",tasks:[{id:"a1",s:"eng",amt:2,note:"",done:false}]},
+    6:{session:"English",tasks:[{id:"a2",s:"prog",amt:1,note:"",done:false}]},
+    0:{session:"",tasks:[{id:"a3",s:"hist",amt:0,note:"Study",done:false}]},
+    1:{session:"",tasks:[{id:"a4",s:"hist",amt:0.5,note:"+ revision",done:false}]},
+    2:{session:"History",tasks:[]},
+    3:{session:"",tasks:[{id:"a5",s:"arab",amt:1,note:"1P lesson",done:false}]},
+    4:{session:"",tasks:[]}
+  }
+};
+let state=load()||structuredClone(DEFAULT);
+const today=new Date().getDay();
+let selDay=today;
+let openForm=null;
+
+function load(){try{const r=localStorage.getItem("study-planner");return r?JSON.parse(r):null}catch(e){return null}}
+function subj(id){return SUBJECTS.find(s=>s.id===id)||SUBJECTS[4]}
+function fmt(n){return (Math.round(n*10)/10).toString()}
+function esc(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function lessonsLabel(a){return a===0?"Study / revise":fmt(a)+(a===1?" lesson":" lessons")}
+
+function totals(){
+  const t={};
+  SUBJECTS.forEach(s=>t[s.id]={done:0,planned:0});
+  DAY_ORDER.forEach(d=>state.days[d].tasks.forEach(k=>{t[k.s].planned+=k.amt;if(k.done)t[k.s].done+=k.amt}));
+  return t;
+}
+
+function render(){
+  const t=totals();
+  // subjects
+  document.getElementById("subjects").innerHTML=SUBJECTS.filter(s=>s.id!=="other").map(s=>{
+    const base=state.remaining[s.id]||0, left=Math.max(0,base-t[s.id].done);
+    const pct=base>0?Math.min(100,t[s.id].done/base*100):0;
+    const unplanned=base-t[s.id].planned;
+    const note=left===0&&base>0?"All done":unplanned>0?`<span class="warn">${fmt(unplanned)} not scheduled</span>`:"All scheduled";
+    return `<div class="subj" style="--c:var(${s.c})">
+      <div class="name">${s.name}</div>
+      <div class="row"><span class="num">${fmt(left)}</span><span class="of">of ${fmt(base)} left</span></div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="foot"><span>${note}</span><span class="step">
+        <button aria-label="Fewer ${s.name} lessons" data-step="${s.id}" data-by="-0.5">−</button>
+        <button aria-label="More ${s.name} lessons" data-step="${s.id}" data-by="0.5">+</button></span></div>
+    </div>`}).join("");
+
+  // strip
+  document.getElementById("strip").innerHTML=DAY_ORDER.map(d=>{
+    const tasks=state.days[d].tasks;
+    return `<button data-sel="${d}" class="${d===selDay?"sel":""}" aria-pressed="${d===selDay}">
+      <b>${DAY_NAMES[d].slice(0,3)}</b><small>${d===today?"Today":""}</small>
+      <div class="dots">${tasks.map(k=>`<span class="${k.done?"d":""}" style="--c:var(${subj(k.s).c})"></span>`).join("")}</div></button>`}).join("");
+
+  // days
+  document.getElementById("days").innerHTML=DAY_ORDER.map(d=>{
+    const day=state.days[d];
+    const list=day.tasks.length?`<ul>${day.tasks.map(k=>{const s=subj(k.s);return `
+      <li class="task ${k.done?"done":""}" style="--c:var(${s.c})">
+        <input type="checkbox" class="chk" data-tick="${d}:${k.id}" ${k.done?"checked":""} aria-label="Done: ${s.name}">
+        <div class="tt"><b>${s.name}</b><small>${lessonsLabel(k.amt)}${k.note?" · "+esc(k.note):""}</small></div>
+        <button class="del" data-del="${d}:${k.id}" aria-label="Remove task">×</button>
+      </li>`}).join("")}</ul>`:`<div class="empty">Nothing planned. Free day.</div>`;
+    const form=openForm===d?`<div class="form" data-form="${d}">
+        <select name="s">${SUBJECTS.map(s=>`<option value="${s.id}">${s.name}</option>`).join("")}</select>
+        <input name="amt" type="number" min="0" step="0.5" value="1" inputmode="decimal" aria-label="Lessons">
+        <input class="note" name="note" placeholder="Note (optional)" maxlength="60">
+        <div class="acts"><button class="btn ghost" data-cancel>Cancel</button><button class="btn" data-save="${d}">Add task</button></div>
+      </div>`:`<button class="addbtn" data-open="${d}">+ Add task</button>`;
+    return `<article class="day ${d===selDay?"sel":""} ${d===today?"today":""}">
+      <div class="dayhead"><h2>${DAY_NAMES[d]}</h2>${d===today?'<span class="tag">Today</span>':""}</div>
+      <label class="session"><span>Class</span><input data-session="${d}" value="${esc(day.session)}" placeholder="No class"></label>
+      ${list}<div class="add">${form}</div></article>`}).join("");
+}
+
+// saving
+let db=null,userId=null,saveTimer=null,lastSent=0;
+function save(){
+  state.updatedAt=Date.now();
+  try{localStorage.setItem("study-planner",JSON.stringify(state))}catch(e){}
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(pushRemote,700);
+}
+let writing=false;
+async function pushRemote(){
+  if(!db||!userId)return;
+  if(writing){saveTimer=setTimeout(pushRemote,500);return}
+  writing=true;
+  try{lastSent=state.updatedAt;await db.doc(`data/users/${userId}/planner`).set(JSON.parse(JSON.stringify(state)));setSync(true)}
+  catch(e){setSync(false)}
+  finally{writing=false}
+}
+function setSync(){}
+function _unused(on){const el=document.getElementById("sync");el.className="sync"+(on?" on":"");el.textContent=on?"Synced across devices":"Saved on this device"}
+function change(fn){fn();save();render()}
+
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-sel],[data-step],[data-del],[data-open],[data-cancel],[data-save],#reset");
+  if(!b)return;
+  if(b.dataset.sel!==undefined){selDay=+b.dataset.sel;openForm=null;render();return}
+  if(b.dataset.step){change(()=>{const id=b.dataset.step;state.remaining[id]=Math.max(0,(state.remaining[id]||0)+ +b.dataset.by)});return}
+  if(b.dataset.del){const[d,id]=b.dataset.del.split(":");change(()=>{state.days[d].tasks=state.days[d].tasks.filter(k=>k.id!==id)});return}
+  if(b.dataset.open!==undefined){openForm=+b.dataset.open;render();document.querySelector(`[data-form="${openForm}"] select`)?.focus();return}
+  if(b.dataset.cancel!==undefined){openForm=null;render();return}
+  if(b.dataset.save!==undefined){
+    const f=document.querySelector(`[data-form="${b.dataset.save}"]`);
+    const amt=Math.max(0,parseFloat(f.querySelector("[name=amt]").value)||0);
+    change(()=>{state.days[b.dataset.save].tasks.push({id:uid(),s:f.querySelector("[name=s]").value,amt,note:f.querySelector("[name=note]").value.trim(),done:false});openForm=null});
+    return}
+  if(b.id==="reset"){
+    if(b.dataset.confirm){delete b.dataset.confirm;change(()=>DAY_ORDER.forEach(d=>state.days[d].tasks.forEach(k=>k.done=false)))}
+    else{b.dataset.confirm="1";b.textContent="Tap again to clear";setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent="Clear all ticks"}},3000)}
+  }
+});
+document.addEventListener("change",e=>{
+  const t=e.target;
+  if(t.dataset.tick){const[d,id]=t.dataset.tick.split(":");change(()=>{const k=state.days[d].tasks.find(k=>k.id===id);if(k)k.done=t.checked})}
+});
+document.addEventListener("input",e=>{
+  const t=e.target;
+  if(t.dataset.session!==undefined){state.days[t.dataset.session].session=t.value;save()}
+});
+document.addEventListener("focusout",e=>{if(e.target.dataset?.session!==undefined)render()});
+
+render();
+
+function toCode(){return btoa(unescape(encodeURIComponent(JSON.stringify(state))))}
+document.getElementById("exp").onclick=async e=>{
+  const b=e.currentTarget,code=toCode();
+  try{await navigator.clipboard.writeText(code);b.textContent="Copied. Paste it on your other device"}
+  catch(err){document.getElementById("impbox").hidden=false;const t=document.getElementById("impcode");t.value=code;t.select();document.getElementById("impmsg").textContent="Copy this code by hand."}
+  setTimeout(()=>b.textContent="Copy backup code",3000)};
+document.getElementById("imp").onclick=()=>{const bx=document.getElementById("impbox");bx.hidden=false;document.getElementById("impcode").value="";document.getElementById("impmsg").textContent="";document.getElementById("impcode").focus()};
+document.getElementById("impcancel").onclick=()=>document.getElementById("impbox").hidden=true;
+document.getElementById("impgo").onclick=()=>{
+  const m=document.getElementById("impmsg");
+  try{const s=JSON.parse(decodeURIComponent(escape(atob(document.getElementById("impcode").value.trim()))));
+    if(!s.days||!s.remaining)throw 0;state=s;save();render();m.style.color="var(--arab)";m.textContent="Backup loaded.";
+    setTimeout(()=>document.getElementById("impbox").hidden=true,1200)}
+  catch(err){m.style.color="var(--eng)";m.textContent="That code didn't work. Copy the whole code again and paste it."}};
+</script>
+</body>
+</html>
