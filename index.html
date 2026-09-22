@@ -600,6 +600,8 @@ ul.card{padding:2px 14px}
 .day .empty{padding:2px 0 8px;font-size:.86rem}
 .dayhead h2{display:flex;align-items:baseline;gap:8px}
 .hwday div{font-size:.84rem;padding:4px 8px}
+.inlink{border:0;background:none;color:var(--prog);font:inherit;font-size:inherit;font-weight:600;padding:0;cursor:pointer;text-decoration:underline}
+:root[data-style="luxe"] .inlink{color:var(--gold)}
 .rep{grid-column:1/-1;display:flex;gap:6px}
 .rep label{flex:1;display:flex;align-items:center;gap:6px;font-size:.85rem;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:7px 8px;cursor:pointer}
 .rep label:has(input:checked){border-color:var(--ink);font-weight:600}
@@ -832,20 +834,17 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     </section>
     <h4 class="setsec">System</h4>
     <section class="setgrp">
-      <div class="setrow"><div><b>Works offline</b><small id="offst">Checking…</small></div></div>
-      <div class="setrow"><div><b>Updates</b><small id="ver"></small></div><button class="btn" id="upd">Check</button></div>
-      <div class="setrow"><div><b>Move or back up your data</b><small>Makes a link with all your data. Open it in Safari to bring everything into a new app. Also works as a backup.</small></div><button class="btn" id="mv">Share link</button></div>
-      <div class="setrow"><div><b>Full backup file</b><small>Everything, including note photos, in one file. Save it to Files or iCloud Drive.</small></div><button class="btn" id="fbSave">Save file</button></div>
-      <div class="setrow"><div><b>Restore from file</b><small>Load a full backup file. This replaces what's on this device.</small></div><button class="btn ghost" id="fbLoad">Choose file</button></div>
+      <div class="setrow"><div><b>Backup</b><small>One file with everything, photos included. <button class="inlink" id="mv">or share a link</button></small></div><button class="btn" id="fbSave">Save file</button></div>
       <div id="fbLink" class="fblink" hidden></div>
-      <div class="setrow"><div><b>Start fresh</b><small>Clears all tasks, homework, exams, grades, notes, attendance and counts. Keeps your subjects, colors and settings.</small></div><button class="btn ghost danger" id="wipe">Clear</button></div>
+      <div class="setrow"><div><b>Restore</b><small>Replaces what's on this device. <button class="inlink" id="imp">or paste a link or code</button></small></div><button class="btn ghost" id="fbLoad">Choose file</button></div>
       <input type="file" id="fbIn" accept=".json,application/json" hidden>
-      <div class="setrow"><div><b>Load a backup</b><small>Paste a data link or an old backup code.</small></div><button class="btn ghost" id="imp">Load</button></div>
       <div class="imp" id="impbox" hidden>
         <textarea id="impcode" rows="3" placeholder="Paste link or code here"></textarea>
         <div class="acts"><button class="btn ghost" id="impcancel">Cancel</button><button class="btn ghost" id="impPaste">Paste &amp; load</button><button class="btn" id="impgo">Load</button></div>
         <div class="msg" id="impmsg"></div>
       </div>
+      <div class="setrow"><div><b>Updates</b><small><span id="ver"></span> · <span id="offst">Checking…</span></small></div><button class="btn ghost" id="upd">Check</button></div>
+      <div class="setrow"><div><b>Start fresh</b><small>Clears everything except your subjects and settings.</small></div><button class="btn ghost danger" id="wipe">Clear</button></div>
     </section>
   </div>
   <div id="pSchool">
@@ -1751,12 +1750,12 @@ document.addEventListener("focusout",e=>{const ds=e.target.dataset||{};if(ds.ses
 render();
 if(focus)showFocus();
 
-const APP_VERSION="0.51";
+const APP_VERSION="0.52";
 (function(){const st=document.getElementById("offst");
-  if(!("serviceWorker" in navigator)){st.textContent="Not supported on this browser";return}
-  navigator.serviceWorker.register("sw.js").then(()=>navigator.serviceWorker.ready).then(()=>{st.textContent="Ready ✓ The app opens even without internet."})
-    .catch(()=>{st.textContent="Not set up. Make sure sw.js is uploaded to GitHub next to index.html."})})();
-document.getElementById("ver").textContent="Version "+APP_VERSION;
+  if(!("serviceWorker" in navigator)){st.textContent="offline mode unavailable";return}
+  navigator.serviceWorker.register("sw.js").then(()=>navigator.serviceWorker.ready).then(()=>{st.textContent="works offline"})
+    .catch(()=>{st.textContent="offline mode not set up (upload sw.js)"})})();
+document.getElementById("ver").textContent="v"+APP_VERSION;
 function hardReload(){const u=location.pathname+"?v="+Date.now();try{location.replace(u)}catch(e){location.href=u}setTimeout(()=>location.reload(),1500)}
 async function checkUpdate(manual){
   const b=document.getElementById("upd");
@@ -1787,7 +1786,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdat
 async function shareLink(b){state.lastBackup=Date.now();state.bkSnooze=0;save();renderBanner();
   const url=location.origin+location.pathname+"#data="+encodeURIComponent(toCode());
   try{if(navigator.share){await navigator.share({title:"Study Planner",url});return}}catch(err){if(err&&err.name==="AbortError")return}
-  try{await navigator.clipboard.writeText(url);b.textContent="Link copied ✓";setTimeout(()=>b.textContent="Share link",2500)}
+  try{await navigator.clipboard.writeText(url);b.textContent="link copied ✓";setTimeout(()=>b.textContent="or share a link",2500)}
   catch(err){alertMsg("Couldn't copy the link")}};
 
 function blobToData(b){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(b)})}
