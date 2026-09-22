@@ -519,6 +519,87 @@ mark{background:color-mix(in srgb,var(--hist) 35%,transparent);color:inherit;bor
 .fblink{padding:0 0 12px}
 .fblink[hidden]{display:none}
 .fblink a{display:block;text-align:center;text-decoration:none}
+/* ===== calmer timetable ===== */
+#studySeg{background:none;border:0;padding:0;gap:18px;justify-content:flex-start;margin:-4px 0 14px 4px;width:auto}
+#studySeg button{flex:none;background:none!important;box-shadow:none!important;padding:4px 0;font-size:.95rem;color:var(--muted);border-radius:0;border-bottom:2px solid transparent}
+#studySeg button.on{color:var(--ink);border-bottom-color:var(--ink)}
+:root[data-style="luxe"] #studySeg button.on{color:var(--gold);border-bottom-color:var(--gold);background:none!important}
+.todaycard{gap:4px}
+.newl.tc{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);gap:6px}
+.newl.tc span{flex:none;font-size:.78rem}
+.newl.tc button{padding:3px 9px;font-size:.74rem}
+.tmr{font-size:.8rem}
+.lstrip{margin:2px 0 14px}
+.lstrip .lsl{font-size:.74rem}
+.lstrip button{padding:4px 10px;font-size:.78rem;background:transparent}
+.lstrip button small{color:var(--muted);font-weight:500;margin-left:2px}
+.wknav{justify-content:center;gap:14px;margin-bottom:10px}
+.wkbtn{width:32px;height:32px;font-size:1.1rem;box-shadow:none}
+.wkmid b{font-size:.98rem}
+.wkmid small{font-size:.74rem}
+.day{padding:16px 16px 12px}
+.day h2{font-size:1.2rem}
+.dayhead{margin-bottom:6px}
+.tagsoft{font-size:.72rem;font-weight:600;color:var(--muted)}
+.session.slim{background:none;padding:2px 0;margin-bottom:6px;border:0!important}
+.session.slim span{font-size:.72rem}
+.session.slim input{font-size:.9rem}
+li.task{padding:11px 0}
+.tt b{font-size:.98rem}
+.amtrow{gap:3px;margin-top:2px}
+.amtin{border-color:transparent;background:var(--soft);width:2.8em;padding:1px 4px;font-size:.8rem}
+.amtl{font-size:.78rem;color:var(--muted)}
+.dots-btn{opacity:.55}
+.dayadds{display:flex;gap:16px;margin-top:6px;padding-top:10px;border-top:1px solid var(--line)}
+.dayadds button{border:0;background:none;color:var(--muted);font:inherit;font-size:.82rem;font-weight:600;cursor:pointer;padding:2px 0}
+.dayadds button:active{color:var(--ink)}
+.dnotes{margin-top:8px;padding-top:8px}
+.dnotes textarea{min-height:44px;font-size:.88rem}
+.hwday{margin-top:6px}
+/* ===== calmer everywhere ===== */
+.todoseg{background:none;border:0;padding:0;gap:18px;justify-content:flex-start;margin:-4px 0 14px 4px;width:auto;display:flex}
+.todoseg button{flex:none!important;background:none!important;box-shadow:none!important;padding:4px 0!important;font-size:.95rem!important;color:var(--muted);border-radius:0!important;border-bottom:2px solid transparent}
+.todoseg button.on{color:var(--ink);border-bottom-color:var(--ink)}
+:root[data-style="luxe"] .todoseg button.on{color:var(--gold);border-bottom-color:var(--gold);background:none!important}
+.todoseg em{font-size:.66rem}
+.collapsible>*:not(:first-child){display:none}
+.collapsible.open>*:not(:first-child){display:revert}
+.collapsible.open>.fgrid{display:grid}.collapsible.open>.chips{display:flex}.collapsible.open>.remwrap{display:grid}
+.collapsible.open>.remwrap .remcustom[hidden]{display:none}
+.gform.collapsible{display:grid;grid-template-columns:1fr}
+.gform.collapsible.open{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto}
+.gform.collapsible.open #gName,.gform.collapsible.open #gSubj{grid-column:1/-1}
+.addbar{padding:10px;gap:8px}
+.addbar input,.addbar select{padding:8px 10px;font-size:.92rem}
+.grp{font-size:.74rem}
+ul.card{padding:2px 14px}
+.hw .tt b,.exam .tt b{font-size:.95rem}
+.itrow{margin-top:4px}
+.bellbtn{opacity:.45}
+.hint.small{font-size:.78rem;margin:10px 4px}
+.attcard{padding:14px;gap:14px}
+.attring{width:96px;height:96px}
+.attring b{font-size:1.3rem}
+.attnums b{font-size:1.15rem}
+.attnums>div{padding:6px 4px}
+.calcard{padding:12px}
+.cald{font-size:.8rem;border-radius:9px}
+.subj{padding:14px 16px 12px}
+.pgrow em{display:none}
+.stats{padding:12px 14px 10px}
+.bars{height:110px}
+.setgrp{padding:4px 14px}
+.setrow{padding:9px 0}
+.setrow small{font-size:.76rem}
+.btn.danger{color:var(--eng);border-color:color-mix(in srgb,var(--eng) 40%,transparent)}
+.dayadds .pgt{margin-left:auto;font-weight:500;opacity:.8}
+.ttlx{font-weight:500;color:var(--muted)}
+.ttl{width:100%;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:9px;padding:6px 8px;font:inherit;font-size:.92rem}
+.btn.sm{padding:6px 12px;font-size:.82rem;flex:none}
+.form .ftitle,.form .fpg{grid-column:1/-1}
+.day .empty{padding:2px 0 8px;font-size:.86rem}
+.dayhead h2{display:flex;align-items:baseline;gap:8px}
+.hwday div{font-size:.84rem;padding:4px 8px}
 .rep{grid-column:1/-1;display:flex;gap:6px}
 .rep label{flex:1;display:flex;align-items:center;gap:6px;font-size:.85rem;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:7px 8px;cursor:pointer}
 .rep label:has(input:checked){border-color:var(--ink);font-weight:600}
@@ -662,7 +743,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     <div id="subjList">
       <section class="subjects" id="subjects" aria-label="Your subjects"></section>
       <section class="stats"><div class="sthead"><h3 class="grp">Last 7 days</h3><span id="stTotal"></span></div><div class="bars" id="bars"></div><div class="stfocus" id="stFocus"></div></section>
-      <p class="hint">Tap a subject to open its notes. Tap a number to type how many lessons are left, and the color dot to change its color.</p>
+      <p class="hint small">Tap a subject for its notes. Tap a number to edit it.</p>
     </div>
     <div id="subjDetail"></div>
   </div>
@@ -673,7 +754,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <button data-sub="ex">Exams <em id="exCount" hidden></em></button>
     </div>
     <div id="sHw">
-      <div class="addbar">
+      <div class="addbar collapsible">
         <input id="hwText" placeholder="New homework, e.g. Essay page 40" maxlength="80">
         <div class="fgrid">
           <select id="hwSubj" aria-label="Subject"></select>
@@ -687,7 +768,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <div id="remLegacy"></div>
     </div>
     <div id="sEx">
-      <div class="addbar" id="exForm">
+      <div class="addbar collapsible" id="exForm">
         <input id="exText" placeholder="Exam name, e.g. Arabic midterm" maxlength="60">
         <div class="fgrid">
           <select id="exSubj" aria-label="Subject"></select>
@@ -702,7 +783,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         <div id="gAvgs"></div>
         <div id="gWait"></div>
         <div class="gcard">
-          <div class="gform">
+          <div class="gform collapsible">
             <input id="gName" placeholder="Test or quiz name" maxlength="40">
             <select id="gSubj" aria-label="Subject"></select>
             <input id="gScore" type="number" step="any" min="0" inputmode="decimal" placeholder="Score"><span>/</span>
@@ -757,6 +838,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <div class="setrow"><div><b>Full backup file</b><small>Everything, including note photos, in one file. Save it to Files or iCloud Drive.</small></div><button class="btn" id="fbSave">Save file</button></div>
       <div class="setrow"><div><b>Restore from file</b><small>Load a full backup file. This replaces what's on this device.</small></div><button class="btn ghost" id="fbLoad">Choose file</button></div>
       <div id="fbLink" class="fblink" hidden></div>
+      <div class="setrow"><div><b>Start fresh</b><small>Clears all tasks, homework, exams, grades, notes, attendance and counts. Keeps your subjects, colors and settings.</small></div><button class="btn ghost danger" id="wipe">Clear</button></div>
       <input type="file" id="fbIn" accept=".json,application/json" hidden>
       <div class="setrow"><div><b>Load a backup</b><small>Paste a data link or an old backup code.</small></div><button class="btn ghost" id="imp">Load</button></div>
       <div class="imp" id="impbox" hidden>
@@ -773,7 +855,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <div class="calgrid" id="calGrid"></div>
       <div class="legend"><span><i class="lg p"></i>Present</span><span><i class="lg a"></i>Absent</span><span><i class="lg h"></i>No school</span><span><i class="lg w"></i>Weekend</span></div>
     </section>
-    <p class="hint">Tap a school day to mark it: once for <b>Present</b>, twice for <b>Absent</b>, three times for <b>No school</b> (holiday), four times to clear. Future days can only be marked as No school.</p>
+    <p class="hint small">Tap a day to switch between ✓ present, ✗ absent, – no school and clear.</p>
     <section class="setgrp sdays">
       <div class="setrow"><div><b>Absence limit</b><small>How many days you're allowed to miss. Leave empty to turn off.</small></div>
         <input class="pgin lim" id="absLim" type="number" min="0" step="1" inputmode="numeric" placeholder="–"></div>
@@ -814,14 +896,14 @@ function col(sj){return sj.c.startsWith("--")?`var(${sj.c})`:sj.c}
 const uid=()=>Math.random().toString(36).slice(2,9);
 const DEFAULT={
   v:2,updatedAt:0,
-  remaining:{prog:1,arab:1,hist:0.5,eng:3},
+  remaining:{prog:0,arab:0,hist:0,eng:0},
   days:{
-    5:{session:"IT + Arabic",tasks:[{id:"a1",s:"eng",amt:2}],notes:""},
-    6:{session:"English",tasks:[{id:"a2",s:"prog",amt:1}],notes:""},
-    0:{session:"",tasks:[{id:"a3",s:"hist",amt:0}],notes:""},
-    1:{session:"",tasks:[{id:"a4",s:"hist",amt:0.5}],notes:"History: 0.5 lesson + revision"},
-    2:{session:"History",tasks:[],notes:""},
-    3:{session:"",tasks:[{id:"a5",s:"arab",amt:1}],notes:"Arabic: 1P lesson"},
+    5:{session:"",tasks:[],notes:""},
+    6:{session:"",tasks:[],notes:""},
+    0:{session:"",tasks:[],notes:""},
+    1:{session:"",tasks:[],notes:""},
+    2:{session:"",tasks:[],notes:""},
+    3:{session:"",tasks:[],notes:""},
     4:{session:"",tasks:[],notes:""}
   },
   dates:{}
@@ -850,7 +932,7 @@ function migrate(s){
   setOrder(s.settings.weekStart);
   s.v=4;return s}
 function dayData(s,key){const x=s.dates[key]||(s.dates[key]={skip:[],extra:[],done:{}});x.amt=x.amt||{};return x}
-function peek(key){const x=state.dates[key]||{skip:[],extra:[],done:{}};return {...x,amt:x.amt||{}}}
+function peek(key){const x=state.dates[key]||{skip:[],extra:[],done:{}};return {...x,amt:x.amt||{},pg:x.pg||{},donePg:x.donePg||{}}}
 
 let state=migrate(load()||structuredClone(DEFAULT));
 let tab=(()=>{const o=state.settings.openOn;if(o&&o!=="last")return o;try{const t=localStorage.getItem("sp-tab");return t&&t!=="set"&&t!=="search"?t:"week"}catch(e){return "week"}})();
@@ -867,16 +949,18 @@ function lessonsLabel(a){return a===0?"Study / revise":fmt(a)+(a===1?" lesson":"
 // tasks shown on a date: fixed (minus skipped) + extras
 function tasksOn(wd,key){
   const x=peek(key);
-  const fixed=state.days[wd].tasks.map(k=>({...k,amt:x.amt[k.id],kind:"fixed",skipped:x.skip.includes(k.id),done:k.id in x.done}));
+  const fixed=state.days[wd].tasks.map(k=>({...k,amt:x.amt[k.id],pg:x.pg[k.id],kind:"fixed",skipped:x.skip.includes(k.id),done:k.id in x.done}));
   const extra=x.extra.map(k=>({...k,kind:"extra",skipped:false,done:k.id in x.done}));
   return fixed.concat(extra);
 }
+function pagesLeft(sid,t){if(!state.pages||state.pages[sid]==null)return null;t=t||totals();return Math.max(0,state.pages[sid]-(t[sid]?t[sid].donePg:0))}
 function totals(){
-  const t={};SUBJECTS.forEach(s=>t[s.id]={done:0,planned:0});
+  const t={};SUBJECTS.forEach(s=>t[s.id]={done:0,planned:0,donePg:0});
   const amts={};
   DAY_ORDER.forEach(d=>state.days[d].tasks.forEach(k=>amts[k.id]=k.s));
   Object.values(state.dates).forEach(x=>{x.extra.forEach(k=>amts[k.id]=k.s)});
   Object.values(state.dates).forEach(x=>Object.entries(x.done).forEach(([id,amt])=>{const s=amts[id]||x.doneS?.[id]||"other";(t[s]||t.other).done+=amt}));
+  Object.values(state.dates).forEach(x=>Object.entries(x.donePg||{}).forEach(([id,pg])=>{const s=amts[id]||x.doneS?.[id]||"other";(t[s]||t.other).donePg+=pg}));
   // still to do this week (from today onward)
   DAY_ORDER.forEach(d=>{const dt=dateFor(0,d),key=iso(dt);if(key<todayIso)return;
     tasksOn(d,key).forEach(k=>{if(!k.skipped&&!k.done)(t[k.s]||t.other).planned+=(k.amt||0)})});
@@ -927,9 +1011,9 @@ function renderToday(){
   let wk=0;DAY_ORDER.forEach(d=>{const x=state.dates[iso(dateFor(0,d))];if(x)Object.values(x.done).forEach(a=>wk+=a)});
   const fm=(state.focusLog||{})[todayIso]||0;
   const yk=addDays(-1),ywd=new Date(yk+"T12:00:00").getDay();
-  const cls=[[state.days[today].session,"today"],[state.days[ywd].session,"yesterday"]].filter(c=>c[0]);
+  const cls=[[state.days[today].session,"today"]].filter(c=>c[0]);
   const hitIds=[...new Set(cls.flatMap(c=>classSubjects(c[0]).map(x=>x.id)))];
-  const newl=hitIds.length?`<div class="newl tc"><span>From ${cls.map(c=>c[1]).join(" / ")}'s class:</span>${hitIds.map(id=>{const x=subj(id);return `<button data-newl="${id}" style="--c:${col(x)}">+1 Lesson</button><button data-hwfor="${id}" style="--c:${col(x)}">📝 Homework</button>`}).join("")}</div>`:"";
+  const newl=hitIds.length?`<div class="newl tc"><span>Today's class</span>${hitIds.map(id=>{const x=subj(id);return `<button data-newl="${id}" style="--c:${col(x)}">+1 Lesson</button><button data-hwfor="${id}" style="--c:${col(x)}">📝 Homework</button>`}).join("")}</div>`:"";
   let tmr="";
   if(new Date().getHours()>=18){const tk=addDays(1),twd=new Date(tk+"T12:00:00").getDay();
     const tt=tasksOn(twd,tk).filter(k=>!k.skipped).map(k=>esc(subj(k.s).name)+(k.amt?" "+fmt(k.amt):""));
@@ -1002,9 +1086,8 @@ function renderSearch(){
   const rm=state.reminders.filter(r=>has(r.text));
   if(rm.length)groups.push(["Reminders",rm.map(r=>({go:"rem",t:hl(r.text,q),m:relDay(r.date)+", "+r.time}))]);
   const dy=[];DAY_ORDER.forEach(d=>{const day=state.days[d];
-    if(has(day.notes)){const n=day.notes,i=n.toLowerCase().indexOf(q),a=Math.max(0,i-30);dy.push({go:"day:"+d,t:(a?"…":"")+hl(n.slice(a,i+q.length+50),q),m:"Notes · "+DAY_NAMES[d]})}
     if(has(day.session))dy.push({go:"day:"+d,t:hl(day.session,q),m:"Class · "+DAY_NAMES[d]});
-    day.tasks.forEach(k=>{if(has(subj(k.s).name))dy.push({go:"day:"+d,c:subj(k.s),t:hl(subj(k.s).name,q),m:"Every "+DAY_NAMES[d]})})});
+    day.tasks.forEach(k=>{if(has(subj(k.s).name)||has(k.title))dy.push({go:"day:"+d,c:subj(k.s),t:has(k.title)?hl(k.title,q):hl(subj(k.s).name,q),m:(k.title?esc(subj(k.s).name)+" · ":"")+"Every "+DAY_NAMES[d]})})});
   if(dy.length)groups.push(["Your week",dy]);
   const nt=(state.notes||[]).filter(n=>has(n.title)||has(n.text));
   if(nt.length)groups.push(["Notes",nt.map(n=>{let t=n.title.trim()?hl(n.title,q):"";const tx=n.text,i=tx.toLowerCase().indexOf(q);
@@ -1042,7 +1125,8 @@ function renderLStrip(){
   const t=totals(),el=document.getElementById("lStrip");
   const items=SUBJECTS.filter(x=>x.id!=="other");
   el.innerHTML=`<span class="lsl">Lessons left</span>`+items.map(x=>{const l=Math.max(0,(state.remaining[x.id]||0)-t[x.id].done);
-    return `<button data-lsgo="${x.id}" style="--c:${col(x)}"><i></i>${esc(x.name)} <b>${fmt(l)}</b></button>`}).join("");
+    const pl=pagesLeft(x.id,t),pg=pl!=null?`<small>${fmt(pl)}p</small>`:"";
+    return `<button data-lsgo="${x.id}" style="--c:${col(x)}"><i></i>${esc(x.name)} <b>${fmt(l)}</b>${pg}</button>`}).join("");
 }
 function gradeAvg(sid){const g=(state.grades||[]).filter(x=>x.s===sid&&x.max>0);if(!g.length)return null;
   return Math.round(g.reduce((a,x)=>a+x.score/x.max*100,0)/g.length*10)/10}
@@ -1071,7 +1155,7 @@ function renderSubjectPage(){
         ${x.imgs&&x.imgs.length?`<img class="thumb" data-img="${x.imgs[0]}" alt="">`:""}</div>`).join(""):`<div class="emptybig">No notes for ${esc(sj.name)} yet.</div>`}</div>`;
   }
   det.innerHTML=`<div class="sdhead" style="--c:${col(sj)}"><button class="lnk" data-subjback>‹ ${n?esc(sj.name):"Subjects"}</button>${n?"":`<h2><i></i>${esc(sj.name)}</h2>`}</div>
-    ${n?"":`<div class="sdsum"><span><b>${fmt(left)}</b>lesson${left===1?"":"s"} left</span>${state.pages&&state.pages[sj.id]!=null?`<span><b>${fmt(state.pages[sj.id])}</b>page${state.pages[sj.id]===1?"":"s"} left</span>`:""}<span><b>${hw}</b>homework</span>${ex?`<span><b>${daysUntil(ex.date)}</b>days to ${esc(ex.title)}</span>`:""}</div>`}
+    ${n?"":`<div class="sdsum"><span><b>${fmt(left)}</b>lesson${left===1?"":"s"} left</span>${(p=>p!=null?`<span><b>${fmt(p)}</b>page${p===1?"":"s"} left</span>`:"")(pagesLeft(sj.id,t))}<span><b>${hw}</b>homework</span>${ex?`<span><b>${daysUntil(ex.date)}</b>days to ${esc(ex.title)}</span>`:""}</div>`}
     ${body}`;
   loadImgs(det);
   const ta=det.querySelector(".ntext");if(ta){const fit=()=>{ta.style.height="auto";ta.style.height=Math.max(180,ta.scrollHeight)+"px"};fit();ta.addEventListener("input",fit)}
@@ -1278,6 +1362,7 @@ function renderHeader(){
   document.getElementById("greet").textContent=h<5?"Good night":h<12?"Good morning":h<17?"Good afternoon":"Good evening";
   const d=new Date();document.getElementById("sub").textContent=DAY_NAMES[d.getDay()]+", "+d.getDate()+" "+["January","February","March","April","May","June","July","August","September","October","November","December"][d.getMonth()];
 }
+let classOpen=null,notesOpen=null,titleEdit=null;
 let prevTab="study",studySub="tt",todoSub="hw",subjView=null,noteOpen=null;
 let lastTab=null,lastSel=null,justTicked=null;
 function moveInd(){
@@ -1331,7 +1416,7 @@ function render(){
         <span class="step">
         <button aria-label="Fewer ${s.name} lessons" data-step="${s.id}" data-by="-1">−</button>
         <button aria-label="More ${s.name} lessons" data-step="${s.id}" data-by="1">+</button></span></div>
-      <label class="pgrow"><input class="pgin" data-pages="${s.id}" type="number" min="0" step="any" inputmode="decimal" placeholder="–" value="${state.pages&&state.pages[s.id]!=null?fmt(state.pages[s.id]):""}" aria-label="${s.name} pages left"><span>pages left <em>(optional)</em></span></label>
+      <label class="pgrow"><input class="pgin" data-pages="${s.id}" type="number" min="0" step="any" inputmode="decimal" placeholder="–" value="${(p=>p==null?"":fmt(p))(pagesLeft(s.id,t))}" aria-label="${s.name} pages left"><span>pages left <em>(optional)</em></span></label>
     </div>`}).join("");
   document.getElementById("subjects").innerHTML+=addingSubj
     ?`<div class="subj addsubj"><input id="newSubj" placeholder="Subject name" maxlength="24"><div class="acts"><button class="btn ghost" data-subjcancel>Cancel</button><button class="btn" data-subjsave>Add</button></div></div>`
@@ -1356,27 +1441,31 @@ function render(){
     if(isComplete(d,key)&&!expanded.has(key))return `<article class="day donecard ${d===selDay?"sel":""}">
       <div class="dayhead"><h2>${DAY_NAMES[d]} <span class="dnum">${dLabel(dt)}</span></h2><span class="okmark" aria-label="Done">✓</span></div>
       <div class="donerow"><span>Day done</span><button class="lnk" data-expand="${key}">Show</button></div></article>`;
-    const list=tasks.length?`<ul>${tasks.map(k=>{const s=subj(k.s);
-      if(k.skipped)return `<li class="task skipped" style="--c:${col(s)}">
-        <span class="chk off"></span>
-        <div class="tt"><b>${s.name}</b><small>Skipped this week</small></div>
-        <button class="lnk" data-unskip="${key}:${k.id}">Undo</button></li>`;
-      const tag=k.kind==="fixed"?`Every ${DAY_NAMES[d]}`:k.label?esc(k.label):"This week only";
+    const list=tasks.filter(k=>!k.skipped).length?`<ul>${tasks.map(k=>{const s=subj(k.s);
+      if(k.skipped)return "";
+      const tag=k.kind==="fixed"?"":k.label?esc(k.label):"This day only";
       const mk=key+":"+k.id,open=openMenu===mk;
       const acts=`<button class="dots-btn ${open?"on":""}" data-menu="${mk}" aria-label="More options" aria-expanded="${open}">⋯</button>`;
       const menu=open?`<li class="tmenu">
         ${key===todayIso&&!k.done?`<button data-focus="${key}:${k.id}:${k.s}:${k.amt??""}">⏱ Focus</button>`:""}
+        <button data-title="${key}:${k.id}">✎ ${k.title?"Rename":"Add title"}</button>
         ${key>=todayIso&&!k.done?`<button data-move="${key}:${k.id}:${k.kind}:${k.s}:${k.amt??""}">→ Tomorrow</button>`:""}
         ${k.kind==="fixed"
-          ?`<button data-skip="${key}:${k.id}">Skip this week</button><button class="danger" data-delfix="${d}:${k.id}">Remove every ${DAY_NAMES[d].slice(0,3)}</button>`
+          ?`<button data-skip="${key}:${k.id}">Remove from this day</button><button class="danger" data-delfix="${d}:${k.id}">Remove every ${DAY_NAMES[d].slice(0,3)}</button>`
           :`<button class="danger" data-delextra="${key}:${k.id}">Remove</button>`}</li>`:"";
+      if(titleEdit===key+":"+k.id)return `<li class="task" style="--c:${col(s)}">
+        <span class="chk off"></span>
+        <div class="tt"><input class="ttl" id="ttlIn" value="${esc(k.title||"")}" placeholder="Title for ${esc(s.name)}" maxlength="40"></div>
+        <button class="btn sm" data-titlesave="${key}:${k.id}:${k.kind}:${d}">Save</button><button class="lnk" data-titlecancel>Cancel</button></li>`;
       return `<li class="task ${k.done?"done":""}" style="--c:${col(s)}">
-        <input type="checkbox" class="chk" data-tick="${key}:${k.id}:${k.s}:${k.amt||0}" ${k.done?"checked":""} aria-label="Done: ${s.name}">
-        <div class="tt"><b>${s.name}</b><small class="amtrow"><input class="amtin" data-amt="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.amt??""}" placeholder="?" aria-label="${s.name} lessons on ${dLabel(dt)}"> lessons <i class="kind ${k.kind}">${tag}</i></small></div>${acts}</li>${menu}`}).join("")}</ul>`
+        <input type="checkbox" class="chk" data-tick="${key}:${k.id}:${k.s}:${k.amt||0}:${k.pg||0}" ${k.done?"checked":""} aria-label="Done: ${s.name}">
+        <div class="tt"><b>${s.name}${k.title?` <span class="ttlx">${esc(k.title)}</span>`:""}</b><small class="amtrow"><input class="amtin" data-amt="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.amt??""}" placeholder="–" aria-label="${s.name} lessons on ${dLabel(dt)}"> <span class="amtl">lessons</span>${peek(key).noPages?"":`<input class="amtin" data-pg="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.pg??""}" placeholder="–" aria-label="${s.name} pages on ${dLabel(dt)}"> <span class="amtl">pages</span>`} ${tag?`<i class="kind ${k.kind}">${tag}</i>`:""}</small></div>${acts}</li>${menu}`}).join("")}</ul>`
       :`<div class="empty">Nothing planned. Free day.</div>`;
     const form=openForm===d?`<div class="form" data-form="${d}">
         <select name="s">${subjOptions()}</select>
         <input name="amt" type="number" min="0" step="any" placeholder="Lessons" inputmode="decimal" aria-label="Lessons on ${dLabel(dt)}">
+        <input name="title" class="ftitle" placeholder="Title (optional), e.g. Unit 3" maxlength="40">
+        <input name="pg" class="fpg" type="number" min="0" step="any" placeholder="Pages (optional)" inputmode="decimal" aria-label="Pages">
         <div class="rep" role="radiogroup">
           <label><input type="radio" name="rep${d}" value="every" checked> Every ${DAY_NAMES[d]}</label>
           <label><input type="radio" name="rep${d}" value="once"> Only ${dLabel(dt)}</label>
@@ -1384,21 +1473,21 @@ function render(){
         <div class="acts"><button class="btn ghost" data-cancel>Cancel</button><button class="btn" data-save="${d}">Add task</button></div>
       </div>`:`<button class="addbtn" data-open="${d}">+ Add task</button>`;
     return `<article class="day ${d===selDay?"sel":""} ${isToday?"today":""}">
-      <div class="dayhead"><h2>${DAY_NAMES[d]} <span class="dnum">${dLabel(dt)}</span></h2>${isToday?'<span class="tag">Today</span>':""}</div>
-      <label class="session"><span>Class</span><input data-session="${d}" value="${esc(day.session)}" placeholder="No class"></label>
+      <div class="dayhead"><h2>${DAY_NAMES[d]} <span class="dnum">${dLabel(dt)}</span></h2>${isToday?'<span class="tagsoft">Today</span>':""}</div>
+      ${day.session||classOpen===d?`<label class="session slim"><span>Class</span><input data-session="${d}" value="${esc(day.session)}" placeholder="Class name"></label>`:""}
       ${expanded.has(key)?`<button class="lnk hide" data-expand="${key}">Hide finished day</button>`:""}
       ${list}${(ex=>ex.length?`<div class="hwday">${ex.map(x=>`<div class="exday" style="--c:${col(subj(x.s))}"><i></i>${esc(x.title)} <small>exam</small></div>`).join("")}</div>`:"")(state.exams.filter(x=>x.date===key))}${(hw=>hw.length?`<div class="hwday">${hw.map(h=>`<div style="--c:${col(subj(h.s))}"><i></i>${esc(h.text)} <small>homework due</small></div>`).join("")}</div>`:"")(state.homework.filter(h=>!h.done&&h.due===key))}
-      <div class="add">${form}</div>
-      <label class="dnotes"><span>Notes</span><textarea data-notes="${d}" rows="2" placeholder="Anything to remember for ${DAY_NAMES[d]}">${esc(day.notes||"")}</textarea></label></article>`}).join("");
+      ${openForm===d?`<div class="add">${form}</div>`:""}
+      ${openForm===d?"":`<div class="dayadds"><button data-open="${d}">＋ Task</button>${day.session||classOpen===d?"":`<button data-classopen="${d}">＋ Class</button>`}${tasks.some(k=>!k.skipped)?`<button class="pgt" data-pgtoggle="${key}">${peek(key).noPages?"＋ Pages":"Hide pages"}</button>`:""}</div>`}</article>`}).join("");
   afterRender();
 }
 
 function save(){state.updatedAt=Date.now();try{localStorage.setItem("study-planner",JSON.stringify(state))}catch(e){}}
 function change(fn){fn();state.editedAt=Date.now();save();render()}
-function prune(key){const x=state.dates[key];if(x&&!x.skip.length&&!x.extra.length&&!Object.keys(x.done).length&&!Object.keys(x.amt||{}).length)delete state.dates[key]}
+function prune(key){const x=state.dates[key];if(x&&!x.noPages&&!x.skip.length&&!x.extra.length&&!Object.keys(x.done).length&&!Object.keys(x.amt||{}).length&&!Object.keys(x.pg||{}).length)delete state.dates[key]}
 
 document.addEventListener("click",e=>{
-  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-pdel],[data-optstyle],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-addrem],[data-remedit],[data-remsave],[data-remcancel],[data-revplan],[data-qrem],[data-hwpost],[data-hwfor],[data-sub],[data-ssub],[data-lsgo],[data-newl],[data-bknow],[data-bklater],[data-exopen],[data-exdel],#exAdd,[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#remAdd,#reset");
+  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-pdel],[data-optstyle],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-title],[data-titlesave],[data-titlecancel],[data-pgtoggle],[data-classopen],[data-notesopen],[data-addrem],[data-remedit],[data-remsave],[data-remcancel],[data-revplan],[data-qrem],[data-hwpost],[data-hwfor],[data-sub],[data-ssub],[data-lsgo],[data-newl],[data-bknow],[data-bklater],[data-exopen],[data-exdel],#exAdd,[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#remAdd,#reset");
   if(!b)return;
   const ds=b.dataset;
   if(ds.tab){if(ds.tab==="study"&&tab==="study"&&studySub==="subj"){subjView=null;noteOpen=null}if(ds.tab==="back"){tab=prevTab||"week"}else{if(tab!=="set"&&tab!=="search")prevTab=tab;tab=ds.tab}
@@ -1438,6 +1527,14 @@ document.addEventListener("click",e=>{
     if(!t){document.getElementById("qrText").focus();return}if(!d||!tm)return;
     if(d+"T"+tm<=nowStamp()){alertMsg("Pick a time in the future");return}
     change(()=>state.reminders.push({id:uid(),text:t,date:d,time:tm}));closeSheet();alertMsg("Reminder set for "+relDay(d).toLowerCase()+" "+tm);return}
+  if(ds.title){titleEdit=ds.title;openMenu=null;render();setTimeout(()=>document.getElementById("ttlIn")?.focus(),50);return}
+  if(ds.titlecancel!==undefined){titleEdit=null;render();return}
+  if(ds.titlesave){const[key,id,kind,d]=ds.titlesave.split(":");const v=document.getElementById("ttlIn").value.trim();
+    titleEdit=null;change(()=>{if(kind==="fixed"){const k=state.days[d].tasks.find(k=>k.id===id);if(k){if(v)k.title=v;else delete k.title}}
+      else{const k=dayData(state,key).extra.find(k=>k.id===id);if(k){if(v)k.title=v;else delete k.title}}});return}
+  if(ds.pgtoggle){const key=ds.pgtoggle;let hid=false;change(()=>{const x=dayData(state,key);if(x.noPages){delete x.noPages;prune(key)}else{x.noPages=true;hid=true}});
+    alertMsg(hid?"Pages hidden for this day":"Pages shown for this day");return}
+  if(ds.classopen!==undefined){classOpen=+ds.classopen;render();setTimeout(()=>document.querySelector(`[data-session="${classOpen}"]`)?.focus(),40);return}
   if(ds.remedit){editRem=ds.remedit;render();return}
   if(ds.remcancel!==undefined){editRem=null;render();return}
   if(ds.remsave){const d=document.getElementById("reD").value,t=document.getElementById("reT").value;if(!d||!t)return;
@@ -1492,10 +1589,9 @@ document.addEventListener("click",e=>{
   if(ds.sel!==undefined){selDay=+ds.sel;openForm=null;render();return}
   if(ds.step){change(()=>{const done=totals()[ds.step].done,cur=state.remaining[ds.step]||0;state.remaining[ds.step]=Math.max(done,cur+ +ds.by)});return}
   if(ds.delfix){const[d,id]=ds.delfix.split(":");
-    if(!b.dataset.confirm){b.dataset.confirm="1";b.textContent="Tap again to remove";b.classList.add("confirm");setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent="Remove every "+DAY_NAMES[d].slice(0,3);b.classList.remove("confirm")}},3000);return}
     openMenu=null;snap();change(()=>{state.days[d].tasks=state.days[d].tasks.filter(k=>k.id!==id)});undoToast("Removed from every "+DAY_NAMES[d]);return}
   if(ds.delextra){const[key,id]=ds.delextra.split(":");openMenu=null;snap();undoToast("Task removed");change(()=>{const x=dayData(state,key);x.extra=x.extra.filter(k=>k.id!==id);delete x.done[id];prune(key)});return}
-  if(ds.skip){const[key,id]=ds.skip.split(":");openMenu=null;change(()=>{const x=dayData(state,key);x.skip.push(id);delete x.done[id]});return}
+  if(ds.skip){const[key,id]=ds.skip.split(":");openMenu=null;snap();change(()=>{const x=dayData(state,key);x.skip.push(id);delete x.done[id]});undoToast("Task removed from this day");return}
   if(ds.unskip){const[key,id]=ds.unskip.split(":");change(()=>{const x=dayData(state,key);x.skip=x.skip.filter(i=>i!==id);prune(key)});return}
   if(ds.open!==undefined){openForm=+ds.open;render();document.querySelector(`[data-form="${openForm}"] select`)?.focus();return}
   if(ds.cancel!==undefined){openForm=null;render();return}
@@ -1503,10 +1599,14 @@ document.addEventListener("click",e=>{
     const d=+ds.save,f=document.querySelector(`[data-form="${d}"]`);
     const raw=parseFloat(f.querySelector("[name=amt]").value);
     const amt=isNaN(raw)?null:Math.max(0,raw);
+    const rawPg=parseFloat(f.querySelector("[name=pg]").value);
+    const pg=isNaN(rawPg)?null:Math.max(0,rawPg);
+    const title=f.querySelector("[name=title]").value.trim();
     const id=uid(),sj=f.querySelector("[name=s]").value,key=iso(dateFor(week,d));
     const once=f.querySelector(`input[name=rep${d}]:checked`).value==="once";
-    change(()=>{if(once)dayData(state,key).extra.push({id,s:sj,amt});
-      else{state.days[d].tasks.push({id,s:sj});if(amt!==null)dayData(state,key).amt[id]=amt}openForm=null});
+    change(()=>{if(once)dayData(state,key).extra.push({id,s:sj,amt,pg,title:title||undefined});
+      else{state.days[d].tasks.push({id,s:sj,title:title||undefined});const x=dayData(state,key);if(amt!==null)x.amt[id]=amt;if(pg!==null){x.pg=x.pg||{};x.pg[id]=pg}}
+      openForm=null});
     return}
   if(b.id==="reset"){
     if(b.dataset.confirm){delete b.dataset.confirm;b.textContent="Clear";snap();undoToast("Ticks cleared");change(()=>DAY_ORDER.forEach(d=>{const key=iso(dateFor(week,d));if(state.dates[key]){state.dates[key].done={};prune(key)}}))}
@@ -1517,9 +1617,14 @@ document.addEventListener("change",e=>{
   const t=e.target;
   if(t.id==="absLim"){const v=parseInt(t.value);change(()=>{if(isNaN(v)||v<0)delete state.settings.absLimit;else state.settings.absLimit=v});return}
   if(t.id==="absFrom"){change(()=>{if(t.value)state.settings.absFrom=t.value;else delete state.settings.absFrom});return}
-  if(t.dataset.pages){const v=parseFloat(t.value);change(()=>{state.pages=state.pages||{};if(isNaN(v)||v<0)delete state.pages[t.dataset.pages];else state.pages[t.dataset.pages]=v});return}
+  if(t.dataset.pages){const v=parseFloat(t.value),sid=t.dataset.pages;change(()=>{state.pages=state.pages||{};if(isNaN(v)||v<0)delete state.pages[sid];else state.pages[sid]=+(v+totals()[sid].donePg).toFixed(4)});return}
   if(t.dataset.left){const v=parseFloat(t.value);if(isNaN(v)||v<0){render();return}
     change(()=>{state.remaining[t.dataset.left]=+(v+totals()[t.dataset.left].done).toFixed(4)});return}
+  if(t.dataset.pg){const[key,id,kind]=t.dataset.pg.split(":");const v=parseFloat(t.value),pg=isNaN(v)?null:Math.max(0,v);
+    change(()=>{const x=dayData(state,key);x.pg=x.pg||{};
+      if(kind==="fixed"){if(pg===null)delete x.pg[id];else x.pg[id]=pg}
+      else{const k=x.extra.find(k=>k.id===id);if(k)k.pg=pg}
+      if(id in x.done){x.donePg=x.donePg||{};if(pg)x.donePg[id]=pg;else delete x.donePg[id]}prune(key)});return}
   if(t.dataset.amt){const[key,id,kind]=t.dataset.amt.split(":");const v=parseFloat(t.value),amt=isNaN(v)?null:Math.max(0,v);
     change(()=>{const x=dayData(state,key);
       if(kind==="fixed"){if(amt===null)delete x.amt[id];else x.amt[id]=amt}
@@ -1535,10 +1640,10 @@ document.addEventListener("change",e=>{
   if(t.dataset.cpick){setColor(t.dataset.cpick,t.value);return}
   if(t.classList&&t.classList.contains("remsel")){const c=document.getElementById(t.id+"C");if(c){c.hidden=t.value!=="custom";if(t.value==="custom"){const d=document.getElementById(t.id+"D");if(!d.value)d.value=todayIso}}return}
   if(t.dataset.hwtick){change(()=>{const h=state.homework.find(h=>h.id===t.dataset.hwtick);if(h){h.done=t.checked;const r=remFor(h.id);if(r&&t.checked)r.seen=true}});return}
-  if(t.dataset.tick){const[key,id,s,amt]=t.dataset.tick.split(":");
+  if(t.dataset.tick){const[key,id,s,amt,pgs]=t.dataset.tick.split(":");
     const wasDone=key===todayIso&&dayAllDone();if(t.checked)justTicked=key+":"+id;
     change(()=>{const x=dayData(state,key);x.doneS=x.doneS||{};
-      if(t.checked){x.done[id]=+amt;x.doneS[id]=s}else{delete x.done[id];delete x.doneS[id];if(!Object.keys(x.doneS).length)delete x.doneS;prune(key)}});
+      if(t.checked){x.done[id]=+amt;x.doneS[id]=s;if(+pgs){x.donePg=x.donePg||{};x.donePg[id]=+pgs}}else{delete x.done[id];delete x.doneS[id];if(x.donePg)delete x.donePg[id];if(!Object.keys(x.doneS).length)delete x.doneS;prune(key)}});
     if(key===todayIso&&!wasDone&&dayAllDone())celebrate()}
 });
 document.addEventListener("input",e=>{
@@ -1554,7 +1659,7 @@ function autoTick(){
   let changed=false;
   for(let k=from;k<todayIso;k=nextDay(k)){
     const wd=new Date(k+"T12:00:00").getDay();
-    tasksOn(wd,k).forEach(t=>{if(!t.skipped&&!t.done){const x=dayData(state,k);x.done[t.id]=t.amt||0;x.doneS=x.doneS||{};x.doneS[t.id]=t.s;changed=true}});
+    tasksOn(wd,k).forEach(t=>{if(!t.skipped&&!t.done){const x=dayData(state,k);x.done[t.id]=t.amt||0;x.doneS=x.doneS||{};x.doneS[t.id]=t.s;if(t.pg){x.donePg=x.donePg||{};x.donePg[t.id]=t.pg}changed=true}});
     state.autoThrough=k;changed=true;
   }
   if(changed)save();
@@ -1641,12 +1746,12 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkDay()
 setInterval(checkDay,60000);
 autoTick();
 
-document.addEventListener("focusout",e=>{if(e.target.dataset?.session!==undefined)render()});
+document.addEventListener("focusout",e=>{const ds=e.target.dataset||{};if(ds.session!==undefined){classOpen=null;setTimeout(render,0)}});
 
 render();
 if(focus)showFocus();
 
-const APP_VERSION="0.47";
+const APP_VERSION="0.51";
 (function(){const st=document.getElementById("offst");
   if(!("serviceWorker" in navigator)){st.textContent="Not supported on this browser";return}
   navigator.serviceWorker.register("sw.js").then(()=>navigator.serviceWorker.ready).then(()=>{st.textContent="Ready ✓ The app opens even without internet."})
@@ -1747,6 +1852,18 @@ document.addEventListener("click",e=>{
 
 function b64enc(str){const bytes=new TextEncoder().encode(str);let bin="";for(let i=0;i<bytes.length;i+=8192)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+8192));return btoa(bin)}
 function b64dec(b64){const bin=atob(b64),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return new TextDecoder().decode(bytes)}
+document.addEventListener("click",e=>{const b=e.target.closest("#wipe");if(!b)return;
+  if(!b.dataset.confirm){b.dataset.confirm=1;b.textContent="Tap again";setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent="Clear"}},3000);return}
+  delete b.dataset.confirm;b.textContent="Clear";snap();
+  change(()=>{DAY_ORDER.forEach(d=>state.days[d]={session:"",tasks:[],notes:""});
+    Object.assign(state,{dates:{},homework:[],exams:[],grades:[],notes:[],reminders:[],att:{},pages:{},focusLog:{},focusSub:{},autoThrough:iso(new Date(Date.now()-864e5))});
+    state.remaining={};state.subjects.forEach(x=>state.remaining[x.id]=0)});
+  tab="study";studySub="tt";subjView=null;noteOpen=null;render();scrollTo(0,0);undoToast("Everything cleared")});
+
+document.addEventListener("focusin",e=>{const c=e.target.closest(".collapsible");if(c)c.classList.add("open")});
+document.addEventListener("focusout",e=>{const c=e.target.closest(".collapsible");if(!c)return;
+  setTimeout(()=>{if(c.contains(document.activeElement))return;const first=c.querySelector("input");if(first&&!first.value.trim())c.classList.remove("open")},150)});
+
 function toCode(){return b64enc(JSON.stringify(state))}
 function openImport(){const bx=document.getElementById("impbox");bx.hidden=false;document.getElementById("impcode").value="";document.getElementById("impmsg").textContent="";bx.scrollIntoView({behavior:"smooth",block:"center"})}
 async function pasteImport(){try{const t=await navigator.clipboard.readText();document.getElementById("impcode").value=t;doImport()}catch(e){const m=document.getElementById("impmsg");m.style.color="var(--muted)";m.textContent="Couldn't read the clipboard. Tap and hold the box above and choose Paste.";document.getElementById("impcode").focus()}}
