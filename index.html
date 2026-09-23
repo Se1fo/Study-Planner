@@ -441,6 +441,7 @@ mark{background:color-mix(in srgb,var(--hist) 35%,transparent);color:inherit;bor
 .gcard{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:6px 14px 12px;box-shadow:var(--shadow)}
 .glist{list-style:none;margin:0;padding:0}
 .glist li{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.glist li:last-child{border-bottom:0}
 .glist .gt{flex:1;min-width:0}.glist .gt b{display:block;font-weight:600}.glist .gt small{color:var(--muted);font-size:.78rem}
 .glist .gs{text-align:right}.glist .gs b{font-size:1.15rem}.glist .gs b span{font-size:.8rem;color:var(--muted);font-weight:600}
 .glist .gs small{display:block;font-size:.72rem;color:var(--muted)}
@@ -551,12 +552,12 @@ li.task{padding:11px 0}
 .amtin{border-color:transparent;background:var(--soft);width:2.8em;padding:1px 4px;font-size:.8rem}
 .amtl{font-size:.78rem;color:var(--muted)}
 .dots-btn{opacity:.55}
-.dayadds{display:flex;gap:16px;margin-top:6px;padding-top:10px;border-top:1px solid var(--line)}
-.dayadds button{border:0;background:none;color:var(--muted);font:inherit;font-size:.82rem;font-weight:600;cursor:pointer;padding:2px 0}
-.dayadds button:active{color:var(--ink)}
+.dayadds{display:flex;gap:8px;margin-top:10px;padding-top:0;border-top:0;flex-wrap:wrap}
+.dayadds button{border:1px solid var(--line);background:transparent;color:var(--muted);font:inherit;font-size:.8rem;font-weight:600;cursor:pointer;padding:5px 11px;border-radius:20px}
+.dayadds button:active{color:var(--ink);transform:scale(.95)}
 .dnotes{margin-top:8px;padding-top:8px}
 .dnotes textarea{min-height:44px;font-size:.88rem}
-.hwday{margin-top:6px}
+.hwday{margin-top:10px}
 /* ===== calmer everywhere ===== */
 .todoseg{background:none;border:0;padding:0;gap:18px;justify-content:flex-start;margin:-4px 0 14px 4px;width:auto;display:flex}
 .todoseg button{flex:none!important;background:none!important;box-shadow:none!important;padding:4px 0!important;font-size:.95rem!important;color:var(--muted);border-radius:0!important;border-bottom:2px solid transparent}
@@ -593,7 +594,7 @@ ul.card{padding:2px 14px}
 .setrow{padding:9px 0}
 .setrow small{font-size:.76rem}
 .btn.danger{color:var(--eng);border-color:color-mix(in srgb,var(--eng) 40%,transparent)}
-.dayadds .pgt{margin-left:auto;font-weight:500;opacity:.8}
+.dayadds .pgt{margin-left:auto;font-weight:500;opacity:.75;border-style:dashed}
 .ttlx{font-weight:500;color:var(--muted)}
 .ttl{width:100%;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:9px;padding:6px 8px;font:inherit;font-size:.92rem}
 .btn.sm{padding:6px 12px;font-size:.82rem;flex:none}
@@ -626,12 +627,14 @@ header h1{overflow:hidden;text-overflow:ellipsis}
 .nico{font-size:1.15rem;flex:none}
 .nacts2{display:flex;gap:4px;flex:none}
 .verrow{align-items:center;flex-wrap:wrap;gap:10px}
+.verrow .vleft{flex:1 1 auto;min-width:0}
 .vleft{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .vleft b{display:inline}
 .vleft span{font-weight:600;color:var(--muted)}
 .vleft small{width:100%;color:var(--muted);font-size:.76rem}
-.vacts{display:flex;gap:8px;flex:none}
-.vacts .btn{padding:8px 12px;font-size:.85rem}
+.verrow .vacts{display:flex;gap:8px;flex:1 0 100%;min-width:0}
+.vacts .btn{flex:1;min-width:0;padding:9px 6px;font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(min-width:520px){.verrow .vacts{flex:0 0 auto}.vacts .btn{flex:none;padding:8px 14px}}
 .chev2{display:inline-block;transition:transform .2s}
 #showChanges.on .chev2{transform:rotate(90deg)}
 #changeBox[hidden]{display:none}
@@ -758,7 +761,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <h1 id="greet">Hello</h1>
       <div class="sub" id="sub"></div>
     </div>
-    <div class="hbtns"><button class="gear bellbtn2" data-tab="notif" aria-label="Notifications"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><em id="notifDot" hidden></em></button><button class="gear" data-tab="set" aria-label="Settings">⚙︎</button></div>
+    <div class="hbtns"><button class="gear bellbtn2" data-tab="notif" aria-label="Notifications"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><em id="notifDot" hidden></em></button><button class="gear" data-tab="set" aria-label="Settings"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div>
   </header>
 
   <button class="searchbar" data-tab="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search homework, notes, exams…</span></button>
@@ -889,7 +892,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         <div class="msg" id="impmsg"></div>
       </div>
       <div class="setrow verrow"><div class="vleft"><b>Version</b><span id="ver"></span><small id="offst">Checking…</small></div>
-        <div class="vacts"><button class="btn ghost" id="showChanges"><span class="chev2">›</span> Show Changes</button><button class="btn ghost" id="upd">Check for Update</button></div></div>
+        <div class="vacts"><button class="btn ghost" id="showChanges"><span class="chev2">›</span> Changes</button><button class="btn ghost" id="upd">Check Update</button></div></div>
       <div id="changeBox" hidden></div>
       <div class="setrow"><div><b>Start fresh</b><small>Clears everything except your subjects and settings.</small></div><button class="btn ghost danger" id="wipe">Clear</button></div>
     </section>
@@ -925,8 +928,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 </div>
 
 <script>
-const APP_VERSION="0.60";
+const APP_VERSION="0.62";
 const CHANGES=[
+  ["0.62","Tidier day cards — the divider that looked like a cut-off task is gone, and the add buttons are proper chips","Bigger, matching settings icon"],
+  ["0.61","Version row now fits on small phones"],
   ["0.60","Removed the Jump to shortcuts from search"],
   ["0.59","Search is now a bar under the header instead of an icon"],
   ["0.58","Notifications button is back, now without the version notice"],
