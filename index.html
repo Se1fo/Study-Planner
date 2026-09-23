@@ -467,8 +467,10 @@ mark{background:color-mix(in srgb,var(--hist) 35%,transparent);color:inherit;bor
 .limdate{border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:10px;padding:7px 8px;font:inherit;font-size:.85rem;max-width:150px;min-width:0}
 .fab{position:fixed;right:18px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:15;width:56px;height:56px;border-radius:50%;border:0;background:var(--ink);color:var(--bg);font-size:1.8rem;line-height:1;cursor:pointer;box-shadow:0 10px 28px -6px rgba(0,0,0,.45);transition:transform .15s}
 .fab:active{transform:scale(.9)}
+.fab{transition:transform .28s cubic-bezier(.2,.8,.2,1),opacity .25s}
+.fab.tuck{transform:translateY(130%) scale(.9);opacity:0;pointer-events:none}
 :root[data-style="luxe"] .fab{background:linear-gradient(160deg,var(--gold2),var(--gold));color:var(--goldink)}
-.wrap{padding-bottom:100px}
+.wrap{padding-bottom:132px}
 .sheetbg{position:fixed;inset:0;z-index:35;background:rgba(0,0,0,.4);opacity:0;transition:opacity .2s}
 .sheetbg.up{opacity:1}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:36;background:var(--panel);border-radius:22px 22px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 40px rgba(0,0,0,.3);transform:translateY(100%);transition:transform .25s cubic-bezier(.2,.8,.2,1);max-width:640px;margin:0 auto}
@@ -622,6 +624,8 @@ header h1{overflow:hidden;text-overflow:ellipsis}
 .hbtns .gear svg{width:21px;height:21px}
 .logbtn{display:block;margin:6px auto 0}
 .ncell b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.addhead{background:var(--ink);color:var(--bg);border-color:transparent}
+:root[data-style="luxe"] .addhead{background:linear-gradient(160deg,var(--gold2),var(--gold));color:var(--goldink)}
 .bellbtn2{position:relative;font-size:1.05rem}
 .bellbtn2 em{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;border-radius:9px;background:var(--eng);color:var(--panel);font-style:normal;font-size:.66rem;font-weight:700;display:grid;place-items:center;padding:0 4px;border:1.5px solid var(--bg)}
 .bellbtn2 em[hidden]{display:none}
@@ -661,6 +665,10 @@ header h1{overflow:hidden;text-overflow:ellipsis}
 .tabbar button.on{color:var(--ink)}
 :root[data-style="luxe"] .tabbar button.on{color:var(--gold)}
 .tbi{display:block;width:24px;height:24px}
+.tbadd{color:var(--ink)}
+.tbadd .tbi{background:var(--ink);color:var(--bg);border-radius:12px;display:grid;place-items:center;width:34px;height:26px}
+.tbadd .tbi svg{width:18px;height:18px}
+:root[data-style="luxe"] .tbadd .tbi{background:linear-gradient(160deg,var(--gold2),var(--gold));color:var(--goldink)}
 .tbi svg{width:100%;height:100%}
 .tabbar em{position:absolute;top:2px;left:calc(50% + 6px);min-width:16px;height:16px;border-radius:8px;background:var(--line);color:var(--ink);
   font-style:normal;font-size:.62rem;font-weight:700;display:grid;place-items:center;padding:0 4px}
@@ -668,8 +676,8 @@ header h1{overflow:hidden;text-overflow:ellipsis}
 #todoCount2{background:var(--eng);color:#fff}
 body[data-tabpos="bottom"] .tabbar{display:flex}
 body[data-tabpos="bottom"] .tabwrap{display:none}
-body[data-tabpos="bottom"] .wrap{padding-bottom:104px}
-body[data-tabpos="bottom"] .fab{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+body[data-tabpos="bottom"] .wrap{padding-bottom:96px}
+
 body[data-tabpos="bottom"] .searchbar{margin-top:2px}
 body[data-view="set"] .tabbar,body[data-view="search"] .tabbar,body[data-view="notif"] .tabbar{display:none!important}
 body[data-view="set"] .wrap,body[data-view="search"] .wrap,body[data-view="notif"] .wrap{padding-bottom:48px}
@@ -684,9 +692,9 @@ body[data-view="set"] .wrap,body[data-view="search"] .wrap,body[data-view="notif
 body{touch-action:manipulation;overscroll-behavior:none;-webkit-user-select:none;user-select:none}
 input,textarea,.tt small,.ncell small,.logv,.hint,.emptybig{-webkit-user-select:text;user-select:text}
 .wrap,.loglist{-webkit-overflow-scrolling:touch}
-header{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bg);transition:padding .25s ease}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bg);transition:padding .25s ease;min-height:56px}
 body.compact header{padding-top:2px;margin-bottom:6px}
-body.compact .eyebrow,body.compact .sub{opacity:0;height:0;margin:0;overflow:hidden;transition:opacity .2s,height .2s}
+body.compact .eyebrow,body.compact .sub{opacity:0;height:0;margin:0;overflow:hidden;pointer-events:none}
 body.compact header h1{font-size:1.15rem;transition:font-size .25s ease}
 .eyebrow,.sub{transition:opacity .2s,height .2s}
 header h1{transition:font-size .25s ease}
@@ -741,7 +749,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 :root[data-style="luxe"] .wrap{padding-top:26px}
 :root[data-style="luxe"] .eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:.22em;font-size:.68rem;font-weight:700}
 :root[data-style="luxe"] h1{font-family:Fraunces,Georgia,serif;font-weight:400;font-style:italic;font-size:2.6rem;letter-spacing:-.02em;line-height:1.05;margin:6px 0 2px;font-variation-settings:"opsz" 144}
-:root[data-style="luxe"] .sub{font-size:.88rem;color:var(--muted)}
+:root[data-style="luxe"] .sub{font-size:.88rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 :root[data-style="luxe"] .gear{border-radius:50%;background:var(--panel);border:1px solid var(--line);color:var(--gold);box-shadow:var(--shadow)}
 :root[data-style="luxe"] .day,:root[data-style="luxe"] .subj,:root[data-style="luxe"] .todaycard,:root[data-style="luxe"] ul.card,:root[data-style="luxe"] .setgrp,:root[data-style="luxe"] .addbar,:root[data-style="luxe"] .strip button,:root[data-style="luxe"] .imp{
   background:linear-gradient(180deg,var(--hi),transparent 40%),var(--panel);
@@ -822,7 +830,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <h1 id="greet">Hello</h1>
       <div class="sub" id="sub"></div>
     </div>
-    <div class="hbtns"><button class="gear bellbtn2" data-tab="notif" aria-label="Notifications"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><em id="notifDot" hidden></em></button><button class="gear" data-tab="set" aria-label="Settings"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div>
+    <div class="hbtns"><button class="gear addhead" id="fabTab" aria-label="Quick add"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M12 5.5v13M5.5 12h13"/></svg></button><button class="gear bellbtn2" data-tab="notif" aria-label="Notifications"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><em id="notifDot" hidden></em></button><button class="gear" data-tab="set" aria-label="Settings"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div>
   </header>
 
   <button class="searchbar" data-tab="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search homework, notes, exams…</span></button>
@@ -977,7 +985,6 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         <div class="seg" id="sdSeg"></div></div>
     </section>
   </div>
-  <button class="fab" id="fab" aria-label="Quick add">＋</button>
   <div class="sheetbg" id="sheetBg" hidden></div>
   <div class="sheet" id="sheet" hidden role="dialog" aria-label="Quick add"><span class="grabber"></span></div>
   <div class="viewer" id="viewer" hidden><span class="grabber light"></span><img id="viewImg" alt=""><div class="vbar"><button class="btn ghost" data-view-del>Delete photo</button><button class="btn" data-view-close>Close</button></div></div>
@@ -996,8 +1003,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 </div>
 
 <script>
-const APP_VERSION="0.65";
+const APP_VERSION="0.69";
 const CHANGES=[
+  ["0.69","Add button moved to the top bar, so the tab bar is navigation only"],
+  ["0.68","With bottom tabs the + moved into the bar, so it never covers your cards"],
+  ["0.67","The + button now tucks away while you scroll down so it never covers your cards"],
+  ["0.66","Fixed swipe bugs: homework swipes no longer switch tabs, smoother row swiping, and the header no longer flickers on short pages"],
   ["0.65","Swipe between tabs, swipe homework rows to tick or delete, long-press a task for its menu, tabs remember your scroll, friendlier empty screens, themed status bar"],
   ["0.64","Screens slide in with a back-swipe, launch screen, shrinking header, draggable sheets and other native touches"],
   ["0.63","Tabs moved to the bottom like a real app — switch back in Settings → Appearance → Tab bar"],
@@ -1195,16 +1206,27 @@ function renderToday(){
     <span class="tcline">${[...parts,...[wk?fmt(wk)+" lesson"+(wk===1?"":"s")+" done ✓":"",fm?fmtMin(fm)+" focused today":""].filter(Boolean).map(x=>`<em class="wkdone">${x}</em>`)].join(" · ")}</span>${newl}${tmr}`;
 }
 
+let rowSwiping=false;
 function bindSwipeRows(root){
   root.querySelectorAll("li.hw:not([data-sw])").forEach(li=>{li.dataset.sw=1;
-    let x0=0,y0=0,dx=0,on=false;
-    li.addEventListener("touchstart",e=>{if(e.target.closest("button,input,a"))return;on=true;dx=0;x0=e.touches[0].clientX;y0=e.touches[0].clientY;li.style.transition="none"},{passive:true});
-    li.addEventListener("touchmove",e=>{if(!on)return;const t=e.touches[0];if(Math.abs(t.clientY-y0)>28){on=false;li.style.transform="";li.style.transition="";return}
-      dx=t.clientX-x0;li.style.transform=`translateX(${dx}px)`;li.classList.toggle("sw-done",dx>60);li.classList.toggle("sw-del",dx<-60)},{passive:true});
-    li.addEventListener("touchend",()=>{if(!on)return;on=false;li.style.transition="";li.style.transform="";li.classList.remove("sw-done","sw-del");
-      const id=li.querySelector("[data-hwtick]")?.dataset.hwtick;if(!id)return;
+    let x0=0,y0=0,dx=0,axis="",on=false;
+    li.addEventListener("touchstart",e=>{if(e.target.closest("button,input,a"))return;
+      on=true;dx=0;axis="";x0=e.touches[0].clientX;y0=e.touches[0].clientY;li.style.transition="none"},{passive:true});
+    li.addEventListener("touchmove",e=>{if(!on)return;const t=e.touches[0],mx=t.clientX-x0,my=t.clientY-y0;
+      if(!axis){if(Math.abs(mx)<8&&Math.abs(my)<8)return;axis=Math.abs(mx)>Math.abs(my)*1.3?"x":"y";
+        if(axis==="y"){on=false;li.style.transform="";li.style.transition="";return}rowSwiping=true}
+      if(axis!=="x")return;
+      if(e.cancelable)e.preventDefault();
+      dx=Math.max(-140,Math.min(140,mx));li.style.transform=`translateX(${dx}px)`;
+      li.classList.toggle("sw-done",dx>70);li.classList.toggle("sw-del",dx<-70)},{passive:false});
+    const finish=()=>{if(!on&&!rowSwiping)return;on=false;li.style.transition="";li.style.transform="";li.classList.remove("sw-done","sw-del");
+      setTimeout(()=>rowSwiping=false,120);
+      const id=li.querySelector("[data-hwtick]")?.dataset.hwtick;if(!id||axis!=="x")return;
       if(dx>70){const h=state.homework.find(h=>h.id===id);change(()=>{if(h){h.done=!h.done;const r=remFor(h.id);if(r&&h.done)r.seen=true}});alertMsg(h&&h.done?"Marked done ✓":"Marked not done")}
-      else if(dx<-70){snap();change(()=>{state.homework=state.homework.filter(h=>h.id!==id);state.reminders=state.reminders.filter(r=>!(r.link&&r.link.id===id))});undoToast("Homework deleted")}},{passive:true})})}
+      else if(dx<-70){snap();change(()=>{state.homework=state.homework.filter(h=>h.id!==id);state.reminders=state.reminders.filter(r=>!(r.link&&r.link.id===id))});undoToast("Homework deleted")}
+      dx=0};
+    li.addEventListener("touchend",finish,{passive:true});
+    li.addEventListener("touchcancel",finish,{passive:true})})}
 function renderHomework(){
   const pend=hwPending().sort((a,b)=>a.due<b.due?-1:a.due>b.due?1:0);
   const done=state.homework.filter(h=>h.done);
@@ -1573,7 +1595,9 @@ function applySettings(){
 function renderHeader(){
   const h=new Date().getHours();
   document.getElementById("greet").textContent=h<5?"Good night":h<12?"Good morning":h<17?"Good afternoon":"Good evening";
-  const d=new Date();document.getElementById("sub").textContent=DAY_NAMES[d.getDay()]+", "+d.getDate()+" "+["January","February","March","April","May","June","July","August","September","October","November","December"][d.getMonth()];
+  const d=new Date();const MN=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const narrow=innerWidth<420;
+  document.getElementById("sub").textContent=(narrow?DAY_NAMES[d.getDay()].slice(0,3):DAY_NAMES[d.getDay()])+", "+d.getDate()+" "+(narrow?MN[d.getMonth()].slice(0,3):MN[d.getMonth()]);
 }
 let classOpen=null,notesOpen=null,titleEdit=null;
 let prevTab="study",studySub="tt",todoSub="hw",subjView=null,noteOpen=null;
@@ -1602,9 +1626,19 @@ function afterRender(){
   if(restoreScroll!=null){const y=restoreScroll;restoreScroll=null;requestAnimationFrame(()=>scrollTo(0,y))}
 }
 let restoreScroll=null;
-addEventListener("resize",()=>requestAnimationFrame(moveInd));
+addEventListener("resize",()=>{requestAnimationFrame(moveInd);renderHeader()});
 let lastCompact=false;
-addEventListener("scroll",()=>{const c=scrollY>46;if(c!==lastCompact){lastCompact=c;document.body.classList.toggle("compact",c)}},{passive:true});
+let fabT=null,lastY=0,fabAcc=0;
+addEventListener("scroll",()=>{
+  const y=Math.max(0,scrollY),f=document.getElementById("fab");
+  if(f){const d=y-lastY;fabAcc=(fabAcc>0)===(d>0)?fabAcc+d:d;
+    if(fabAcc>26&&y>90)f.classList.add("tuck");else if(fabAcc<-18)f.classList.remove("tuck");
+    clearTimeout(fabT);fabT=setTimeout(()=>{f.classList.remove("tuck");fabAcc=0},900)}
+  lastY=y;
+  const room=document.documentElement.scrollHeight-innerHeight;
+  if(room<160){if(lastCompact){lastCompact=false;document.body.classList.remove("compact")}return}
+  const c=lastCompact?y>34:y>92;
+  if(c!==lastCompact){lastCompact=c;document.body.classList.toggle("compact",c)}},{passive:true});
 function normTab(){
   if(tab==="hw"||tab==="rem"||tab==="ex"){todoSub=tab==="rem"?"hw":tab;tab="todo"}
   if(todoSub==="rem")todoSub="hw";
@@ -1977,7 +2011,7 @@ document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;
   if(e.target.id==="remText")document.getElementById("remAdd").click();
   if(e.target.id==="newSubj")document.querySelector("[data-subjsave]")?.click()});
 (()=>{let sx=0,sy=0,ok=false;const el=document.getElementById("days");
-  el.addEventListener("touchstart",e=>{const t=e.target;ok=!t.closest("input,textarea,select,.tmenu")&&innerWidth<900;sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+  el.addEventListener("touchstart",e=>{const t=e.target;ok=!t.closest("input,textarea,select,.tmenu,li.task")&&innerWidth<900&&!rowSwiping;sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
   el.addEventListener("touchend",e=>{if(!ok)return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
     if(Math.abs(dx)<60||Math.abs(dy)>Math.abs(dx)*.6)return;
     let i=DAY_ORDER.indexOf(selDay)+(dx<0?1:-1);
@@ -1985,11 +2019,13 @@ document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;
     selDay=DAY_ORDER[i];openForm=null;openMenu=null;render()},{passive:true})})();
 (()=>{const ORDER=["study","todo","school"];let sx=0,sy=0,ok=false;
   addEventListener("touchstart",e=>{const t=e.target;
-    ok=!t.closest("#days,.strip,.lstrip,.gavgs,.calgrid,.sheet,.viewer,input,textarea,select,.chips,.seg,.bars")&&ORDER.includes(tab)&&innerWidth<900;
+    const blocked=t.closest("#days,.strip,.lstrip,.gavgs,.calgrid,.sheet,.viewer,li.hw,li.exam,li.rem,.glist,input,textarea,select,.chips,.seg,.bars,.pgrid,.loglist");
+    const overlay=!document.getElementById("sheet").hidden||!document.getElementById("viewer").hidden||!document.getElementById("focus").hidden;
+    ok=!blocked&&!overlay&&!rowSwiping&&ORDER.includes(tab)&&innerWidth<900;
     sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
-  addEventListener("touchend",e=>{if(!ok)return;ok=false;
+  addEventListener("touchend",e=>{if(!ok)return;ok=false;if(rowSwiping)return;
     const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
-    if(Math.abs(dx)<70||Math.abs(dy)>Math.abs(dx)*.6||sx<30)return;
+    if(Math.abs(dx)<80||Math.abs(dy)>Math.abs(dx)*.5||sx<30)return;
     const i=ORDER.indexOf(tab)+(dx<0?1:-1);if(i<0||i>2)return;
     scrollMem[tab]=scrollY;tab=ORDER[i];restoreScroll=scrollMem[tab]??0;
     try{localStorage.setItem("sp-tab",tab)}catch(err){}
@@ -2004,7 +2040,7 @@ document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;
 (()=>{let tmr=null,sx=0,sy=0;
   document.addEventListener("touchstart",e=>{const li=e.target.closest("#days li.task");
     if(!li||e.target.closest("button,input,a"))return;const mk=li.querySelector("[data-menu]")?.dataset.menu;if(!mk)return;
-    sx=e.touches[0].clientX;sy=e.touches[0].clientY;
+    if(rowSwiping)return;sx=e.touches[0].clientX;sy=e.touches[0].clientY;
     tmr=setTimeout(()=>{tmr=null;openMenu=mk;render();try{navigator.vibrate&&navigator.vibrate(8)}catch(err){}},480)},{passive:true});
   const cancel=e=>{if(!tmr)return;if(e.touches&&e.touches[0]&&Math.abs(e.touches[0].clientX-sx)<10&&Math.abs(e.touches[0].clientY-sy)<10)return;clearTimeout(tmr);tmr=null};
   document.addEventListener("touchmove",cancel,{passive:true});
@@ -2124,7 +2160,7 @@ function dragSheet(el,onClose){
 }
 function closeSheet(){const sh=document.getElementById("sheet"),bg=document.getElementById("sheetBg");sh.classList.remove("up");bg.classList.remove("up");setTimeout(()=>{sh.hidden=true;bg.hidden=true},220)}
 document.addEventListener("click",e=>{
-  if(e.target.id==="fab"){openSheet();return}
+  if(e.target.closest("#fab,#fabTab")){openSheet();return}
   if(e.target.id==="sheetBg"){closeSheet();return}
   const b=e.target.closest("[data-qa],[data-qanote]");if(!b)return;const a=b.dataset.qa;
   if(b.dataset.qanote){closeSheet();tab="study";studySub="subj";subjView=b.dataset.qanote;const n={id:uid(),s:subjView,title:"",text:"",imgs:[],created:Date.now(),updated:Date.now()};
