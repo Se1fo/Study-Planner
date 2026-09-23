@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Study Planner">
@@ -165,6 +165,8 @@ body[data-view="set"] .searchbar,body[data-view="search"] .searchbar,body[data-v
 body[data-view="search"] #pSearch,body[data-view="notif"] #pNotif{display:block}
 #pSearch,#pNotif{display:none}
 body[data-view="study"] #pStudy,body[data-view="todo"] #pTodo,body[data-view="school"] #pSchool{display:block}
+input,textarea,select{font-size:16px}
+@media(min-width:600px){input,textarea,select{font-size:inherit}}
 .numin{width:3.4ch;border:0;border-bottom:2px dashed transparent;background:transparent;padding:0;font-size:2.2rem;font-weight:700;color:var(--c);line-height:1.1;-moz-appearance:textfield}
 .numin::-webkit-inner-spin-button,.numin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .numin:hover,.numin:focus{border-bottom-color:var(--c);outline:none}
@@ -222,11 +224,21 @@ ul.card{box-shadow:var(--shadow);background:var(--panel);border:1px solid var(--
 .bnr[hidden]{display:none}
 .bnr.upd{background:var(--prog);color:#fff}.bnr.upd .lnk{color:#fff}
 .bnr .lnk{color:#1a1200;background:rgba(255,255,255,.35)}
-.hwday{margin-top:8px;display:grid;gap:4px}
-.hwday div{display:flex;align-items:center;gap:8px;font-size:.88rem;background:var(--soft);border-radius:8px;padding:5px 8px}
-.hwday span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hwday i{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
-.hwday small{color:var(--muted);margin-left:auto}
+.hwday{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.hwday-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--soft);border:1px solid color-mix(in srgb,var(--line) 75%,transparent);border-radius:12px;transition:background-color .15s,transform .15s;position:relative}
+.hwday-item:active{background:color-mix(in srgb,var(--soft) 70%,var(--ink) 5%)}
+.hwday-item .hwday-chk{appearance:none;-webkit-appearance:none;width:20px;height:20px;border-radius:6px;border:2px solid var(--c,var(--line));flex:none;cursor:pointer;display:grid;place-items:center;margin:0;background:transparent;transition:all .15s}
+.hwday-item .hwday-chk:checked{background:var(--c,var(--ink));border-color:var(--c,var(--ink))}
+.hwday-item .hwday-chk:checked::after{content:"";width:4.5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
+.hwday-item .hwday-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.hwday-item .hwday-title{font-size:.86rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
+.hwday-item .hwday-sub{display:flex;align-items:center;gap:5px;font-size:.73rem;color:var(--muted);line-height:1.2}
+.hwday-item .hwday-badge{font-size:.66rem;font-weight:700;letter-spacing:.02em;text-transform:uppercase;padding:1px 6px;border-radius:5px;background:color-mix(in srgb,var(--c,var(--ink)) 14%,transparent);color:var(--c,var(--ink));flex:none}
+.hwday-item .hwday-time{font-size:.73rem;color:var(--muted);margin-left:auto;white-space:nowrap;font-weight:500;font-variant-numeric:tabular-nums}
+.hwday-item.hwday-exam{background:color-mix(in srgb,var(--c) 8%,var(--soft));border-color:color-mix(in srgb,var(--c) 25%,transparent)}
+.hwday-item.hwday-rem{background:var(--soft)}
+.hwday-item.is-done{opacity:.5}
+.hwday-item.is-done .hwday-title{text-decoration:line-through}
 .del.sm{font-size:1rem;padding:0 4px;float:right}
 .addsubj{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;color:var(--muted);font:inherit;font-weight:600;cursor:pointer;border-style:dashed;min-height:96px}
 .addsubj::before{display:none}
@@ -710,8 +722,9 @@ body[data-view="set"] .wrap,body[data-view="search"] .wrap,body[data-view="notif
 @keyframes slideOut{from{opacity:.4;transform:translateX(-14%)}}
 .slidein{animation:slideIn .3s cubic-bezier(.22,.9,.26,1)}
 .slideout{animation:slideOut .3s cubic-bezier(.22,.9,.26,1)}
-body{touch-action:pan-y;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-input,textarea,.tt small,.ncell small,.logv,.hint,.emptybig{-webkit-user-select:text;user-select:text}
+body,html,header,nav,main,article,button,label,span,b,small,em,h1,h2,h3,p,div{touch-action:pan-y;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea{touch-action:auto;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+.ntext{-webkit-user-select:text;user-select:text}
 .wrap,.loglist{-webkit-overflow-scrolling:touch}
 header{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bg);transition:padding .25s ease;min-height:56px}
 body.compact header{padding-top:2px;margin-bottom:6px}
@@ -744,10 +757,10 @@ li.task.drag-over-bottom{border-bottom:2px solid var(--prog)!important}
 .del::after{content:"";position:absolute;inset:-8px}
 .dots-btn{position:relative;min-width:36px;min-height:36px;display:grid;place-items:center}
 @media(max-width:768px){
-  input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not(.amtin):not(.pgin):not(.numin),
+  input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
   select,textarea{font-size:16px!important}
   .form select,.form input,.addbar input,.addbar select,.gform select,.gform input,.remsel,.due input{font-size:16px!important}
-  .numin{width:3.2ch!important;min-width:2ch}
+  .numin{width:3.2ch!important;min-width:2ch;font-size:2rem!important}
 }
 @keyframes bump{0%{transform:scale(1)}45%{transform:scale(1.35)}100%{transform:scale(1)}}
 .bump{animation:bump .36s cubic-bezier(.3,1.5,.5,1);display:inline-block}
@@ -1048,8 +1061,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 </div>
 
 <script>
-const APP_VERSION="1.5";
+const APP_VERSION="1.6";
 const CHANGES=[
+  ["1.6","Keyboard zoom eliminated: Fixed iOS viewport scaling & inputs so screen won't zoom in or shift when typing",
+        "Clean day card rework: Redesigned homework & reminder items on daily cards with modern checkboxes and styled subject badges",
+        "Text selection lockdown: Prevented unwanted blue text selection highlights across headers, cards, and buttons"],
   ["1.5","Task Reordering: Drag-and-drop or use quick Move Up / Down in task options to prioritize daily study tasks exactly how you want",
         "Persistent order: Custom daily task order is automatically saved and respected across timetable views"],
   ["1.4","Notification dismiss option: easily clear or swipe away any notification individually with an instant dismiss button",
@@ -1498,11 +1514,39 @@ function gradeAvg(sid){const g=(state.grades||[]).filter(x=>x.s===sid&&x.max>0);
   return Math.round(g.reduce((a,x)=>a+x.score/x.max*100,0)/g.length*10)/10}
 function dayItems(key){
   const items=[];
-  state.exams.filter(x=>x.date===key).forEach(x=>items.push({c:col(subj(x.s)),icon:"📅",t:x.title,tag:"exam"}));
-  state.homework.filter(h=>!h.done&&h.due===key).forEach(h=>items.push({c:col(subj(h.s)),icon:"📝",t:h.text,tag:"homework due"}));
-  state.reminders.filter(r=>r.date===key).forEach(r=>items.push({c:"var(--muted)",icon:"🔔",t:r.text,tag:r.time}));
+  state.exams.filter(x=>x.date===key).forEach(x=>{
+    const s=subj(x.s);
+    items.push({
+      type:"exam",id:x.id,c:col(s),sname:s.name,title:x.title,badge:"Exam",time:null,done:false
+    });
+  });
+  state.homework.filter(h=>h.due===key).forEach(h=>{
+    const s=subj(h.s);
+    items.push({
+      type:"hw",id:h.id,c:col(s),sname:s.name,title:h.text,badge:"Homework",time:null,done:!!h.done
+    });
+  });
+  state.reminders.filter(r=>r.date===key&&!r.link).forEach(r=>{
+    items.push({
+      type:"rem",id:r.id,c:"var(--prog)",sname:"",title:r.text,badge:"Reminder",time:t12(r.time),done:false
+    });
+  });
   if(!items.length)return "";
-  return `<div class="hwday">${items.map(i=>`<div style="--c:${i.c}"><i></i><span>${esc(i.t)}</span><small>${esc(i.tag)}</small></div>`).join("")}</div>`}
+  return `<div class="hwday">${items.map(i=>{
+    const checkable=i.type==="hw";
+    return `<div class="hwday-item hwday-${i.type} ${i.done?"is-done":""}" style="--c:${i.c}" ${i.type==="hw"?`data-hwitem="${i.id}"`:""}>
+      ${checkable?`<input type="checkbox" class="hwday-chk" data-hwtick="${i.id}" ${i.done?"checked":""} aria-label="Done: ${esc(i.title)}">`:""}
+      <div class="hwday-body">
+        <div class="hwday-title">${esc(i.title)}</div>
+        <div class="hwday-sub">
+          <span class="hwday-badge">${i.badge}</span>
+          ${i.sname?`<span>${esc(i.sname)}</span>`:""}
+        </div>
+      </div>
+      ${i.time?`<span class="hwday-time">${i.time}</span>`:""}
+    </div>`;
+  }).join("")}</div>`;
+}
 function renderSubjectPage(){
   const list=document.getElementById("subjList"),det=document.getElementById("subjDetail");
   if(!subjView||!SUBJECTS.some(x=>x.id===subjView)){subjView=null;noteOpen=null;list.hidden=false;det.hidden=true;return}
@@ -1896,6 +1940,14 @@ let restoreScroll=null;
 addEventListener("resize",()=>{requestAnimationFrame(moveInd);renderHeader()});
 ["gesturestart","gesturechange","gestureend"].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
 document.addEventListener("touchmove",e=>{if(e.touches.length>1&&e.cancelable)e.preventDefault()},{passive:false});
+let lastTouchEnd=0;
+document.addEventListener("touchend",e=>{
+  const now=Date.now();
+  if(now-lastTouchEnd<=300&&!e.target.closest("input,textarea")){
+    e.preventDefault();
+  }
+  lastTouchEnd=now;
+},{passive:false});
 let lastCompact=false;
 let fabT=null,lastY=0,fabAcc=0;
 addEventListener("scroll",()=>{
