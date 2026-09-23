@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Study Planner">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#000000" id="themeColor">
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="manifest.json">
 <script>(function(){try{var st=(JSON.parse(localStorage.getItem("study-planner")||"{}").settings)||{};
   var dark=st.theme==="dark"||(st.theme!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);
   var luxe=st.style==="luxe";
@@ -225,20 +225,23 @@ ul.card{box-shadow:var(--shadow);background:var(--panel);border:1px solid var(--
 .bnr.upd{background:var(--prog);color:#fff}.bnr.upd .lnk{color:#fff}
 .bnr .lnk{color:#1a1200;background:rgba(255,255,255,.35)}
 .hwday{margin-top:10px;display:flex;flex-direction:column;gap:6px}
-.hwday-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--soft);border:1px solid color-mix(in srgb,var(--line) 75%,transparent);border-radius:12px;transition:background-color .15s,transform .15s;position:relative}
-.hwday-item:active{background:color-mix(in srgb,var(--soft) 70%,var(--ink) 5%)}
-.hwday-item .hwday-chk{appearance:none;-webkit-appearance:none;width:20px;height:20px;border-radius:6px;border:2px solid var(--c,var(--line));flex:none;cursor:pointer;display:grid;place-items:center;margin:0;background:transparent;transition:all .15s}
+.hwday-item{display:flex;align-items:center;gap:10px;padding:9px 12px 9px 13px;background:linear-gradient(90deg,color-mix(in srgb,var(--c,var(--ink)) 7%,var(--panel)),var(--panel) 46%);border:1px solid color-mix(in srgb,var(--line) 75%,transparent);border-left:3px solid color-mix(in srgb,var(--c,var(--muted)) 70%,transparent);border-radius:13px;transition:background-color .15s,transform .15s;position:relative;box-shadow:var(--shadow)}
+.hwday-item:active{transform:scale(.985)}
+.hwday-item .hwday-chk{appearance:none;-webkit-appearance:none;width:21px;height:21px;border-radius:50%;border:2px solid var(--c,var(--line));flex:none;cursor:pointer;display:grid;place-items:center;margin:0;background:var(--panel);transition:all .15s}
 .hwday-item .hwday-chk:checked{background:var(--c,var(--ink));border-color:var(--c,var(--ink))}
-.hwday-item .hwday-chk:checked::after{content:"";width:4.5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
+.hwday-item .hwday-chk:checked::after{content:"";width:4.5px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
+.hwday-item .hwday-ico{width:21px;height:21px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:.72rem;background:color-mix(in srgb,var(--c,var(--ink)) 16%,transparent);color:var(--c,var(--ink))}
 .hwday-item .hwday-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
 .hwday-item .hwday-title{font-size:.86rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
-.hwday-item .hwday-sub{display:flex;align-items:center;gap:5px;font-size:.73rem;color:var(--muted);line-height:1.2}
-.hwday-item .hwday-badge{font-size:.66rem;font-weight:700;letter-spacing:.02em;text-transform:uppercase;padding:1px 6px;border-radius:5px;background:color-mix(in srgb,var(--c,var(--ink)) 14%,transparent);color:var(--c,var(--ink));flex:none}
-.hwday-item .hwday-time{font-size:.73rem;color:var(--muted);margin-left:auto;white-space:nowrap;font-weight:500;font-variant-numeric:tabular-nums}
-.hwday-item.hwday-exam{background:color-mix(in srgb,var(--c) 8%,var(--soft));border-color:color-mix(in srgb,var(--c) 25%,transparent)}
-.hwday-item.hwday-rem{background:var(--soft)}
+.hwday-item .hwday-sub{display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--c,var(--muted));font-weight:700;letter-spacing:.03em;text-transform:uppercase;line-height:1.2}
+.hwday-item .hwday-badge{display:none}
+.hwday-item .hwday-time{font-size:.73rem;color:var(--muted);margin-left:auto;white-space:nowrap;font-weight:600;font-variant-numeric:tabular-nums;background:var(--soft);border-radius:20px;padding:3px 9px}
+.hwday-item.hwday-exam{border-left-style:double;border-left-width:5px}
+.hwday-item.hwday-rem{}
 .hwday-item.is-done{opacity:.5}
 .hwday-item.is-done .hwday-title{text-decoration:line-through}
+:root[data-style="luxe"] .hwday-item{border-radius:8px;background:linear-gradient(90deg,color-mix(in srgb,var(--c,var(--gold)) 10%,var(--panel)),var(--panel) 46%)}
+:root[data-style="luxe"] .hwday-item .hwday-chk{border-radius:2px}
 .del.sm{font-size:1rem;padding:0 4px;float:right}
 .addsubj{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;color:var(--muted);font:inherit;font-weight:600;cursor:pointer;border-style:dashed;min-height:96px}
 .addsubj::before{display:none}
@@ -1061,56 +1064,17 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 </div>
 
 <script>
-const APP_VERSION="1.6";
+const APP_VERSION="2.0";
 const CHANGES=[
-  ["1.6","Keyboard zoom eliminated: Fixed iOS viewport scaling & inputs so screen won't zoom in or shift when typing",
-        "Clean day card rework: Redesigned homework & reminder items on daily cards with modern checkboxes and styled subject badges",
-        "Text selection lockdown: Prevented unwanted blue text selection highlights across headers, cards, and buttons"],
-  ["1.5","Task Reordering: Drag-and-drop or use quick Move Up / Down in task options to prioritize daily study tasks exactly how you want",
-        "Persistent order: Custom daily task order is automatically saved and respected across timetable views"],
-  ["1.4","Notification dismiss option: easily clear or swipe away any notification individually with an instant dismiss button",
-        "Fixed swipe collisions: swiping homework to tick/delete no longer accidentally switches tabs",
-        "Refined touch gesture separation: clear distinction between row swipe actions and page navigation"],
-  ["1.3","Smooth universal swipe navigation: effortless flick/swipe across all main tabs, study days, subpages, and settings with no conflicts",
-        "Redesigned Notifications center: organized cards with quick-actions for new updates, overdue and today's tasks, upcoming exams, and backup alerts",
-        "Seamless direct routing: tap any notification to jump directly into your study, homework, or exam schedule with zero friction"],
-  ["1.2","Automatic seamless updates: when changes are deployed, the app updates automatically without reinstalling",
-        "PWA Support & manifest: installable to home screen on iOS and Android with custom app icons",
-        "Screen Wake Lock: phone display stays awake during active Focus / Pomodoro study sessions",
-        "Mobile viewport protection: fixed iOS Safari input auto-zooming and keyboard jumpiness",
-        "Safe-area padding: tab navigation bar now perfectly respects phone notch and home indicator",
-        "Swipe improvements: task rows now distinguish between vertical scrolling and horizontal swipe gestures"],
-  ["1.1","Back-swipe now follows your finger in real time instead of a fixed animation, and works from a wider edge",
-        "Small haptic taps on tab switches and ticking tasks (where the browser supports it)",
-        "Photo thumbnails show a soft shimmer while they load instead of popping in",
-        "Removed the last bit of rubber-band bounce, and made sure every button presses down when tapped"],
-  ["1.0","Feels like a real app: bottom tab bar, screens that slide with swipe-back, launch screen, draggable sheets and a shrinking header",
-        "Swipe between tabs, swipe homework to tick or delete, long-press a task for its menu",
-        "Add button moved to the top bar; zooming disabled so taps feel native"],
-  ["0.9","Notification centre for reminders, overdue homework, exams and backups",
-        "Version and full change list in Settings",
-        "Search bar with filters, result counts and recent searches"],
-  ["0.8","Homework, exams and reminders now show on the day they belong to",
-        "Evening preview of tomorrow's lessons and tasks",
-        "Grades with averages, moved under Exams"],
-  ["0.7","Attendance calendar: mark present, absent or no school, with your percentage",
-        "Choose your school days and set an absence limit",
-        "Optional pages and titles on tasks"],
-  ["0.6","Quick add button for homework, exams, grades, reminders, notes and focus sessions",
-        "Custom reminder times you can save and reuse",
-        "Revision planner that adds study days before an exam"],
-  ["0.5","Subject pages with notes and photos",
-        "Focus timer with per-subject study time and a 7-day chart",
-        "Full backup file including photos, plus restore"],
-  ["0.4","Homework and exams with reminders",
-        "Your own subjects and colours",
-        "Works offline and searches everything"],
-  ["0.3","Repeating weekly timetable with one-day exceptions",
-        "Tasks tick themselves after midnight",
-        "Move your data to a new device with a link"],
-  ["0.2","Lessons left per subject, updated as you tick tasks",
-        "Week view with classes and day notes"],
-  ["0.1","First version: your timetable and lessons left"]
+  ["2.0","A full weekly timetable with lessons-left tracking per subject, plus optional page counts and task titles",
+        "Homework, exams and reminders — due dates, custom reminder times, a revision planner, and everything shown right on the day it belongs to",
+        "Subject pages with notes, photos, and grades with averages",
+        "Attendance calendar with your percentage, school days and an absence limit",
+        "Focus timer with per-subject stats, a 7-day chart, confetti and a screen wake lock",
+        "Your own subjects and colors, Classic or Luxe style, light or dark, top or bottom tabs",
+        "Works offline, installable to your home screen, with search, a notification centre, and full backup and restore",
+        "Feels like a native app: swipe navigation, drag-to-reorder tasks, sliding screens, a launch screen, and haptic taps",
+        "Updates itself automatically, and carries your data safely across every version"]
 ];
 let DAY_ORDER=[5,6,0,1,2,3,4];
 function setOrder(st){DAY_ORDER=Array.from({length:7},(_,i)=>(st+i)%7)}
@@ -1163,7 +1127,7 @@ function migrate(s){
   s.dismissed=s.dismissed||[];
   SUBJECTS=[...s.subjects,OTHER];
   if(!s.seenVersion&&s.editedAt)s.seenVersion="0.9";
-  if(s.seenVersion&&!/^(1\.[0-9]+|0\.[1-9])$/.test(s.seenVersion))s.seenVersion="0.9";
+  if(s.seenVersion&&!/^[0-9]+\.[0-9]+$/.test(s.seenVersion))s.seenVersion="0.9";
   s.settings=Object.assign({autoTick:true,focusMin:25,theme:"auto",style:"classic",tabPos:"bottom",schoolDays:[0,1,2,3,4],size:"m",weekStart:5,openOn:"last",confetti:true,sound:true},s.settings||{});
   setOrder(s.settings.weekStart);
   s.v=4;return s}
@@ -1534,14 +1498,12 @@ function dayItems(key){
   if(!items.length)return "";
   return `<div class="hwday">${items.map(i=>{
     const checkable=i.type==="hw";
+    const ico=i.type==="exam"?"📅":i.type==="rem"?"🔔":"";
     return `<div class="hwday-item hwday-${i.type} ${i.done?"is-done":""}" style="--c:${i.c}" ${i.type==="hw"?`data-hwitem="${i.id}"`:""}>
-      ${checkable?`<input type="checkbox" class="hwday-chk" data-hwtick="${i.id}" ${i.done?"checked":""} aria-label="Done: ${esc(i.title)}">`:""}
+      ${checkable?`<input type="checkbox" class="hwday-chk" data-hwtick="${i.id}" ${i.done?"checked":""} aria-label="Done: ${esc(i.title)}">`:`<span class="hwday-ico">${ico}</span>`}
       <div class="hwday-body">
         <div class="hwday-title">${esc(i.title)}</div>
-        <div class="hwday-sub">
-          <span class="hwday-badge">${i.badge}</span>
-          ${i.sname?`<span>${esc(i.sname)}</span>`:""}
-        </div>
+        <div class="hwday-sub">${i.badge}${i.sname?` · ${esc(i.sname)}`:""}</div>
       </div>
       ${i.time?`<span class="hwday-time">${i.time}</span>`:""}
     </div>`;
@@ -2416,7 +2378,7 @@ document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;
     const target=e.target;
     const overlay=!document.getElementById("sheet").hidden||!document.getElementById("viewer").hidden||!document.getElementById("focus").hidden;
     if(overlay||rowSwiping||isTaskDragging)return;
-    if(target.closest("li.hw,li.task,li.exam,li.rem,.drag-grip,input,textarea,select,.numin,.amtin,.pgin,.cpick,button,.tmenu,.cald,.sheet,.viewer"))return;
+    if(target.closest("li.hw,li.task,li.exam,li.rem,.drag-grip,input,textarea,select,.numin,.amtin,.pgin,.cpick,button,.tmenu,.cald,.sheet,.viewer,.lstrip,.strip,.gavgs"))return;
 
     // Check if starting near the left edge for swipe-back navigation
     const isEdgeBack=t.clientX<46&&(noteOpen||subjView||STACKED.includes(tab));
