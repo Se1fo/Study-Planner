@@ -1,0 +1,8 @@
+{
+  "name": "Study Planner",
+  "description": "Track your daily study schedule, subjects, tasks, and progress with an offline-capable, distraction-free study planner.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

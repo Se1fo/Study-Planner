@@ -1,16 +1,29 @@
 // Study Planner offline support
-const CACHE = "study-planner-v1";
+const CACHE = "study-planner-v1.2";
+const PRECACHE = ["./", "/", "/index.html", "/manifest.json", "/icon-192.png"];
+
+self.addEventListener("message", e => {
+  if (e.data && e.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.add("./")).catch(() => {}));
+  e.waitUntil(
+    caches.open(CACHE).then(async c => {
+      for (const url of PRECACHE) {
+        try { await c.add(url); } catch (err) {}
+      }
+    })
+  );
   self.skipWaiting();
 });
+
 self.addEventListener("activate", e => {
-  // Remove any caches from older versions of this app so storage doesn't pile up.
   e.waitUntil(
-    caches.keys()
-      .then(names => Promise.all(names.filter(n => n !== CACHE).map(n => caches.delete(n))))
-      .then(() => self.clients.claim())
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
   );
 });
 
@@ -21,14 +34,36 @@ self.addEventListener("fetch", e => {
 
   // The app page itself: always try the internet first (so updates arrive), fall back to the saved copy offline.
   const isPage = req.mode === "navigate" ||
-    (url.origin === self.location.origin && (url.pathname.endsWith("/") || url.pathname.endsWith(".html")));
+    (url.origin === self.location.origin && (url.pathname.endsWith("/") || url.pathname.endsWith(".html") || url.pathname === "/"));
   if (isPage) {
     if (url.searchParams.has("check")) return; // update checks go straight to the network
     e.respondWith(
       fetch(req).then(res => {
-        if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put("./", copy)); }
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => {
+            c.put(req, copy);
+            c.put("./", copy.clone());
+          });
+        }
         return res;
-      }).catch(() => caches.match("./"))
+      }).catch(async () => {
+        const cached = await caches.match(req);
+        if (cached) return cached;
+        const fallback = await caches.match("./") || await caches.match("/") || await caches.match("/index.html");
+        return fallback;
+      })
+    );
+    return;
+  }
+
+  // Static assets (manifest, icons): Cache first, fallback to network
+  if (url.origin === self.location.origin && (url.pathname.endsWith(".json") || url.pathname.endsWith(".png") || url.pathname.endsWith(".svg"))) {
+    e.respondWith(
+      caches.match(req).then(hit => hit || fetch(req).then(res => {
+        if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
+        return res;
+      }))
     );
     return;
   }
@@ -43,3 +78,4 @@ self.addEventListener("fetch", e => {
     );
   }
 });
+
