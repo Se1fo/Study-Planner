@@ -733,6 +733,11 @@ li.hw.sw-done{background:color-mix(in srgb,var(--arab) 18%,transparent)}
 li.hw.sw-done::before{content:"✓ Done";position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--arab);font-weight:700;font-size:.82rem;pointer-events:none}
 li.hw.sw-del{background:color-mix(in srgb,var(--eng) 18%,transparent)}
 li.hw.sw-del::after{content:"✕ Delete";position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--eng);font-weight:700;font-size:.82rem;pointer-events:none}
+.drag-grip{display:flex;align-items:center;justify-content:center;width:24px;height:32px;color:var(--muted);cursor:grab;touch-action:none;opacity:.4;flex:none;transition:opacity .15s,color .15s}
+.drag-grip:active{cursor:grabbing;opacity:.9;color:var(--ink)}
+li.task.dragging{opacity:.35;background:var(--soft);border-radius:10px}
+li.task.drag-over-top{border-top:2px solid var(--prog)!important}
+li.task.drag-over-bottom{border-bottom:2px solid var(--prog)!important}
 .cdot{position:relative}
 .cdot::after{content:"";position:absolute;inset:-10px}
 .del{position:relative}
@@ -1043,8 +1048,10 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 </div>
 
 <script>
-const APP_VERSION="1.4";
+const APP_VERSION="1.5";
 const CHANGES=[
+  ["1.5","Task Reordering: Drag-and-drop or use quick Move Up / Down in task options to prioritize daily study tasks exactly how you want",
+        "Persistent order: Custom daily task order is automatically saved and respected across timetable views"],
   ["1.4","Notification dismiss option: easily clear or swipe away any notification individually with an instant dismiss button",
         "Fixed swipe collisions: swiping homework to tick/delete no longer accidentally switches tabs",
         "Refined touch gesture separation: clear distinction between row swipe actions and page navigation"],
@@ -1159,12 +1166,23 @@ function fmt(n){return String(+(+n).toFixed(4))}
 function esc(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function lessonsLabel(a){return a===0?"Study / revise":fmt(a)+(a===1?" lesson":" lessons")}
 
-// tasks shown on a date: fixed (minus skipped) + extras
+// tasks shown on a date: fixed (minus skipped) + extras (ordered by custom order if saved)
 function tasksOn(wd,key){
   const x=peek(key);
   const fixed=state.days[wd].tasks.map(k=>({...k,amt:x.amt[k.id],pg:x.pg[k.id],kind:"fixed",skipped:x.skip.includes(k.id),done:k.id in x.done}));
   const extra=x.extra.map(k=>({...k,kind:"extra",skipped:false,done:k.id in x.done}));
-  return fixed.concat(extra);
+  const all=fixed.concat(extra);
+  const ord=x.order;
+  if(Array.isArray(ord)&&ord.length){
+    all.sort((a,b)=>{
+      const ia=ord.indexOf(a.id),ib=ord.indexOf(b.id);
+      if(ia===-1&&ib===-1)return 0;
+      if(ia===-1)return 1;
+      if(ib===-1)return -1;
+      return ia-ib;
+    });
+  }
+  return all;
 }
 function pagesLeft(sid,t){if(!state.pages||state.pages[sid]==null)return null;t=t||totals();return Math.max(0,state.pages[sid]-(t[sid]?t[sid].donePg:0))}
 function totals(){
@@ -1748,8 +1766,131 @@ function afterRender(){
   if(selDay!==lastSel){const d=document.querySelector(".day.sel");if(d&&lastSel!==null)d.classList.add("enter");
     document.querySelector(".strip button.sel")?.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});lastSel=selDay}
   if(justTicked){const el=document.querySelector(`[data-tick^="${justTicked}:"]`);if(el)el.closest("li").classList.add("pop");justTicked=null}
+  bindTaskReorder();
   requestAnimationFrame(moveInd);
   if(restoreScroll!=null){const y=restoreScroll;restoreScroll=null;requestAnimationFrame(()=>scrollTo(0,y))}
+}
+
+let isTaskDragging=false;
+function bindTaskReorder(){
+  document.querySelectorAll("ul.task-list").forEach(ul=>{
+    const dkey=ul.dataset.dkey;
+    if(!dkey)return;
+    const items=[...ul.children].filter(li=>li.classList.contains("task")&&li.dataset.tid);
+    if(items.length<=1)return;
+
+    items.forEach(li=>{
+      const grip=li.querySelector(".drag-grip");
+      if(!grip)return;
+
+      let startY=0,initialY=0,itemH=0,dragged=false,longPressTimer=null,currOver=null,placeAfter=false;
+
+      const cleanup=()=>{
+        clearTimeout(longPressTimer);
+        isTaskDragging=false;
+        li.classList.remove("dragging");
+        li.style.transform="";
+        li.style.zIndex="";
+        li.style.position="";
+        li.style.width="";
+        ul.querySelectorAll(".task").forEach(t=>t.classList.remove("drag-over-top","drag-over-bottom"));
+        window.removeEventListener("touchmove",onTouchMove);
+        window.removeEventListener("touchend",onTouchEnd);
+        window.removeEventListener("touchcancel",onTouchEnd);
+      };
+
+      const onTouchMove=e=>{
+        if(!dragged)return;
+        if(e.cancelable)e.preventDefault();
+        const touch=e.touches[0];
+        const curY=touch.clientY;
+        const dy=curY-startY;
+        li.style.transform=`translateY(${dy}px)`;
+
+        // Find which item we are hovering over
+        ul.querySelectorAll(".task").forEach(t=>t.classList.remove("drag-over-top","drag-over-bottom"));
+        currOver=null;
+        const elUnder=document.elementFromPoint(touch.clientX,curY);
+        const overTask=elUnder?elUnder.closest("li.task"):null;
+        if(overTask&&overTask!==li&&ul.contains(overTask)&&overTask.dataset.tid){
+          currOver=overTask;
+          const rect=overTask.getBoundingClientRect();
+          placeAfter=curY>(rect.top+rect.height/2);
+          overTask.classList.add(placeAfter?"drag-over-bottom":"drag-over-top");
+        }
+      };
+
+      const onTouchEnd=e=>{
+        if(dragged&&currOver&&currOver!==li){
+          const fromId=li.dataset.tid;
+          const toId=currOver.dataset.tid;
+          const d=new Date(dkey+"T12:00:00").getDay();
+          const tasks=tasksOn(d,dkey);
+          const ids=tasks.map(k=>k.id);
+          const fromIdx=ids.indexOf(fromId);
+          if(fromIdx!==-1){
+            ids.splice(fromIdx,1);
+            let toIdx=ids.indexOf(toId);
+            if(placeAfter)toIdx++;
+            ids.splice(toIdx,0,fromId);
+            buzz(8);
+            cleanup();
+            change(()=>{
+              const x=dayData(state,dkey);
+              x.order=ids;
+            });
+            return;
+          }
+        }
+        cleanup();
+      };
+
+      const startDrag=touch=>{
+        isTaskDragging=true;
+        dragged=true;
+        startY=touch.clientY;
+        const rect=li.getBoundingClientRect();
+        itemH=rect.height;
+        li.classList.add("dragging");
+        li.style.zIndex="15";
+        buzz(12);
+        window.addEventListener("touchmove",onTouchMove,{passive:false});
+        window.addEventListener("touchend",onTouchEnd,{passive:false});
+        window.addEventListener("touchcancel",onTouchEnd,{passive:false});
+      };
+
+      grip.addEventListener("touchstart",e=>{
+        if(e.touches.length!==1)return;
+        const touch=e.touches[0];
+        startDrag(touch);
+      },{passive:true});
+
+      // Also support long-press on the task row itself (outside inputs/buttons/checkboxes)
+      li.addEventListener("touchstart",e=>{
+        if(e.touches.length!==1)return;
+        if(e.target.closest("button,input,a,.lnk,.dots-btn,.chk,.amtin,.pgin,.drag-grip"))return;
+        const touch=e.touches[0];
+        longPressTimer=setTimeout(()=>{
+          startDrag(touch);
+        },380);
+      },{passive:true});
+
+      li.addEventListener("touchmove",e=>{
+        if(!dragged&&longPressTimer){
+          const t=e.touches[0];
+          if(Math.abs(t.clientY-startY)>8)clearTimeout(longPressTimer);
+        }
+      },{passive:true});
+
+      li.addEventListener("touchend",()=>{
+        clearTimeout(longPressTimer);
+      },{passive:true});
+
+      li.addEventListener("touchcancel",()=>{
+        clearTimeout(longPressTimer);
+      },{passive:true});
+    });
+  });
 }
 let restoreScroll=null;
 addEventListener("resize",()=>{requestAnimationFrame(moveInd);renderHeader()});
@@ -1833,23 +1974,27 @@ function render(){
     if(isComplete(d,key)&&!expanded.has(key))return `<article class="day donecard ${d===selDay?"sel":""}">
       <div class="dayhead"><h2>${DAY_NAMES[d]} <span class="dnum">${dLabel(dt)}</span></h2><span class="okmark" aria-label="Done">✓</span></div>
       <div class="donerow"><span>Day done</span><button class="lnk" data-expand="${key}">Show</button></div></article>`;
-    const list=tasks.filter(k=>!k.skipped).length?`<ul>${tasks.map(k=>{const s=subj(k.s);
+    const list=tasks.filter(k=>!k.skipped).length?`<ul class="task-list" data-dkey="${key}" data-wd="${d}">${tasks.map((k,idx,arr)=>{const s=subj(k.s);
       if(k.skipped)return "";
       const tag=k.kind==="fixed"?"":k.label?esc(k.label):"This day only";
       const mk=key+":"+k.id,open=openMenu===mk;
       const acts=`<button class="dots-btn ${open?"on":""}" data-menu="${mk}" aria-label="More options" aria-expanded="${open}">⋯</button>`;
+      const isFirst=idx===0,isLast=idx===arr.length-1;
       const menu=open?`<li class="tmenu">
+        ${!isFirst?`<button data-reorder="${key}:${k.id}:up">↑ Move up</button>`:""}
+        ${!isLast?`<button data-reorder="${key}:${k.id}:down">↓ Move down</button>`:""}
         ${key===todayIso&&!k.done?`<button data-focus="${key}:${k.id}:${k.s}:${k.amt??""}">⏱ Focus</button>`:""}
         <button data-title="${key}:${k.id}">✎ ${k.title?"Rename":"Add title"}</button>
         ${key>=todayIso&&!k.done?`<button data-move="${key}:${k.id}:${k.kind}:${k.s}:${k.amt??""}">→ Tomorrow</button>`:""}
         ${k.kind==="fixed"
           ?`<button data-skip="${key}:${k.id}">Remove from this day</button><button class="danger" data-delfix="${d}:${k.id}">Remove every ${DAY_NAMES[d].slice(0,3)}</button>`
           :`<button class="danger" data-delextra="${key}:${k.id}">Remove</button>`}</li>`:"";
-      if(titleEdit===key+":"+k.id)return `<li class="task" style="--c:${col(s)}">
+      if(titleEdit===key+":"+k.id)return `<li class="task" style="--c:${col(s)}" data-tid="${k.id}">
         <span class="chk off"></span>
         <div class="tt"><input class="ttl" id="ttlIn" value="${esc(k.title||"")}" placeholder="Title for ${esc(s.name)}" maxlength="40"></div>
         <button class="btn sm" data-titlesave="${key}:${k.id}:${k.kind}:${d}">Save</button><button class="lnk" data-titlecancel>Cancel</button></li>`;
-      return `<li class="task ${k.done?"done":""}" style="--c:${col(s)}">
+      return `<li class="task ${k.done?"done":""}" style="--c:${col(s)}" data-tid="${k.id}">
+        <span class="drag-grip" aria-label="Drag to reorder" title="Drag to reorder">⋮⋮</span>
         <input type="checkbox" class="chk" data-tick="${key}:${k.id}:${k.s}:${k.amt||0}:${k.pg||0}" ${k.done?"checked":""} aria-label="Done: ${s.name}">
         <div class="tt"><b>${s.name}${k.title?` <span class="ttlx">${esc(k.title)}</span>`:""}</b><small class="amtrow"><input class="amtin" data-amt="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.amt??""}" placeholder="–" aria-label="${s.name} lessons on ${dLabel(dt)}"> <span class="amtl">lessons</span>${peek(key).noPages?"":`<input class="amtin" data-pg="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.pg??""}" placeholder="–" aria-label="${s.name} pages on ${dLabel(dt)}"> <span class="amtl">pages</span>`} ${tag?`<i class="kind ${k.kind}">${tag}</i>`:""}</small></div>${acts}</li>${menu}`}).join("")}</ul>`
       :`<div class="empty">Nothing planned. Free day.</div>`;
@@ -1879,7 +2024,7 @@ function change(fn){fn();state.editedAt=Date.now();save();render()}
 function prune(key){const x=state.dates[key];if(x&&!x.noPages&&!x.skip.length&&!x.extra.length&&!Object.keys(x.done).length&&!Object.keys(x.amt||{}).length&&!Object.keys(x.pg||{}).length)delete state.dates[key]}
 
 document.addEventListener("click",e=>{
-  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-pdel],[data-optstyle],[data-optpos],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-ngo],[data-ndismiss],[data-ndismissall],[data-focusfield],[data-title],[data-titlesave],[data-titlecancel],[data-pgtoggle],[data-classopen],[data-notesopen],[data-addrem],[data-remedit],[data-remsave],[data-remcancel],[data-revplan],[data-qrem],[data-hwpost],[data-hwfor],[data-sub],[data-ssub],[data-lsgo],[data-newl],[data-bknow],[data-bklater],[data-exopen],[data-exdel],#exAdd,[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#remAdd,#reset");
+  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-reorder],[data-pdel],[data-optstyle],[data-optpos],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-ngo],[data-ndismiss],[data-ndismissall],[data-focusfield],[data-title],[data-titlesave],[data-titlecancel],[data-pgtoggle],[data-classopen],[data-notesopen],[data-addrem],[data-remedit],[data-remsave],[data-remcancel],[data-revplan],[data-qrem],[data-hwpost],[data-hwfor],[data-sub],[data-ssub],[data-lsgo],[data-newl],[data-bknow],[data-bklater],[data-exopen],[data-exdel],#exAdd,[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#remAdd,#reset");
   if(!b)return;
   const ds=b.dataset;
   if(ds.ndismiss!==undefined){
@@ -1999,6 +2144,26 @@ document.addEventListener("click",e=>{
   if(ds.color){colorOpen=colorOpen===ds.color?null:ds.color;render();return}
   if(ds.setc){const[id,h]=ds.setc.split(":");setColor(id,h);return}
   if(ds.menu){openMenu=openMenu===ds.menu?null:ds.menu;render();return}
+  if(ds.reorder){
+    const[key,id,dir]=ds.reorder.split(":");
+    const d=new Date(key+"T12:00:00").getDay();
+    const tasks=tasksOn(d,key);
+    const ids=tasks.map(k=>k.id);
+    const idx=ids.indexOf(id);
+    if(idx!==-1){
+      const targetIdx=dir==="up"?idx-1:idx+1;
+      if(targetIdx>=0&&targetIdx<ids.length){
+        ids.splice(idx,1);
+        ids.splice(targetIdx,0,id);
+        change(()=>{
+          const x=dayData(state,key);
+          x.order=ids;
+        });
+        buzz(4);
+      }
+    }
+    return;
+  }
   if(ds.move){const[key,id,kind,sj,amt]=ds.move.split(":");const tk=nextDay(key);
     openMenu=null;change(()=>{const x=dayData(state,key);
       if(kind==="fixed")x.skip.push(id);else x.extra=x.extra.filter(k=>k.id!==id);
@@ -2198,8 +2363,8 @@ document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;
     const t=e.touches[0];
     const target=e.target;
     const overlay=!document.getElementById("sheet").hidden||!document.getElementById("viewer").hidden||!document.getElementById("focus").hidden;
-    if(overlay||rowSwiping)return;
-    if(target.closest("li.hw,li.task,li.exam,li.rem,input,textarea,select,.numin,.amtin,.pgin,.cpick,button,.tmenu,.cald,.sheet,.viewer"))return;
+    if(overlay||rowSwiping||isTaskDragging)return;
+    if(target.closest("li.hw,li.task,li.exam,li.rem,.drag-grip,input,textarea,select,.numin,.amtin,.pgin,.cpick,button,.tmenu,.cald,.sheet,.viewer"))return;
 
     // Check if starting near the left edge for swipe-back navigation
     const isEdgeBack=t.clientX<46&&(noteOpen||subjView||STACKED.includes(tab));
