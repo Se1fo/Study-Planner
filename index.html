@@ -640,12 +640,21 @@ header h1{overflow:hidden;text-overflow:ellipsis}
 .bellbtn2 em{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;border-radius:9px;background:var(--eng);color:var(--panel);font-style:normal;font-size:.66rem;font-weight:700;display:grid;place-items:center;padding:0 4px;border:1.5px solid var(--bg)}
 .bellbtn2 em[hidden]{display:none}
 :root[data-style="luxe"] .bellbtn2 em{background:linear-gradient(160deg,var(--gold2),var(--gold));color:var(--goldink)}
-.ncell{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.ncell{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow);transition:transform .12s,background .15s}
+.ncell:active{transform:scale(.985)}
+.ncell.n-upd{border-color:color-mix(in srgb,var(--prog) 50%,transparent);background:linear-gradient(135deg,color-mix(in srgb,var(--prog) 8%,transparent),var(--panel))}
+.ncell.n-crit{border-color:color-mix(in srgb,var(--eng) 45%,transparent)}
 .ncell .bt{flex:1;min-width:0}
 .ncell b{display:block;font-size:.95rem}
 .ncell small{color:var(--muted);font-size:.8rem;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.nico{font-size:1.15rem;flex:none}
-.nacts2{display:flex;gap:4px;flex:none}
+.nico{font-size:1.25rem;flex:none;width:34px;height:34px;border-radius:10px;background:var(--soft);display:grid;place-items:center}
+.nacts2{display:flex;gap:6px;flex:none;align-items:center}
+.nacts2 .lnk{padding:6px 11px;border-radius:10px;font-size:.82rem;font-weight:600;border:1px solid var(--line);background:var(--soft);color:var(--ink);text-decoration:none}
+.nacts2 .lnk:active{transform:scale(.92)}
+.nacts2 .ghostlnk{background:transparent;border-color:transparent;color:var(--muted)}
+.nacts2 .updbtn{background:var(--ink);color:var(--bg);border-color:transparent}
+:root[data-style="luxe"] .nacts2 .updbtn{background:linear-gradient(160deg,var(--gold2),var(--gold));color:var(--goldink)}
+.ncell.n-dismiss{opacity:.4;transform:scale(.95);transition:opacity .2s,transform .2s}
 .verrow{align-items:center;flex-wrap:wrap;gap:10px}
 .verrow .vleft{flex:1 1 auto;min-width:0}
 .vleft{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
@@ -1032,8 +1041,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 </div>
 
 <script>
-const APP_VERSION="1.2";
+const APP_VERSION="1.3";
 const CHANGES=[
+  ["1.3","Smooth universal swipe navigation: effortless flick/swipe across all main tabs, study days, subpages, and settings with no conflicts",
+        "Redesigned Notifications center: organized cards with quick-actions for new updates, overdue and today's tasks, upcoming exams, and backup alerts",
+        "Seamless direct routing: tap any notification to jump directly into your study, homework, or exam schedule with zero friction"],
   ["1.2","Automatic seamless updates: when changes are deployed, the app updates automatically without reinstalling",
         "PWA Support & manifest: installable to home screen on iOS and Android with custom app icons",
         "Screen Wake Lock: phone display stays awake during active Focus / Pomodoro study sessions",
@@ -1184,26 +1196,47 @@ let hwShowDone=false,remShowPast=false,addingSubj=false;
 let updateReady=false;
 function notifItems(){
   const out=[],n=nowStamp();
-  if(updateReady)out.push({k:"upd",icon:"✨",t:"New version available",s:"Tap to update. Your data stays as it is.",act:"Update",go:"update"});
-  remDue().forEach(r=>out.push({k:"rem:"+r.id,icon:"🔔",t:r.text,s:relDay(r.date)+", "+r.time,act:"Dismiss",go:"remseen:"+r.id}));
+  if(updateReady){
+    out.push({k:"upd",icon:"✨",t:"New version "+APP_VERSION+" is ready",s:"Tap update to load the latest features instantly.",act:"Update now",go:"update",cls:"n-upd",btnCls:"updbtn"});
+  }
+  remDue().forEach(r=>out.push({k:"rem:"+r.id,icon:"🔔",t:r.text,s:relDay(r.date)+", "+r.time,act:"Done",go:"remseen:"+r.id}));
   const over=hwPending().filter(h=>h.due<todayIso);
-  if(over.length)out.push({k:"hwover",icon:"⚠️",t:over.length===1?"1 homework overdue":over.length+" homework overdue",s:over.map(h=>h.text).slice(0,3).join(", "),act:"Open",go:"hw"});
+  if(over.length){
+    out.push({k:"hwover",icon:"⚠️",t:over.length===1?"1 homework task overdue":over.length+" homework tasks overdue",s:over.map(h=>h.text).slice(0,3).join(", "),act:"View tasks",go:"hw",cls:"n-crit"});
+  }
   const todayHw=hwPending().filter(h=>h.due===todayIso);
-  if(todayHw.length)out.push({k:"hwtoday",icon:"📝",t:todayHw.length===1?"1 homework due today":todayHw.length+" homework due today",s:todayHw.map(h=>h.text).slice(0,3).join(", "),act:"Open",go:"hw"});
-  state.exams.filter(x=>x.date>=todayIso&&daysUntil(x.date)<=3).forEach(x=>out.push({k:"ex:"+x.id,icon:"📅",t:x.title,s:subj(x.s).name+" · "+(daysUntil(x.date)===0?"today":daysUntil(x.date)===1?"tomorrow":"in "+daysUntil(x.date)+" days"),act:"Open",go:"ex"}));
+  if(todayHw.length){
+    out.push({k:"hwtoday",icon:"📝",t:todayHw.length===1?"1 homework due today":todayHw.length+" homework due today",s:todayHw.map(h=>h.text).slice(0,3).join(", "),act:"View tasks",go:"hw"});
+  }
+  // Today's study tasks remaining
+  const studyTasks=tasksOn(today,todayIso).filter(k=>!k.skipped);
+  const studyLeft=studyTasks.filter(k=>!k.done);
+  if(studyTasks.length&&studyLeft.length){
+    const sNames=[...new Set(studyLeft.map(k=>subj(k.s).name))].slice(0,3).join(", ");
+    out.push({k:"studytoday",icon:"📚",t:studyLeft.length===1?"1 study task left today":studyLeft.length+" study tasks left today",s:sNames,act:"Study",go:"study"});
+  }
+  state.exams.filter(x=>x.date>=todayIso&&daysUntil(x.date)<=5).forEach(x=>{
+    const du=daysUntil(x.date);
+    out.push({k:"ex:"+x.id,icon:"📅",t:x.title,s:subj(x.s).name+" · "+(du===0?"Exam is today":du===1?"Exam is tomorrow":"Exam in "+du+" days"),act:"Open",go:"ex",cls:du<=1?"n-crit":""});
+  });
   const L=state.settings.absLimit;
-  if(L!=null&&L!==""){const from=state.settings.absFrom||"",used=attCounts(k=>!from||k>=from).a,rem=L-used;
-    if(rem<=2)out.push({k:"abs",icon:"🚫",t:rem<0?"Over your absence limit":rem===0?"No absences left":"Only "+rem+" absence"+(rem===1?"":"s")+" left",s:used+" of "+L+" used",act:"Open",go:"school"})}
+  if(L!=null&&L!==""){
+    const from=state.settings.absFrom||"",used=attCounts(k=>!from||k>=from).a,rem=L-used;
+    if(rem<=2)out.push({k:"abs",icon:"🚫",t:rem<0?"Over your absence limit":rem===0?"No absences left":"Only "+rem+" absence"+(rem===1?"":"s")+" left",s:used+" of "+L+" used",act:"Attendance",go:"school",cls:"n-crit"});
+  }
   const last=state.lastBackup||state.created||Date.now(),snooze=state.bkSnooze||0;
-  if(Date.now()-last>7*864e5&&Date.now()>snooze&&(state.editedAt||0)>0)out.push({k:"bk",icon:"🛟",t:"Back up your planner",s:"It's been a week. Save a backup file somewhere safe.",act:"Back up",go:"backup",extra:"Later|bklater"});
-  return out}
+  if(Date.now()-last>7*864e5&&Date.now()>snooze&&(state.editedAt||0)>0){
+    out.push({k:"bk",icon:"🛟",t:"Back up your planner",s:"It's been a week. Keep your data safe with a quick file backup.",act:"Back up",go:"backup",extra:"Later|bklater"});
+  }
+  return out;
+}
 function renderBanner(){
   const items=notifItems(),dot=document.getElementById("notifDot");
   if(dot){dot.textContent=items.length||"";dot.hidden=!items.length}
   const el=document.getElementById("notifList");if(!el)return;
-  el.innerHTML=items.length?items.map(i=>`<div class="ncell"><span class="nico">${i.icon}</span><div class="bt"><b>${esc(i.t)}</b><small>${esc(i.s)}</small></div>
-    <div class="nacts2">${i.extra?`<button class="lnk ghostlnk" data-ngo="${i.extra.split("|")[1]}">${esc(i.extra.split("|")[0])}</button>`:""}<button class="lnk" data-ngo="${i.go}">${esc(i.act)}</button></div></div>`).join("")
-    :`<div class="emptybig">You're all caught up.</div>`;
+  el.innerHTML=items.length?items.map(i=>`<div class="ncell ${i.cls||""}"><span class="nico">${i.icon}</span><div class="bt"><b>${esc(i.t)}</b><small>${esc(i.s)}</small></div>
+    <div class="nacts2">${i.extra?`<button class="lnk ghostlnk" data-ngo="${i.extra.split("|")[1]}">${esc(i.extra.split("|")[0])}</button>`:""}<button class="lnk ${i.btnCls||""}" data-ngo="${i.go}">${esc(i.act)}</button></div></div>`).join("")
+    :`<div class="emptybig">You're all caught up. No pending alerts.</div>`;
 }
 
 function renderToday(){
@@ -1815,6 +1848,7 @@ document.addEventListener("click",e=>{
   if(ds.ngo){const g=ds.ngo;
     if(g==="update"){hardReload();return}
     if(g.startsWith("remseen:")){change(()=>{const r=state.reminders.find(r=>r.id===g.slice(8));if(r)r.seen=true});return}
+    if(g==="study"){tab="study";studySub="tt";render();scrollTo(0,0);return}
     if(g==="hw"||g==="ex"){tab="todo";todoSub=g;render();scrollTo(0,0);return}
     if(g==="school"){tab="school";render();scrollTo(0,0);return}
     if(g==="backup"){tab="set";render();scrollTo(0,0);setTimeout(()=>document.getElementById("fbSave")?.scrollIntoView({block:"center",behavior:"smooth"}),150);return}
@@ -2084,27 +2118,118 @@ document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;
   if(e.target.id==="hwText")document.getElementById("hwAdd").click();
   if(e.target.id==="remText")document.getElementById("remAdd").click();
   if(e.target.id==="newSubj")document.querySelector("[data-subjsave]")?.click()});
-(()=>{let sx=0,sy=0,ok=false;const el=document.getElementById("days");
-  el.addEventListener("touchstart",e=>{const t=e.target;ok=!t.closest("input,textarea,select,.tmenu,li.task")&&innerWidth<900&&!rowSwiping;sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
-  el.addEventListener("touchend",e=>{if(!ok)return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
-    if(Math.abs(dx)<60||Math.abs(dy)>Math.abs(dx)*.6)return;
-    let i=DAY_ORDER.indexOf(selDay)+(dx<0?1:-1);
-    if(i>6){week++;i=0}else if(i<0){week--;i=6}
-    selDay=DAY_ORDER[i];openForm=null;openMenu=null;render()},{passive:true})})();
-(()=>{const ORDER=["study","todo","school"];let sx=0,sy=0,ok=false;
-  addEventListener("touchstart",e=>{const t=e.target;
-    const blocked=t.closest("#days,.strip,.lstrip,.gavgs,.calgrid,.sheet,.viewer,li.hw,li.exam,li.rem,.glist,input,textarea,select,.chips,.seg,.bars,.pgrid,.loglist");
+(()=>{
+  const ORDER=["study","todo","school"];
+  let sx=0,sy=0,lastX=0,lastT=0,vx=0,axis="",active=false;
+
+  addEventListener("touchstart",e=>{
+    if(e.touches.length!==1||innerWidth>=900)return;
+    const t=e.touches[0];
+    const target=e.target;
     const overlay=!document.getElementById("sheet").hidden||!document.getElementById("viewer").hidden||!document.getElementById("focus").hidden;
-    ok=!blocked&&!overlay&&!rowSwiping&&!noteOpen&&!subjView&&ORDER.includes(tab)&&innerWidth<900;
-    sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
-  addEventListener("touchend",e=>{if(!ok)return;ok=false;if(rowSwiping)return;
-    const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
-    if(Math.abs(dx)<80||Math.abs(dy)>Math.abs(dx)*.5||sx<44)return;
-    const i=ORDER.indexOf(tab)+(dx<0?1:-1);if(i<0||i>2)return;
-    scrollMem[tab]=scrollY;tab=ORDER[i];restoreScroll=scrollMem[tab]??0;
-    try{localStorage.setItem("sp-tab",tab)}catch(err){}
-    const w=document.querySelector(".wrap");w.classList.remove("slidein","slideout");void w.offsetWidth;w.classList.add(dx<0?"slidein":"slideout");
-    render()},{passive:true})})();
+    if(overlay||rowSwiping)return;
+    if(target.closest("input,textarea,select,.numin,.amtin,.pgin,.cpick,button,.tmenu,.cald,.sheet,.viewer"))return;
+
+    // Check if starting near the left edge for swipe-back navigation
+    const isEdgeBack=t.clientX<46&&(noteOpen||subjView||STACKED.includes(tab));
+    if(isEdgeBack)return; // Handled by edge back gesture
+
+    sx=lastX=t.clientX;
+    sy=t.clientY;
+    lastT=performance.now();
+    vx=0;
+    axis="";
+    active=true;
+  },{passive:true});
+
+  addEventListener("touchmove",e=>{
+    if(!active)return;
+    const t=e.touches[0];
+    const dx=t.clientX-sx;
+    const dy=t.clientY-sy;
+    const absX=Math.abs(dx),absY=Math.abs(dy);
+
+    if(!axis){
+      if(absX<10&&absY<10)return;
+      // Determine dominant direction
+      axis=absX>absY*1.2?"x":"y";
+      if(axis==="y"){active=false;return}
+    }
+    if(axis!=="x")return;
+
+    const now=performance.now();
+    const dt=now-lastT;
+    if(dt>8){
+      vx=(t.clientX-lastX)/dt;
+      lastX=t.clientX;
+      lastT=now;
+    }
+  },{passive:true});
+
+  const onEnd=e=>{
+    if(!active||axis!=="x"){active=false;return}
+    active=false;
+    const dx=lastX-sx;
+    const absX=Math.abs(dx);
+    const flick=absX>30&&Math.abs(vx)>0.35;
+    const pass=absX>55||flick;
+    if(!pass)return;
+
+    // 1. Stacked screens (Settings, Search, Notifications) -> swipe right to go back
+    if(STACKED.includes(tab)){
+      if(dx>40){
+        buzz(4);
+        tab=prevTab||"study";
+        restoreScroll=scrollMem[tab]??0;
+        const w=document.querySelector(".wrap");
+        if(w){w.classList.remove("slidein","slideout");void w.offsetWidth;w.classList.add("slideout")}
+        render();scrollTo(0,0);
+      }
+      return;
+    }
+
+    // 2. Subject page or note open -> swipe right to go back
+    if(tab==="study"&&studySub==="subj"&&(noteOpen||subjView)){
+      if(dx>40){
+        buzz(4);
+        if(noteOpen)noteOpen=null;
+        else subjView=null;
+        render();scrollTo(0,0);
+      }
+      return;
+    }
+
+    // 3. Main study week view: if swiping inside days area, switch days smoothly
+    const inDays=e.target?.closest?.("#days");
+    if(inDays&&tab==="study"&&studySub==="tt"){
+      let i=DAY_ORDER.indexOf(selDay)+(dx<0?1:-1);
+      if(i>6){week++;i=0}else if(i<0){week--;i=6}
+      buzz(3);
+      selDay=DAY_ORDER[i];openForm=null;openMenu=null;
+      render();
+      return;
+    }
+
+    // 4. Main Tab Navigation (Study <-> Tasks <-> Attendance)
+    if(ORDER.includes(tab)){
+      const curIdx=ORDER.indexOf(tab);
+      const nextIdx=curIdx+(dx<0?1:-1);
+      if(nextIdx>=0&&nextIdx<ORDER.length){
+        buzz(4);
+        scrollMem[tab]=scrollY;
+        tab=ORDER[nextIdx];
+        restoreScroll=scrollMem[tab]??0;
+        try{localStorage.setItem("sp-tab",tab)}catch(err){}
+        const w=document.querySelector(".wrap");
+        if(w){w.classList.remove("slidein","slideout");void w.offsetWidth;w.classList.add(dx<0?"slidein":"slideout")}
+        render();
+      }
+    }
+  };
+
+  addEventListener("touchend",onEnd,{passive:true});
+  addEventListener("touchcancel",onEnd,{passive:true});
+})();
 (()=>{
   const EDGE=42,THRESH=0.32,VEL=0.55;
   let sx=0,sy=0,dx=0,tracking=false,mode=null,target=null,t0=0,lastX=0,lastT=0,v=0;
