@@ -726,6 +726,7 @@ body[data-view="set"] .wrap,body[data-view="search"] .wrap,body[data-view="notif
 .slidein{animation:slideIn .3s cubic-bezier(.22,.9,.26,1)}
 .slideout{animation:slideOut .3s cubic-bezier(.22,.9,.26,1)}
 body,html,header,nav,main,article,button,label,span,b,small,em,h1,h2,h3,p,div{touch-action:pan-y;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.lstrip,.lstrip *,.strip,.strip *,.gavgs,.gavgs *{touch-action:pan-x pan-y}
 input,textarea{touch-action:auto;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 .ntext{-webkit-user-select:text;user-select:text}
 .wrap,.loglist{-webkit-overflow-scrolling:touch}
@@ -1046,6 +1047,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         <div class="seg" id="sdSeg"></div></div>
     </section>
   </div>
+  <footer hidden>
+  </footer>
+</div>
   <div class="sheetbg" id="sheetBg" hidden></div>
   <div class="sheet" id="sheet" hidden role="dialog" aria-label="Quick add"><span class="grabber"></span></div>
   <div class="viewer" id="viewer" hidden><span class="grabber light"></span><img id="viewImg" alt=""><div class="vbar"><button class="btn ghost" data-view-del>Delete photo</button><button class="btn" data-view-close>Close</button></div></div>
@@ -1059,13 +1063,13 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   <div class="toast" id="toast" hidden></div>
   <div class="confetti" id="confetti" aria-hidden="true"></div>
   <div class="focus" id="focus" hidden role="dialog" aria-label="Focus timer"><div class="fbox"></div></div>
-  <footer hidden>
-  </footer>
-</div>
 
 <script>
-const APP_VERSION="2.0";
+const APP_VERSION="2.1";
 const CHANGES=[
+  ["2.1","Fixed the Lessons left row (and the day picker) not scrolling by touch",
+        "Fixed the tab bar briefly moving or disappearing when swiping between tabs",
+        "Fixed the header flickering when scrolling hard or bouncing at the top"],
   ["2.0","A full weekly timetable with lessons-left tracking per subject, plus optional page counts and task titles",
         "Homework, exams and reminders — due dates, custom reminder times, a revision planner, and everything shown right on the day it belongs to",
         "Subject pages with notes, photos, and grades with averages",
@@ -1910,7 +1914,7 @@ document.addEventListener("touchend",e=>{
   }
   lastTouchEnd=now;
 },{passive:false});
-let lastCompact=false;
+let lastCompact=false,compactT=null,pendingCompact=null;
 let fabT=null,lastY=0,fabAcc=0;
 addEventListener("scroll",()=>{
   const y=Math.max(0,scrollY),f=document.getElementById("fab");
@@ -1919,9 +1923,14 @@ addEventListener("scroll",()=>{
     clearTimeout(fabT);fabT=setTimeout(()=>{f.classList.remove("tuck");fabAcc=0},900)}
   lastY=y;
   const room=document.documentElement.scrollHeight-innerHeight;
-  if(room<160){if(lastCompact){lastCompact=false;document.body.classList.remove("compact")}return}
+  if(room<160){pendingCompact=null;clearTimeout(compactT);if(lastCompact){lastCompact=false;document.body.classList.remove("compact")}return}
   const c=lastCompact?y>34:y>92;
-  if(c!==lastCompact){lastCompact=c;document.body.classList.toggle("compact",c)}},{passive:true});
+  if(c===lastCompact){pendingCompact=null;clearTimeout(compactT);return}
+  // debounce: only commit the change once the scroll position has held still for a moment,
+  // so a rubber-band bounce or a quick flick can't flip the header back and forth.
+  if(pendingCompact!==c){pendingCompact=c;clearTimeout(compactT);
+    compactT=setTimeout(()=>{if(pendingCompact===c){lastCompact=c;document.body.classList.toggle("compact",c)}pendingCompact=null},120)}
+},{passive:true});
 function normTab(){
   if(tab==="hw"||tab==="rem"||tab==="ex"){todoSub=tab==="rem"?"hw":tab;tab="todo"}
   if(todoSub==="rem")todoSub="hw";
