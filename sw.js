@@ -5,7 +5,14 @@ self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.add("./")).catch(() => {}));
   self.skipWaiting();
 });
-self.addEventListener("activate", e => { e.waitUntil(self.clients.claim()); });
+self.addEventListener("activate", e => {
+  // Remove any caches from older versions of this app so storage doesn't pile up.
+  e.waitUntil(
+    caches.keys()
+      .then(names => Promise.all(names.filter(n => n !== CACHE).map(n => caches.delete(n))))
+      .then(() => self.clients.claim())
+  );
+});
 
 self.addEventListener("fetch", e => {
   const req = e.request;
