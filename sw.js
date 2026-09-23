@@ -1,5 +1,5 @@
 // Study Planner offline support
-const CACHE = "study-planner-v1.3";
+const CACHE = "study-planner-v1.4";
 const PRECACHE = ["./", "/", "/index.html", "/manifest.json", "/icon-192.png"];
 
 self.addEventListener("message", e => {

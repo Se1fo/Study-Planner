@@ -654,7 +654,9 @@ header h1{overflow:hidden;text-overflow:ellipsis}
 .nacts2 .ghostlnk{background:transparent;border-color:transparent;color:var(--muted)}
 .nacts2 .updbtn{background:var(--ink);color:var(--bg);border-color:transparent}
 :root[data-style="luxe"] .nacts2 .updbtn{background:linear-gradient(160deg,var(--gold2),var(--gold));color:var(--goldink)}
-.ncell.n-dismiss{opacity:.4;transform:scale(.95);transition:opacity .2s,transform .2s}
+.ndismiss-btn{width:28px;height:28px;border-radius:50%;border:none;background:transparent;color:var(--muted);font-size:1.15rem;line-height:1;display:grid;place-items:center;padding:0;cursor:pointer;transition:background .15s,color .15s}
+.ndismiss-btn:active{background:var(--soft);color:var(--ink);transform:scale(.9)}
+.ncell.n-dismiss{opacity:0;transform:translateX(30px);transition:opacity .22s ease-out,transform .22s ease-out}
 .verrow{align-items:center;flex-wrap:wrap;gap:10px}
 .verrow .vleft{flex:1 1 auto;min-width:0}
 .vleft{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
@@ -1041,8 +1043,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 </div>
 
 <script>
-const APP_VERSION="1.3";
+const APP_VERSION="1.4";
 const CHANGES=[
+  ["1.4","Notification dismiss option: easily clear or swipe away any notification individually with an instant dismiss button",
+        "Fixed swipe collisions: swiping homework to tick/delete no longer accidentally switches tabs",
+        "Refined touch gesture separation: clear distinction between row swipe actions and page navigation"],
   ["1.3","Smooth universal swipe navigation: effortless flick/swipe across all main tabs, study days, subpages, and settings with no conflicts",
         "Redesigned Notifications center: organized cards with quick-actions for new updates, overdue and today's tasks, upcoming exams, and backup alerts",
         "Seamless direct routing: tap any notification to jump directly into your study, homework, or exam schedule with zero friction"],
@@ -1132,6 +1137,7 @@ function migrate(s){
       if(k.amt!==undefined){const x=dayData(s,iso(dateFor(0,+d)));if(!(k.id in x.amt))x.amt[k.id]=k.amt;delete k.amt}})});
   s.subjects=s.subjects||BASE_SUBJECTS.map(x=>({...x}));
   s.homework=s.homework||[];s.exams=s.exams||[];s.notes=s.notes||[];s.pages=s.pages||{};s.att=s.att||{};s.grades=s.grades||[];s.focusLog=s.focusLog||{};s.created=s.created||Date.now();s.reminders=s.reminders||[];
+  s.dismissed=s.dismissed||[];
   SUBJECTS=[...s.subjects,OTHER];
   if(!s.seenVersion&&s.editedAt)s.seenVersion="0.9";
   if(s.seenVersion&&!/^(1\.[0-9]+|0\.[1-9])$/.test(s.seenVersion))s.seenVersion="0.9";
@@ -1196,37 +1202,41 @@ let hwShowDone=false,remShowPast=false,addingSubj=false;
 let updateReady=false;
 function notifItems(){
   const out=[],n=nowStamp();
-  if(updateReady){
-    out.push({k:"upd",icon:"✨",t:"New version "+APP_VERSION+" is ready",s:"Tap update to load the latest features instantly.",act:"Update now",go:"update",cls:"n-upd",btnCls:"updbtn"});
+  const dis=new Set(state.dismissed||[]);
+  if(updateReady&&!dis.has("upd")){
+    out.push({k:"upd",icon:"✨",t:"New version "+APP_VERSION+" is ready",s:"Tap update to load the latest features instantly.",act:"Update now",go:"update",cls:"n-upd",btnCls:"updbtn",canDismiss:false});
   }
-  remDue().forEach(r=>out.push({k:"rem:"+r.id,icon:"🔔",t:r.text,s:relDay(r.date)+", "+r.time,act:"Done",go:"remseen:"+r.id}));
+  remDue().forEach(r=>{
+    if(!dis.has("rem:"+r.id))out.push({k:"rem:"+r.id,icon:"🔔",t:r.text,s:relDay(r.date)+", "+r.time,act:"Done",go:"remseen:"+r.id,canDismiss:true});
+  });
   const over=hwPending().filter(h=>h.due<todayIso);
-  if(over.length){
-    out.push({k:"hwover",icon:"⚠️",t:over.length===1?"1 homework task overdue":over.length+" homework tasks overdue",s:over.map(h=>h.text).slice(0,3).join(", "),act:"View tasks",go:"hw",cls:"n-crit"});
+  if(over.length&&!dis.has("hwover")){
+    out.push({k:"hwover",icon:"⚠️",t:over.length===1?"1 homework task overdue":over.length+" homework tasks overdue",s:over.map(h=>h.text).slice(0,3).join(", "),act:"View tasks",go:"hw",cls:"n-crit",canDismiss:true});
   }
   const todayHw=hwPending().filter(h=>h.due===todayIso);
-  if(todayHw.length){
-    out.push({k:"hwtoday",icon:"📝",t:todayHw.length===1?"1 homework due today":todayHw.length+" homework due today",s:todayHw.map(h=>h.text).slice(0,3).join(", "),act:"View tasks",go:"hw"});
+  if(todayHw.length&&!dis.has("hwtoday")){
+    out.push({k:"hwtoday",icon:"📝",t:todayHw.length===1?"1 homework due today":todayHw.length+" homework due today",s:todayHw.map(h=>h.text).slice(0,3).join(", "),act:"View tasks",go:"hw",canDismiss:true});
   }
   // Today's study tasks remaining
   const studyTasks=tasksOn(today,todayIso).filter(k=>!k.skipped);
   const studyLeft=studyTasks.filter(k=>!k.done);
-  if(studyTasks.length&&studyLeft.length){
+  if(studyTasks.length&&studyLeft.length&&!dis.has("studytoday")){
     const sNames=[...new Set(studyLeft.map(k=>subj(k.s).name))].slice(0,3).join(", ");
-    out.push({k:"studytoday",icon:"📚",t:studyLeft.length===1?"1 study task left today":studyLeft.length+" study tasks left today",s:sNames,act:"Study",go:"study"});
+    out.push({k:"studytoday",icon:"📚",t:studyLeft.length===1?"1 study task left today":studyLeft.length+" study tasks left today",s:sNames,act:"Study",go:"study",canDismiss:true});
   }
   state.exams.filter(x=>x.date>=todayIso&&daysUntil(x.date)<=5).forEach(x=>{
+    if(dis.has("ex:"+x.id))return;
     const du=daysUntil(x.date);
-    out.push({k:"ex:"+x.id,icon:"📅",t:x.title,s:subj(x.s).name+" · "+(du===0?"Exam is today":du===1?"Exam is tomorrow":"Exam in "+du+" days"),act:"Open",go:"ex",cls:du<=1?"n-crit":""});
+    out.push({k:"ex:"+x.id,icon:"📅",t:x.title,s:subj(x.s).name+" · "+(du===0?"Exam is today":du===1?"Exam is tomorrow":"Exam in "+du+" days"),act:"Open",go:"ex",cls:du<=1?"n-crit":"",canDismiss:true});
   });
   const L=state.settings.absLimit;
-  if(L!=null&&L!==""){
+  if(L!=null&&L!==""&&!dis.has("abs")){
     const from=state.settings.absFrom||"",used=attCounts(k=>!from||k>=from).a,rem=L-used;
-    if(rem<=2)out.push({k:"abs",icon:"🚫",t:rem<0?"Over your absence limit":rem===0?"No absences left":"Only "+rem+" absence"+(rem===1?"":"s")+" left",s:used+" of "+L+" used",act:"Attendance",go:"school",cls:"n-crit"});
+    if(rem<=2)out.push({k:"abs",icon:"🚫",t:rem<0?"Over your absence limit":rem===0?"No absences left":"Only "+rem+" absence"+(rem===1?"":"s")+" left",s:used+" of "+L+" used",act:"Attendance",go:"school",cls:"n-crit",canDismiss:true});
   }
   const last=state.lastBackup||state.created||Date.now(),snooze=state.bkSnooze||0;
-  if(Date.now()-last>7*864e5&&Date.now()>snooze&&(state.editedAt||0)>0){
-    out.push({k:"bk",icon:"🛟",t:"Back up your planner",s:"It's been a week. Keep your data safe with a quick file backup.",act:"Back up",go:"backup",extra:"Later|bklater"});
+  if(Date.now()-last>7*864e5&&Date.now()>snooze&&(state.editedAt||0)>0&&!dis.has("bk")){
+    out.push({k:"bk",icon:"🛟",t:"Back up your planner",s:"It's been a week. Keep your data safe with a quick file backup.",act:"Back up",go:"backup",extra:"Later|bklater",canDismiss:true});
   }
   return out;
 }
@@ -1234,9 +1244,21 @@ function renderBanner(){
   const items=notifItems(),dot=document.getElementById("notifDot");
   if(dot){dot.textContent=items.length||"";dot.hidden=!items.length}
   const el=document.getElementById("notifList");if(!el)return;
-  el.innerHTML=items.length?items.map(i=>`<div class="ncell ${i.cls||""}"><span class="nico">${i.icon}</span><div class="bt"><b>${esc(i.t)}</b><small>${esc(i.s)}</small></div>
-    <div class="nacts2">${i.extra?`<button class="lnk ghostlnk" data-ngo="${i.extra.split("|")[1]}">${esc(i.extra.split("|")[0])}</button>`:""}<button class="lnk ${i.btnCls||""}" data-ngo="${i.go}">${esc(i.act)}</button></div></div>`).join("")
-    :`<div class="emptybig">You're all caught up. No pending alerts.</div>`;
+  if(!items.length){
+    el.innerHTML=`<div class="emptybig">You're all caught up. No pending alerts.</div>`;
+    return;
+  }
+  const dismissableCount=items.filter(i=>i.canDismiss).length;
+  const headerHtml=dismissableCount>1?`<div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="lnk dim" data-ndismissall style="font-size:.82rem">Clear all alerts</button></div>`:""
+  el.innerHTML=headerHtml+items.map(i=>`<div class="ncell ${i.cls||""}" data-nid="${i.k}">
+    <span class="nico">${i.icon}</span>
+    <div class="bt"><b>${esc(i.t)}</b><small>${esc(i.s)}</small></div>
+    <div class="nacts2">
+      ${i.extra?`<button class="lnk ghostlnk" data-ngo="${i.extra.split("|")[1]}">${esc(i.extra.split("|")[0])}</button>`:""}
+      <button class="lnk ${i.btnCls||""}" data-ngo="${i.go}">${esc(i.act)}</button>
+      ${i.canDismiss?`<button class="ndismiss-btn" data-ndismiss="${i.k}" aria-label="Dismiss">×</button>`:""}
+    </div>
+  </div>`).join("");
 }
 
 function renderToday(){
@@ -1275,29 +1297,57 @@ function renderToday(){
 }
 
 let rowSwiping=false;
+let rowSwipeTimeout=null;
 function bindSwipeRows(root){
   root.querySelectorAll("li.hw:not([data-sw])").forEach(li=>{li.dataset.sw=1;
     let x0=0,y0=0,dx=0,axis="",on=false;
-    li.addEventListener("touchstart",e=>{if(e.target.closest("button,input,a"))return;
-      on=true;dx=0;axis="";x0=e.touches[0].clientX;y0=e.touches[0].clientY;li.style.transition="none"},{passive:true});
-    li.addEventListener("touchmove",e=>{if(!on)return;const t=e.touches[0],mx=t.clientX-x0,my=t.clientY-y0;
-      if(!axis){if(Math.abs(mx)<12&&Math.abs(my)<12)return;axis=Math.abs(mx)>Math.abs(my)*1.5?"x":"y";
-        if(axis==="y"){on=false;li.style.transform="";li.style.transition="";return}rowSwiping=true}
+    li.addEventListener("touchstart",e=>{
+      if(e.target.closest("button,input,a,.lnk"))return;
+      on=true;dx=0;axis="";rowSwiping=true;clearTimeout(rowSwipeTimeout);
+      x0=e.touches[0].clientX;y0=e.touches[0].clientY;li.style.transition="none"
+    },{passive:true});
+    li.addEventListener("touchmove",e=>{
+      if(!on)return;const t=e.touches[0],mx=t.clientX-x0,my=t.clientY-y0;
+      if(!axis){
+        if(Math.abs(mx)<8&&Math.abs(my)<8)return;
+        axis=Math.abs(mx)>Math.abs(my)*1.2?"x":"y";
+        if(axis==="y"){
+          on=false;li.style.transform="";li.style.transition="";
+          rowSwipeTimeout=setTimeout(()=>{rowSwiping=false},80);
+          return;
+        }
+        rowSwiping=true;
+      }
       if(axis!=="x")return;
       if(e.cancelable)e.preventDefault();
       dx=Math.max(-140,Math.min(140,mx));li.style.transform=`translateX(${dx}px)`;
       const wasDone=li.classList.contains("sw-done"),wasDel=li.classList.contains("sw-del");
       const isDone=dx>70,isDel=dx<-70;
       if((isDone&&!wasDone)||(isDel&&!wasDel))buzz(6);
-      li.classList.toggle("sw-done",isDone);li.classList.toggle("sw-del",isDel)},{passive:false});
-    const finish=()=>{if(!on&&!rowSwiping)return;on=false;li.style.transition="";li.style.transform="";li.classList.remove("sw-done","sw-del");
-      setTimeout(()=>rowSwiping=false,120);
-      const id=li.querySelector("[data-hwtick]")?.dataset.hwtick;if(!id||axis!=="x")return;
-      if(dx>70){const h=state.homework.find(h=>h.id===id);change(()=>{if(h){h.done=!h.done;const r=remFor(h.id);if(r&&h.done)r.seen=true}});alertMsg(h&&h.done?"Marked done ✓":"Marked not done")}
-      else if(dx<-70){snap();change(()=>{state.homework=state.homework.filter(h=>h.id!==id);state.reminders=state.reminders.filter(r=>!(r.link&&r.link.id===id))});undoToast("Homework deleted")}
-      dx=0};
+      li.classList.toggle("sw-done",isDone);li.classList.toggle("sw-del",isDel)
+    },{passive:false});
+    const finish=()=>{
+      if(!on&&!rowSwiping)return;
+      on=false;li.style.transition="";li.style.transform="";li.classList.remove("sw-done","sw-del");
+      clearTimeout(rowSwipeTimeout);
+      rowSwipeTimeout=setTimeout(()=>{rowSwiping=false},250);
+      const id=li.querySelector("[data-hwtick]")?.dataset.hwtick;
+      if(!id||axis!=="x")return;
+      if(dx>70){
+        const h=state.homework.find(h=>h.id===id);
+        change(()=>{if(h){h.done=!h.done;const r=remFor(h.id);if(r&&h.done)r.seen=true}});
+        alertMsg(h&&h.done?"Marked done ✓":"Marked not done");
+      }else if(dx<-70){
+        snap();
+        change(()=>{state.homework=state.homework.filter(h=>h.id!==id);state.reminders=state.reminders.filter(r=>!(r.link&&r.link.id===id))});
+        undoToast("Homework deleted");
+      }
+      dx=0;
+    };
     li.addEventListener("touchend",finish,{passive:true});
-    li.addEventListener("touchcancel",finish,{passive:true})})}
+    li.addEventListener("touchcancel",finish,{passive:true});
+  });
+}
 function renderHomework(){
   const pend=hwPending().sort((a,b)=>a.due<b.due?-1:a.due>b.due?1:0);
   const done=state.homework.filter(h=>h.done);
@@ -1829,9 +1879,30 @@ function change(fn){fn();state.editedAt=Date.now();save();render()}
 function prune(key){const x=state.dates[key];if(x&&!x.noPages&&!x.skip.length&&!x.extra.length&&!Object.keys(x.done).length&&!Object.keys(x.amt||{}).length&&!Object.keys(x.pg||{}).length)delete state.dates[key]}
 
 document.addEventListener("click",e=>{
-  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-pdel],[data-optstyle],[data-optpos],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-ngo],[data-focusfield],[data-title],[data-titlesave],[data-titlecancel],[data-pgtoggle],[data-classopen],[data-notesopen],[data-addrem],[data-remedit],[data-remsave],[data-remcancel],[data-revplan],[data-qrem],[data-hwpost],[data-hwfor],[data-sub],[data-ssub],[data-lsgo],[data-newl],[data-bknow],[data-bklater],[data-exopen],[data-exdel],#exAdd,[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#remAdd,#reset");
+  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-pdel],[data-optstyle],[data-optpos],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-ngo],[data-ndismiss],[data-ndismissall],[data-focusfield],[data-title],[data-titlesave],[data-titlecancel],[data-pgtoggle],[data-classopen],[data-notesopen],[data-addrem],[data-remedit],[data-remsave],[data-remcancel],[data-revplan],[data-qrem],[data-hwpost],[data-hwfor],[data-sub],[data-ssub],[data-lsgo],[data-newl],[data-bknow],[data-bklater],[data-exopen],[data-exdel],#exAdd,[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#remAdd,#reset");
   if(!b)return;
   const ds=b.dataset;
+  if(ds.ndismiss!==undefined){
+    const k=ds.ndismiss;
+    const card=b.closest(".ncell");
+    if(card)card.classList.add("n-dismiss");
+    setTimeout(()=>{
+      state.dismissed=state.dismissed||[];
+      if(!state.dismissed.includes(k))state.dismissed.push(k);
+      save();
+      renderBanner();
+    },180);
+    return;
+  }
+  if(ds.ndismissall!==undefined){
+    const cur=notifItems();
+    state.dismissed=state.dismissed||[];
+    cur.forEach(i=>{if(i.canDismiss&&!state.dismissed.includes(i.k))state.dismissed.push(i.k)});
+    save();
+    renderBanner();
+    alertMsg("Alerts cleared");
+    return;
+  }
   if(ds.tab){buzz(4);if(ds.tab==="study"&&tab==="study"&&studySub==="subj"){subjView=null;noteOpen=null}
     if(ds.tab!=="back"&&scrollMem[ds.tab]!=null&&ds.tab!==tab)restoreScroll=scrollMem[ds.tab];
     if(ds.tab==="back"&&scrollMem[prevTab]!=null)restoreScroll=scrollMem[prevTab];if(ds.tab==="back"){tab=prevTab||"week"}else{if(tab!=="set"&&tab!=="search"&&tab!=="notif")prevTab=tab;tab=ds.tab}
@@ -2128,7 +2199,7 @@ document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;
     const target=e.target;
     const overlay=!document.getElementById("sheet").hidden||!document.getElementById("viewer").hidden||!document.getElementById("focus").hidden;
     if(overlay||rowSwiping)return;
-    if(target.closest("input,textarea,select,.numin,.amtin,.pgin,.cpick,button,.tmenu,.cald,.sheet,.viewer"))return;
+    if(target.closest("li.hw,li.task,li.exam,li.rem,input,textarea,select,.numin,.amtin,.pgin,.cpick,button,.tmenu,.cald,.sheet,.viewer"))return;
 
     // Check if starting near the left edge for swipe-back navigation
     const isEdgeBack=t.clientX<46&&(noteOpen||subjView||STACKED.includes(tab));
