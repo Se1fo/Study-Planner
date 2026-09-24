@@ -966,6 +966,16 @@ ul.tickets>li.tmenu{padding:0 4px 2px;margin-top:-1px}
 .setrow .seg:has([data-optopen]) button{font-size:.74rem}
 .day .dayadds{justify-content:flex-end}
 @media(max-width:600px){.day{padding-left:12px;padding-right:12px}}
+/* ---- drag to reorder ---- */
+ul.tickets>li.tk,.dsec>h3{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.dsec>h3{cursor:grab}
+@media(hover:hover){ul.tickets>li.tk{cursor:grab}}
+ul.tickets>li.tk.dragging,.dsec.dragging{position:relative;z-index:20;opacity:.85;box-shadow:0 10px 28px rgba(0,0,0,.28);transition:none;cursor:grabbing}
+ul.tickets>li.tk.drag-over-top{box-shadow:0 -3px 0 var(--prog)}
+ul.tickets>li.tk.drag-over-bottom{box-shadow:0 3px 0 var(--prog)}
+.dsec.drag-over-top{box-shadow:0 -3px 0 var(--prog)}
+.dsec.drag-over-bottom{box-shadow:0 3px 0 var(--prog)}
+.dsec{border-radius:10px}
 </style>
 </head>
 <body>
@@ -1165,8 +1175,14 @@ ul.tickets>li.tmenu{padding:0 4px 2px;margin-top:-1px}
   <div class="focus" id="focus" hidden role="dialog" aria-label="Focus timer"><div class="fbox"></div></div>
 
 <script>
-const APP_VERSION="2.7";
+const APP_VERSION="2.8";
+// Goes up with every published change, including small tweaks that keep the same version.
+// The update check compares this, so tweaks still reach installed apps.
+const APP_BUILD=1;
 const CHANGES=[
+  ["2.8","Hold and drag anything on a day card to reorder it: lessons, homework, exams and reminders",
+        "Hold a section title to move the whole section; the order is kept for every day",
+        "Small fixes now arrive as updates without changing the version number"],
   ["2.7","Tomorrow's plan now sits near the top of today's card",
         "Day cards give tickets a little more room on phones"],
   ["2.6","Subjects moved to a new Lessons tab in Tasks, next to Homework and Exams",
@@ -1333,7 +1349,7 @@ function notifItems(){
   const out=[],n=nowStamp();
   const dis=new Set(state.dismissed||[]);
   if(updateReady&&!dis.has("upd")){
-    out.push({k:"upd",icon:"✨",t:"New version"+(newVersion?" "+newVersion:"")+" is ready",s:"Tap Update now to install it. Your data stays as it is.",act:"Update now",go:"update",cls:"n-upd",btnCls:"updbtn",canDismiss:false});
+    out.push({k:"upd",icon:"✨",t:newVersion?"Version "+newVersion+" is ready":"An update is ready",s:"Tap Update now to install it. Your data stays as it is.",act:"Update now",go:"update",cls:"n-upd",btnCls:"updbtn",canDismiss:false});
   }
   remDue().forEach(r=>{
     if(!dis.has("rem:"+r.id))out.push({k:"rem:"+r.id,icon:"🔔",t:r.text,s:relDay(r.date)+", "+r.time,act:"Done",go:"remseen:"+r.id,canDismiss:true});
@@ -1391,15 +1407,15 @@ function renderBanner(){
 }
 
 // ---- tickets: one look for lessons, homework, exams and reminders ----
-function hwTicket(h){const sj=subj(h.s),over=h.due<todayIso&&!h.done;return `<li class="task tk hw ${h.done?"done":""}" style="--c:${col(sj)}">
+function hwTicket(h){const sj=subj(h.s),over=h.due<todayIso&&!h.done;return `<li class="task tk hw ${h.done?"done":""}" style="--c:${col(sj)}" data-oid="${h.id}">
     <input type="checkbox" class="chk" data-hwtick="${h.id}" ${h.done?"checked":""} aria-label="Done: ${esc(h.text)}">
     <div class="tt"><b>${esc(h.text)}</b><small class="tsub">${esc(sj.name)} · ${over?`<span class="red">overdue</span>`:"due "+relDay(h.due).toLowerCase()}</small>${h.done?"":`<div class="itrow">${remChip(h,"hw")}${h.due<=todayIso?`<button class="lnk postpone" data-hwpost="${h.id}">+1 day</button>`:""}</div>`}</div>
     <button class="del" data-hwdel="${h.id}" aria-label="Delete">×</button></li>`}
-function examTicket(x){const sj=subj(x.s),n=daysUntil(x.date);return `<li class="task tk exam" style="--c:${col(sj)}">
+function examTicket(x){const sj=subj(x.s),n=daysUntil(x.date);return `<li class="task tk exam" style="--c:${col(sj)}" data-oid="${x.id}">
     <span class="tico ${n<=3?"soon":""}" title="${n===0?"Today":n+" days"}">${n===0?"!":n}</span>
     <div class="tt"><b>${esc(x.title)}</b><small class="tsub">${esc(sj.name)} · ${n===0?"today":n===1?"tomorrow":"in "+n+" days"}</small><div class="itrow">${remChip(x,"ex")}${n>=1?`<button class="lnk postpone" data-revplan="${x.id}">${revCount(x)?"📚 "+revCount(x)+" revision days":"📚 Plan revision"}</button>`:""}</div></div>
     <button class="del" data-exdel="${x.id}" aria-label="Delete exam">×</button></li>`}
-function remTicket(r){const past=(r.date+"T"+r.time)<=nowStamp();return `<li class="task tk rem ${past?"done":""}" style="--c:var(--prog)">
+function remTicket(r){const past=(r.date+"T"+r.time)<=nowStamp();return `<li class="task tk rem ${past?"done":""}" style="--c:var(--prog)" data-oid="${r.id}">
     <span class="tico">🔔</span>
     <div class="tt"><b>${esc(r.text)}</b><small class="tsub">${relDay(r.date)} · ${t12(r.time)}</small></div>${past?"":`<a class="lnk cal" href="${icsFor(r)}" download="reminder.ics" aria-label="Add to calendar">📅</a>`}<button class="del" data-remdel="${r.id}" aria-label="Delete">×</button></li>`}
 function tickets(items){return `<ul class="tickets">${items.join("")}</ul>`}
@@ -1415,7 +1431,8 @@ function bindSwipeRows(root){
       x0=e.touches[0].clientX;y0=e.touches[0].clientY;li.style.transition="none"
     },{passive:true});
     li.addEventListener("touchmove",e=>{
-      if(!on)return;const t=e.touches[0],mx=t.clientX-x0,my=t.clientY-y0;
+      if(!on)return;if(isTaskDragging){on=false;li.style.transform="";li.classList.remove("sw-done","sw-del");return}
+      const t=e.touches[0],mx=t.clientX-x0,my=t.clientY-y0;
       if(!axis){
         if(Math.abs(mx)<8&&Math.abs(my)<8)return;
         axis=Math.abs(mx)>Math.abs(my)*1.2?"x":"y";
@@ -1581,16 +1598,22 @@ function renderLStrip(){
 function gradeAvg(sid){const g=(state.grades||[]).filter(x=>x.s===sid&&x.max>0);if(!g.length)return null;
   return Math.round(g.reduce((a,x)=>a+x.score/x.max*100,0)/g.length*10)/10}
 // Homework, exams and reminders for one date, as ticket sections. Today also picks up overdue homework.
+const SEC_IDS=["les","hw","ex","rem"];
+function secOrder(){const o=(state.settings.secOrder||[]).filter(k=>SEC_IDS.includes(k));return [...o,...SEC_IDS.filter(k=>!o.includes(k))]}
+// Sort by the order saved for this date; anything not in it keeps its natural place after.
+function byDayOrder(key,list){const ord=peek(key).order||[];if(!ord.length)return list;
+  return list.map((it,i)=>[it,ord.indexOf(it.id),i]).sort((a,b)=>(a[1]<0?1e9+a[2]:a[1])-(b[1]<0?1e9+b[2]:b[1])).map(x=>x[0])}
+// Homework, exams and reminders for one date as ticket sections. Today also picks up overdue homework.
 function daySections(key){
-  const isToday=key===todayIso,out=[];
-  const hw=state.homework.filter(h=>h.due===key||(isToday&&!h.done&&h.due<todayIso)).sort((a,b)=>(a.done-b.done)||(a.due<b.due?-1:1));
-  if(hw.length)out.push(dsec("Homework",hw.filter(h=>!h.done).length,hw.length,tickets(hw.map(hwTicket))));
-  const ex=state.exams.filter(x=>x.date===key);
-  if(ex.length)out.push(dsec("Exams",null,ex.length,tickets(ex.map(examTicket))));
-  const rm=state.reminders.filter(r=>r.date===key&&!r.link).sort((a,b)=>a.time<b.time?-1:1);
-  if(rm.length)out.push(dsec("Reminders",null,rm.length,tickets(rm.map(remTicket))));
-  return out.join("")}
-function dsec(name,left,total,body){return `<section class="dsec"><h3>${name}${left!=null&&total?`<span>${left?left+" left":"all done"}</span>`:""}</h3>${body}</section>`}
+  const isToday=key===todayIso,out={};
+  const hw=byDayOrder(key,state.homework.filter(h=>h.due===key||(isToday&&!h.done&&h.due<todayIso)).sort((a,b)=>(a.done-b.done)||(a.due<b.due?-1:1)));
+  if(hw.length)out.hw=dsec("hw","Homework",hw.filter(h=>!h.done).length,hw.length,tickets(hw.map(hwTicket)));
+  const ex=byDayOrder(key,state.exams.filter(x=>x.date===key));
+  if(ex.length)out.ex=dsec("ex","Exams",null,ex.length,tickets(ex.map(examTicket)));
+  const rm=byDayOrder(key,state.reminders.filter(r=>r.date===key&&!r.link).sort((a,b)=>a.time<b.time?-1:1));
+  if(rm.length)out.rem=dsec("rem","Reminders",null,rm.length,tickets(rm.map(remTicket)));
+  return out}
+function dsec(id,name,left,total,body){return `<section class="dsec" data-oid="${id}"><h3 title="Hold to move this section">${name}${left!=null&&total?`<span>${left?left+" left":"all done"}</span>`:""}</h3>${body}</section>`}
 // The summary, class shortcuts and tomorrow line that used to live in the card above the week.
 function todayExtras(){
   const tasks=tasksOn(today,todayIso).filter(k=>!k.skipped),left=tasks.filter(k=>!k.done).length;
@@ -1881,129 +1904,48 @@ function afterRender(){
   if(selDay!==lastSel){const d=document.querySelector(".day.sel");if(d&&lastSel!==null)d.classList.add("enter");
     document.querySelector(".strip button.sel")?.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});lastSel=selDay}
   if(justTicked){const el=document.querySelector(`[data-tick^="${justTicked}:"]`);if(el)el.closest("li").classList.add("pop");justTicked=null}
-  bindTaskReorder();
+  bindDaySortables();
   requestAnimationFrame(moveInd);
   if(restoreScroll!=null){const y=restoreScroll;restoreScroll=null;requestAnimationFrame(()=>scrollTo(0,y))}
 }
 
 let isTaskDragging=false;
-function bindTaskReorder(){
-  document.querySelectorAll("ul.task-list").forEach(ul=>{
-    const dkey=ul.dataset.dkey;
-    if(!dkey)return;
-    const items=[...ul.children].filter(li=>li.classList.contains("task")&&li.dataset.tid);
-    if(items.length<=1)return;
-
-    items.forEach(li=>{
-      const grip=li.querySelector(".drag-grip");
-
-      let startY=0,initialY=0,itemH=0,dragged=false,longPressTimer=null,currOver=null,placeAfter=false;
-
-      const cleanup=()=>{
-        clearTimeout(longPressTimer);
-        isTaskDragging=false;
-        li.classList.remove("dragging");
-        li.style.transform="";
-        li.style.zIndex="";
-        li.style.position="";
-        li.style.width="";
-        ul.querySelectorAll(".task").forEach(t=>t.classList.remove("drag-over-top","drag-over-bottom"));
-        window.removeEventListener("touchmove",onTouchMove);
-        window.removeEventListener("touchend",onTouchEnd);
-        window.removeEventListener("touchcancel",onTouchEnd);
-      };
-
-      const onTouchMove=e=>{
-        if(!dragged)return;
-        if(e.cancelable)e.preventDefault();
-        const touch=e.touches[0];
-        const curY=touch.clientY;
-        const dy=curY-startY;
-        li.style.transform=`translateY(${dy}px)`;
-
-        // Find which item we are hovering over
-        ul.querySelectorAll(".task").forEach(t=>t.classList.remove("drag-over-top","drag-over-bottom"));
-        currOver=null;
-        const elUnder=document.elementFromPoint(touch.clientX,curY);
-        const overTask=elUnder?elUnder.closest("li.task"):null;
-        if(overTask&&overTask!==li&&ul.contains(overTask)&&overTask.dataset.tid){
-          currOver=overTask;
-          const rect=overTask.getBoundingClientRect();
-          placeAfter=curY>(rect.top+rect.height/2);
-          overTask.classList.add(placeAfter?"drag-over-bottom":"drag-over-top");
-        }
-      };
-
-      const onTouchEnd=e=>{
-        if(dragged&&currOver&&currOver!==li){
-          const fromId=li.dataset.tid;
-          const toId=currOver.dataset.tid;
-          const d=new Date(dkey+"T12:00:00").getDay();
-          const tasks=tasksOn(d,dkey);
-          const ids=tasks.map(k=>k.id);
-          const fromIdx=ids.indexOf(fromId);
-          if(fromIdx!==-1){
-            ids.splice(fromIdx,1);
-            let toIdx=ids.indexOf(toId);
-            if(placeAfter)toIdx++;
-            ids.splice(toIdx,0,fromId);
-            buzz(8);
-            cleanup();
-            change(()=>{
-              const x=dayData(state,dkey);
-              x.order=ids;
-            });
-            return;
-          }
-        }
-        cleanup();
-      };
-
-      const startDrag=touch=>{
-        isTaskDragging=true;
-        dragged=true;
-        startY=touch.clientY;
-        const rect=li.getBoundingClientRect();
-        itemH=rect.height;
-        li.classList.add("dragging");
-        li.style.zIndex="15";
-        buzz(12);
-        window.addEventListener("touchmove",onTouchMove,{passive:false});
-        window.addEventListener("touchend",onTouchEnd,{passive:false});
-        window.addEventListener("touchcancel",onTouchEnd,{passive:false});
-      };
-
-      if(grip)grip.addEventListener("touchstart",e=>{
-        if(e.touches.length!==1)return;
-        const touch=e.touches[0];
-        startDrag(touch);
-      },{passive:true});
-
-      // Also support long-press on the task row itself (outside inputs/buttons/checkboxes)
-      li.addEventListener("touchstart",e=>{
-        if(e.touches.length!==1)return;
-        if(e.target.closest("button,input,a,.lnk,.dots-btn,.chk,.amtin,.pgin,.drag-grip"))return;
-        const touch=e.touches[0];
-        longPressTimer=setTimeout(()=>{
-          startDrag(touch);
-        },380);
-      },{passive:true});
-
-      li.addEventListener("touchmove",e=>{
-        if(!dragged&&longPressTimer){
-          const t=e.touches[0];
-          if(Math.abs(t.clientY-startY)>8)clearTimeout(longPressTimer);
-        }
-      },{passive:true});
-
-      li.addEventListener("touchend",()=>{
-        clearTimeout(longPressTimer);
-      },{passive:true});
-
-      li.addEventListener("touchcancel",()=>{
-        clearTimeout(longPressTimer);
-      },{passive:true});
-    });
+const NO_DRAG="button,input,select,textarea,a,label,.chk,.amtin,.remchip,.remedit";
+// Make the direct children of `list` that match itemSel draggable. handleSel limits where a drag can start.
+function sortable(list,itemSel,handleSel,onDrop){
+  const items=()=>[...list.children].filter(el=>el.matches(itemSel));
+  items().forEach(el=>{
+    if(el.dataset.sortOn)return;el.dataset.sortOn=1;
+    const handle=handleSel?el.querySelector(":scope>"+handleSel):el;if(!handle)return;
+    let timer=null,x0=0,y0=0,dragging=false,over=null,after=false;
+    const clear=()=>items().forEach(t=>t.classList.remove("drag-over-top","drag-over-bottom"));
+    const begin=()=>{dragging=true;isTaskDragging=true;openMenu=null;el.classList.add("dragging");buzz(12)};
+    const move=(x,y,e)=>{if(e.cancelable)e.preventDefault();el.style.transform=`translateY(${y-y0}px)`;clear();over=null;
+      el.style.pointerEvents="none";const hit=document.elementFromPoint(x,y);el.style.pointerEvents="";
+      const t=hit&&hit.closest(itemSel);
+      if(t&&t!==el&&t.parentElement===list){over=t;const r=t.getBoundingClientRect();after=y>r.top+r.height/2;t.classList.add(after?"drag-over-bottom":"drag-over-top")}};
+    const end=()=>{clearTimeout(timer);timer=null;if(!dragging)return;dragging=false;
+      el.classList.remove("dragging");el.style.transform="";clear();setTimeout(()=>{isTaskDragging=false},60);
+      if(over){const ids=items().map(t=>t.dataset.oid).filter(id=>id!==el.dataset.oid);let i=ids.indexOf(over.dataset.oid);if(after)i++;
+        ids.splice(i,0,el.dataset.oid);over=null;buzz(8);onDrop(ids)}};
+    handle.addEventListener("touchstart",e=>{if(e.touches.length!==1||e.target.closest(NO_DRAG))return;
+      const t=e.touches[0];x0=t.clientX;y0=t.clientY;clearTimeout(timer);timer=setTimeout(begin,380)},{passive:true});
+    handle.addEventListener("touchmove",e=>{const t=e.touches[0];
+      if(!dragging){if(timer&&(Math.abs(t.clientY-y0)>8||Math.abs(t.clientX-x0)>8)){clearTimeout(timer);timer=null}return}
+      move(t.clientX,t.clientY,e)},{passive:false});
+    handle.addEventListener("touchend",end);handle.addEventListener("touchcancel",end);
+    handle.addEventListener("mousedown",e=>{if(e.button!==0||e.target.closest(NO_DRAG))return;x0=e.clientX;y0=e.clientY;
+      const mm=ev=>{if(!dragging){if(Math.abs(ev.clientY-y0)<6)return;begin()}move(ev.clientX,ev.clientY,ev)};
+      const mu=()=>{removeEventListener("mousemove",mm);removeEventListener("mouseup",mu);end()};
+      addEventListener("mousemove",mm);addEventListener("mouseup",mu)});
+  });
+}
+function bindDaySortables(){
+  document.querySelectorAll("#days .dsecs").forEach(box=>{
+    const key=box.dataset.dkey;
+    sortable(box,".dsec","h3",ids=>change(()=>{state.settings.secOrder=ids}));
+    box.querySelectorAll(".dsec>ul.tickets").forEach(ul=>sortable(ul,"li.tk",null,ids=>change(()=>{
+      const x=dayData(state,key);x.order=[...(x.order||[]).filter(i=>!ids.includes(i)),...ids]})));
   });
 }
 let restoreScroll=null;
@@ -2104,8 +2046,8 @@ function render(){
     if(isComplete(d,key)&&!expanded.has(key))return `<article class="day donecard ${d===selDay?"sel":""}">
       <div class="dayhead"><h2>${DAY_NAMES[d]} <span class="dnum">${dLabel(dt)}</span></h2><span class="okmark" aria-label="Done">✓</span></div>
       <div class="donerow"><span>Day done</span><button class="lnk" data-expand="${key}">Show</button></div></article>`;
-    const hasLessons=tasks.filter(k=>!k.skipped).length>0,secs=daySections(key),tx=isToday?todayExtras():null;
-    let list=hasLessons?`<section class="dsec"><h3>Lessons<span>${(n=>n?n+" left":"all done")(tasks.filter(k=>!k.skipped&&!k.done).length)}</span></h3><ul class="task-list tickets" data-dkey="${key}" data-wd="${d}">${tasks.map((k,idx,arr)=>{const s=subj(k.s);
+    const hasLessons=tasks.filter(k=>!k.skipped).length>0,secMap=daySections(key),tx=isToday?todayExtras():null;let copyRow="";
+    let list=hasLessons?`<section class="dsec" data-oid="les"><h3 title="Hold to move this section">Lessons<span>${(n=>n?n+" left":"all done")(tasks.filter(k=>!k.skipped&&!k.done).length)}</span></h3><ul class="task-list tickets" data-dkey="${key}" data-wd="${d}">${tasks.map((k,idx,arr)=>{const s=subj(k.s);
       if(k.skipped)return "";
       const tag=k.kind==="fixed"?"":k.label?esc(k.label):"This day only";
       const mk=key+":"+k.id,open=openMenu===mk;
@@ -2125,7 +2067,7 @@ function render(){
         <span class="chk off"></span>
         <div class="tt"><input class="ttl" id="ttlIn" value="${esc(k.title||"")}" placeholder="Title for ${esc(s.name)}" maxlength="40"></div>
         <button class="btn sm" data-titlesave="${key}:${k.id}:${k.kind}:${d}">Save</button><button class="lnk" data-titlecancel>Cancel</button></li>`;
-      return `<li class="task tk les ${k.done?"done":""}" style="--c:${col(s)}" data-tid="${k.id}">
+      return `<li class="task tk les ${k.done?"done":""}" style="--c:${col(s)}" data-tid="${k.id}" data-oid="${k.id}">
         <input type="checkbox" class="chk" data-tick="${key}:${k.id}:${k.s}:${k.amt||0}:${k.pg||0}" ${k.done?"checked":""} aria-label="Done: ${s.name}">
         <div class="tt"><b>${s.name}${k.title?` <span class="ttlx">${esc(k.title)}</span>`:""}</b>${tag?`<small class="tsub">${tag}</small>`:""}<div class="itrow amtrow"><input class="amtin" data-amt="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.amt??""}" placeholder="–" aria-label="${s.name} lessons on ${dLabel(dt)}"> <span class="amtl">lessons</span>${peek(key).noPages?"":`<input class="amtin" data-pg="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.pg??""}" placeholder="–" aria-label="${s.name} pages on ${dLabel(dt)}"> <span class="amtl">pages</span>`}</div></div>${acts}</li>${menu}`}).join("")}</ul></section>`
       :"";
@@ -2146,14 +2088,14 @@ function render(){
       </div>`:"";
       const lastKey=iso(dateFor(week-1,d));
       const hasLastWeek=!!state.days[d]&&state.days[d].tasks&&state.days[d].tasks.length;
-      if(!tasksOn(d,key).length&&hasLastWeek&&week>0&&openForm!==d)list+=`<div class="actrow"><button class="lnk" data-copyweek="${d}">Same as last week</button></div>`;
+      if(!tasksOn(d,key).length&&hasLastWeek&&week>0&&openForm!==d)copyRow=`<div class="actrow"><button class="lnk" data-copyweek="${d}">Same as last week</button></div>`;
     return `<article class="day ${d===selDay?"sel":""} ${isToday?"today":""}">
       <div class="dayhead"><h2>${DAY_NAMES[d]} <span class="dnum">${dLabel(dt)}</span></h2>${isToday?'<button class="focusbtn" id="focusStart" aria-label="Start focus timer">⏱ Focus</button>':""}</div>
       ${isToday?tx.sum+tx.tmr:""}
       ${day.session||classOpen===d?`<label class="session slim"><span>Class</span><input data-session="${d}" value="${esc(day.session)}" placeholder="Class name"></label>`:""}
       ${isToday?tx.cls:""}
       ${expanded.has(key)?`<button class="lnk hide" data-expand="${key}">Hide finished day</button>`:""}
-      ${list}${secs}${!hasLessons&&!secs?`<div class="empty">Nothing planned. Free day.</div>`:""}
+      ${(()=>{secMap.les=list;const body=secOrder().map(k=>secMap[k]||"").join("");return body?`<div class="dsecs" data-dkey="${key}">${body}</div>`:`<div class="empty">Nothing planned. Free day.</div>`})()}${copyRow}
 
       ${openForm===d?`<div class="add">${form}</div>`:""}
       ${openForm===d?"":`<div class="dayadds"><button data-open="${d}">＋ Add</button>${day.session||classOpen===d?"":`<button data-classopen="${d}">＋ Class</button>`}</div>`}</article>`}).join("");
@@ -2164,7 +2106,7 @@ function render(){
 function save(){state.updatedAt=Date.now();try{localStorage.setItem("study-planner",JSON.stringify(state))}catch(e){}}
 function change(fn){fn();state.editedAt=Date.now();save();render()}
 function persistStorage(){if(state.persisted)return;navigator.storage.persist().then(granted=>{state.persisted=granted;save();renderSettingsPERSIST()})}
-function prune(key){const x=state.dates[key];if(x&&!x.noPages&&!x.skip.length&&!x.extra.length&&!Object.keys(x.done).length&&!Object.keys(x.amt||{}).length&&!Object.keys(x.pg||{}).length)delete state.dates[key]}
+function prune(key){const x=state.dates[key];if(x&&!x.noPages&&!x.skip.length&&!x.extra.length&&!Object.keys(x.done).length&&!Object.keys(x.amt||{}).length&&!Object.keys(x.pg||{}).length&&!(x.order&&x.order.length))delete state.dates[key]}
 
 document.addEventListener("click",e=>{
   const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-reorder],[data-pdel],[data-optstyle],[data-optpos],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-ngo],[data-ndismiss],[data-ndismissall],[data-focusfield],[data-title],[data-titlesave],[data-titlecancel],[data-pgtoggle],[data-classopen],[data-notesopen],[data-addrem],[data-remedit],[data-remsave],[data-remcancel],[data-revplan],[data-qrem],[data-hwpost],[data-hwfor],[data-sub],[data-ssub],[data-lsgo],[data-newl],[data-bknow],[data-bklater],[data-exopen],[data-exdel],#exAdd,[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#remAdd,#reset");
@@ -2298,7 +2240,7 @@ document.addEventListener("click",e=>{
         ids.splice(targetIdx,0,id);
         change(()=>{
           const x=dayData(state,key);
-          x.order=ids;
+          x.order=[...(x.order||[]).filter(i=>!ids.includes(i)),...ids];
         });
         buzz(4);
       }
@@ -2534,7 +2476,7 @@ document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;
     const target=e.target;
     const overlay=!document.getElementById("sheet").hidden||!document.getElementById("viewer").hidden||!document.getElementById("focus").hidden;
     if(overlay||rowSwiping||isTaskDragging)return;
-    if(target.closest("li.hw,li.task,li.exam,li.rem,.drag-grip,input,textarea,select,.numin,.amtin,.pgin,.cpick,button,.tmenu,.cald,.sheet,.viewer,.lstrip,.strip,.gavgs"))return;
+    if(target.closest("li.hw,li.task,li.exam,li.rem,.dsec>h3,.drag-grip,input,textarea,select,.numin,.amtin,.pgin,.cpick,button,.tmenu,.cald,.sheet,.viewer,.lstrip,.strip,.gavgs"))return;
 
     // Check if starting near the left edge for swipe-back navigation
     const isEdgeBack=t.clientX<46&&(noteOpen||subjView||STACKED.includes(tab));
@@ -2767,15 +2709,17 @@ async function checkUpdate(manual){const b=document.getElementById("upd"),st=doc
     if(swReg){try{await withTimeout(swReg.update(),8000)}catch(err){}}
     const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),8000);
     const r=await fetch(location.pathname+"?check="+Date.now(),{cache:"no-store",signal:ctl.signal});clearTimeout(to);
-    const t=await r.text();const m=t.match(/const APP_VERSION="([^"]+)"/);
+    const t=await r.text(),m=t.match(/const APP_VERSION="([^"]+)"/),mb=t.match(/const APP_BUILD=(\d+)/);
     lastUpdCheck=Date.now();
-    if(m&&verNewer(m[1],APP_VERSION)){
-      newVersion=m[1];updateReady=true;renderBanner();
-      b.textContent="Update";st.textContent="v"+m[1]+" available";
-      if(manual)alertMsg("New update (v"+m[1]+") is ready. Tap Update to install.");
+    const sameVer=m&&m[1]===APP_VERSION,newerBuild=sameVer&&mb&&+mb[1]>APP_BUILD;
+    if(m&&(verNewer(m[1],APP_VERSION)||newerBuild)){
+      const tag=sameVer?m[1]+"."+mb[1]:m[1];
+      newVersion=sameVer?null:m[1];updateReady=true;renderBanner();
+      b.textContent="Update";st.textContent=sameVer?"Update available":"v"+m[1]+" available";
+      if(manual)alertMsg(sameVer?"An update is ready. Tap Update to install.":"New update (v"+m[1]+") is ready. Tap Update to install.");
       // Auto-update on: install right away, unless the user is in the middle of typing or an open sheet.
       else if(state.settings.autoUpdate===true&&!document.querySelector("input:focus,textarea:focus")&&document.getElementById("sheet").hidden)hardReload();
-      else if(announcedVersion!==m[1]){announcedVersion=m[1];alertMsg("Version "+m[1]+" is ready. Open 🔔 to update.")}
+      else if(announcedVersion!==tag){announcedVersion=tag;alertMsg((sameVer?"An update":"Version "+m[1])+" is ready. Open 🔔 to update.")}
     }
     else if(manual){b.textContent="Check Update";st.textContent="Up to date";alertMsg("You're on the latest version ("+APP_VERSION+")")}
   }
