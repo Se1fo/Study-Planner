@@ -1031,8 +1031,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         <label class="sw"><input type="checkbox" id="optSound"><span></span></label></div>
       <div class="setrow"><div><b>Confetti</b><small>When you finish all of today's study.</small></div>
         <label class="sw"><input type="checkbox" id="optConf"><span></span></label></div>
-      <div class="setrow"><div><b>Auto-update</b><small>Automatically check for updates and install when available.</small></div>
-        <label class="sw"><input type="checkbox" id="optAutoUpdate"><span></span></label></div>
+      <div class="setrow"><div><b>Export schedule</b><small>Your timetable, exams and homework as a calendar file. Open it to add everything to Apple Calendar.</small></div><button class="btn ghost" id="expIcs">Export .ics</button></div>
       <div class="setrow"><div><b>Clear ticks</b><small>Unticks every task in the week you're viewing.</small></div><button class="btn ghost" id="reset">Clear</button></div>
     </section>
     <h4 class="setsec">Appearance</h4>
@@ -1052,8 +1051,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <div class="setrow verrow"><div class="vleft"><b>Version</b><span id="ver"></span><small id="offst">Checking…</small></div>
         <div class="vacts"><button class="btn ghost" id="showChanges"><span class="chev2">›</span> Changes</button><button class="btn ghost" id="upd">Check Update</button></div></div>
       <div id="changeBox" hidden></div>
-      <div class="setrow"><div><b>Export schedule</b><small>Your timetable, exams and homework as a calendar file. Open it to add everything to Apple Calendar.</small></div><button class="btn ghost" id="expIcs">Export .ics</button></div>
-      <div class="setrow"><div><b>First-run setup</b><small>Run the guided setup again to change subjects, school days and timetable.</small></div><button class="btn ghost" id="reSetup">Run setup</button></div>
+      <div class="setrow"><div><b>Auto-update</b><small>Automatically check for updates and install when available.</small></div>
+        <label class="sw"><input type="checkbox" id="optAutoUpdate"><span></span></label></div>
       <div class="setrow"><div><b>Backup</b><small>One file with everything, photos included. <button class="inlink" id="mv">or share a link</button></small></div><button class="btn" id="fbSave">Save file</button></div>
       <div id="fbLink" class="fblink" hidden></div>
       <div class="setrow"><div><b>Restore</b><small>Replaces what's on this device. <button class="inlink" id="imp">or paste a link or code</button></small></div><button class="btn ghost" id="fbLoad">Choose file</button></div>
@@ -2642,6 +2641,10 @@ document.addEventListener("focusout",e=>{const ds=e.target.dataset||{};if(ds.ses
 render();
 if(focus)showFocus();
 requestAnimationFrame(()=>{const sp=document.getElementById("splash");if(!sp)return;sp.classList.add("gone");setTimeout(()=>sp.remove(),450)});
+// First-run setup tutorial - runs automatically on first startup if not completed
+if(state.settings.setupDone!==true && !state.settings.setupDone){
+  openSetup();
+}
 
 
 let swReg=null;
