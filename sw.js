@@ -1,5 +1,5 @@
 // Study Planner offline support
-const CACHE = "study-planner-v1.7";
+const CACHE = "study-planner-v1.8";
 // The app page lives in its own cache that survives service worker updates,
 // so with auto-update off the installed version stays put until the user updates.
 const PAGE_CACHE = "study-planner-page";
@@ -62,7 +62,8 @@ self.addEventListener("activate", e => {
 });
 
 async function networkPage(req) {
-  const res = await fetch(req);
+  // Skip the browser's HTTP cache (GitHub Pages sets max-age=600) so an update shows up right away.
+  const res = await fetch(req.url, { cache: "no-cache", credentials: "same-origin" });
   if (res.ok) {
     const copy = res.clone();
     caches.open(PAGE_CACHE).then(c => c.put(PAGE_KEY, copy));

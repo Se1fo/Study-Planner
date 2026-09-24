@@ -1110,8 +1110,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   <div class="focus" id="focus" hidden role="dialog" aria-label="Focus timer"><div class="fbox"></div></div>
 
 <script>
-const APP_VERSION="2.4";
+const APP_VERSION="2.5";
 const CHANGES=[
+  ["2.5","Turning Auto-update off now really keeps your current version until you tap Update",
+        "Fixed the version status getting stuck on “Checking…”",
+        "The Update button now installs the new version, and the Auto-update switch shows your real setting"],
   ["2.4","First-run setup walks you through subjects, school days and your timetable on a fresh install",
         "New “Same as last week” shortcut on empty days, and a whole-week copy when the week is blank",
         "Export your whole schedule — timetable, exams and homework — to Apple Calendar in one tap (Settings → System)",
