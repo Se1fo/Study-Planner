@@ -964,6 +964,7 @@ ul.tickets>li.tmenu{padding:0 4px 2px;margin-top:-1px}
 .setrow .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr}
 .setrow .seg button{min-width:0;overflow:hidden;text-overflow:ellipsis;padding-left:4px;padding-right:4px}
 .setrow .seg:has([data-optopen]) button{font-size:.74rem}
+.day .dayadds{justify-content:flex-end}
 </style>
 </head>
 <body>
@@ -999,9 +1000,9 @@ ul.tickets>li.tmenu{padding:0 4px 2px;margin-top:-1px}
   </div>
   <div id="pTodo">
     <div class="seg todoseg">
+      <button data-sub="les">Lessons <em id="lesCount" hidden></em></button>
       <button data-sub="hw">Homework <em id="hwCount" hidden></em></button>
       <button data-sub="ex">Exams <em id="exCount" hidden></em></button>
-      <button data-sub="les">Lessons <em id="lesCount" hidden></em></button>
     </div>
     <div id="sHw">
       <div class="addbar collapsible">
@@ -1389,15 +1390,15 @@ function renderBanner(){
 // ---- tickets: one look for lessons, homework, exams and reminders ----
 function hwTicket(h){const sj=subj(h.s),over=h.due<todayIso&&!h.done;return `<li class="task tk hw ${h.done?"done":""}" style="--c:${col(sj)}">
     <input type="checkbox" class="chk" data-hwtick="${h.id}" ${h.done?"checked":""} aria-label="Done: ${esc(h.text)}">
-    <div class="tt"><b>${esc(h.text)}</b><small class="tsub">Homework · ${esc(sj.name)} · ${over?`<span class="red">overdue</span>`:"due "+relDay(h.due).toLowerCase()}</small>${h.done?"":`<div class="itrow">${remChip(h,"hw")}${h.due<=todayIso?`<button class="lnk postpone" data-hwpost="${h.id}">+1 day</button>`:""}</div>`}</div>
+    <div class="tt"><b>${esc(h.text)}</b><small class="tsub">${esc(sj.name)} · ${over?`<span class="red">overdue</span>`:"due "+relDay(h.due).toLowerCase()}</small>${h.done?"":`<div class="itrow">${remChip(h,"hw")}${h.due<=todayIso?`<button class="lnk postpone" data-hwpost="${h.id}">+1 day</button>`:""}</div>`}</div>
     <button class="del" data-hwdel="${h.id}" aria-label="Delete">×</button></li>`}
 function examTicket(x){const sj=subj(x.s),n=daysUntil(x.date);return `<li class="task tk exam" style="--c:${col(sj)}">
     <span class="tico ${n<=3?"soon":""}" title="${n===0?"Today":n+" days"}">${n===0?"!":n}</span>
-    <div class="tt"><b>${esc(x.title)}</b><small class="tsub">Exam · ${esc(sj.name)} · ${n===0?"today":n===1?"tomorrow":"in "+n+" days"}</small><div class="itrow">${remChip(x,"ex")}${n>=1?`<button class="lnk postpone" data-revplan="${x.id}">${revCount(x)?"📚 "+revCount(x)+" revision days":"📚 Plan revision"}</button>`:""}</div></div>
+    <div class="tt"><b>${esc(x.title)}</b><small class="tsub">${esc(sj.name)} · ${n===0?"today":n===1?"tomorrow":"in "+n+" days"}</small><div class="itrow">${remChip(x,"ex")}${n>=1?`<button class="lnk postpone" data-revplan="${x.id}">${revCount(x)?"📚 "+revCount(x)+" revision days":"📚 Plan revision"}</button>`:""}</div></div>
     <button class="del" data-exdel="${x.id}" aria-label="Delete exam">×</button></li>`}
 function remTicket(r){const past=(r.date+"T"+r.time)<=nowStamp();return `<li class="task tk rem ${past?"done":""}" style="--c:var(--prog)">
     <span class="tico">🔔</span>
-    <div class="tt"><b>${esc(r.text)}</b><small class="tsub">Reminder · ${relDay(r.date)} · ${t12(r.time)}</small></div>${past?"":`<a class="lnk cal" href="${icsFor(r)}" download="reminder.ics" aria-label="Add to calendar">📅</a>`}<button class="del" data-remdel="${r.id}" aria-label="Delete">×</button></li>`}
+    <div class="tt"><b>${esc(r.text)}</b><small class="tsub">${relDay(r.date)} · ${t12(r.time)}</small></div>${past?"":`<a class="lnk cal" href="${icsFor(r)}" download="reminder.ics" aria-label="Add to calendar">📅</a>`}<button class="del" data-remdel="${r.id}" aria-label="Delete">×</button></li>`}
 function tickets(items){return `<ul class="tickets">${items.join("")}</ul>`}
 
 let rowSwiping=false;
@@ -1855,7 +1856,7 @@ function renderHeader(){
   document.getElementById("sub").textContent=(narrow?DAY_NAMES[d.getDay()].slice(0,3):DAY_NAMES[d.getDay()])+", "+d.getDate()+" "+(narrow?MN[d.getMonth()].slice(0,3):MN[d.getMonth()]);
 }
 let classOpen=null,notesOpen=null,titleEdit=null;
-let prevTab="study",studySub="tt",todoSub="hw",subjView=null,noteOpen=null;
+let prevTab="study",studySub="tt",todoSub="les",subjView=null,noteOpen=null;
 const scrollMem={};
 let lastTab=null,lastSel=null,justTicked=null;
 function moveInd(){
@@ -2123,7 +2124,7 @@ function render(){
         <button class="btn sm" data-titlesave="${key}:${k.id}:${k.kind}:${d}">Save</button><button class="lnk" data-titlecancel>Cancel</button></li>`;
       return `<li class="task tk les ${k.done?"done":""}" style="--c:${col(s)}" data-tid="${k.id}">
         <input type="checkbox" class="chk" data-tick="${key}:${k.id}:${k.s}:${k.amt||0}:${k.pg||0}" ${k.done?"checked":""} aria-label="Done: ${s.name}">
-        <div class="tt"><b>${s.name}${k.title?` <span class="ttlx">${esc(k.title)}</span>`:""}</b><small class="tsub">Lesson${tag?" · "+tag:""}</small><div class="itrow amtrow"><input class="amtin" data-amt="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.amt??""}" placeholder="–" aria-label="${s.name} lessons on ${dLabel(dt)}"> <span class="amtl">lessons</span>${peek(key).noPages?"":`<input class="amtin" data-pg="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.pg??""}" placeholder="–" aria-label="${s.name} pages on ${dLabel(dt)}"> <span class="amtl">pages</span>`}</div></div>${acts}</li>${menu}`}).join("")}</ul></section>`
+        <div class="tt"><b>${s.name}${k.title?` <span class="ttlx">${esc(k.title)}</span>`:""}</b>${tag?`<small class="tsub">${tag}</small>`:""}<div class="itrow amtrow"><input class="amtin" data-amt="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.amt??""}" placeholder="–" aria-label="${s.name} lessons on ${dLabel(dt)}"> <span class="amtl">lessons</span>${peek(key).noPages?"":`<input class="amtin" data-pg="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.pg??""}" placeholder="–" aria-label="${s.name} pages on ${dLabel(dt)}"> <span class="amtl">pages</span>`}</div></div>${acts}</li>${menu}`}).join("")}</ul></section>`
       :"";
     const fk=formKind,kinds=[["les","Lesson"],["hw","Homework"],["ex","Exam"]];
     const form=openForm===d?`<div class="form" data-form="${d}">
