@@ -51,8 +51,8 @@ button{-webkit-user-select:none;user-select:none;touch-action:manipulation}
 @keyframes toastIn{from{opacity:0;transform:translate(-50%,14px) scale(.96)}}
 .enter{animation:enter .38s cubic-bezier(.2,.8,.2,1)}
 li.pop .chk{animation:pop .38s cubic-bezier(.3,1.6,.5,1)}
-.btn,.strip button,.tabs button,.chips button,.seg button,.gear,.addbtn,.dots-btn,.wkbtn,.step button,li.tmenu button,.addsubj,.fchips button{transition:transform .14s cubic-bezier(.2,.8,.2,1),background-color .2s,color .2s,box-shadow .2s,opacity .2s}
-.btn:active,.strip button:active,.chips button:active,.seg button:active,.gear:active,.addbtn:active,.dots-btn:active,.wkbtn:active,.step button:active,li.tmenu button:active,.addsubj:active,.fchips button:active{transform:scale(.95)}
+.btn,.strip button,.tabs button,.chips button,.seg button,.gear,.dots-btn,.wkbtn,.step button,li.tmenu button,.addsubj,.fchips button{transition:transform .14s cubic-bezier(.2,.8,.2,1),background-color .2s,color .2s,box-shadow .2s,opacity .2s}
+.btn:active,.strip button:active,.chips button:active,.seg button:active,.gear:active,.dots-btn:active,.wkbtn:active,.step button:active,li.tmenu button:active,.addsubj:active,.fchips button:active{transform:scale(.95)}
 .tabs button:active{transform:scale(.97)}
 .chk{transition:background-color .2s,border-color .2s,transform .14s}
 .chk:active{transform:scale(.9)}
@@ -60,14 +60,11 @@ li.pop .chk{animation:pop .38s cubic-bezier(.3,1.6,.5,1)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.5 Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
 .wrap{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
-h1,h2,.num{font-family:"Bricolage Grotesque",Figtree,system-ui,sans-serif}
+h1,h2{font-family:"Bricolage Grotesque",Figtree,system-ui,sans-serif}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;padding-top:6px}
 h1{font-size:2.1rem;font-weight:800;letter-spacing:-.035em;line-height:1.05;margin:2px 0 0}
 .eyebrow{font-size:.78rem;font-weight:600;color:var(--muted);letter-spacing:.02em}
 .sub{color:var(--muted);font-size:.9rem;margin-top:6px}
-.sync{font-size:.78rem;color:var(--muted);white-space:nowrap}
-.sync::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--muted);margin-right:6px;vertical-align:1px}
-.sync.on::before{background:var(--arab)}
 
 /* Remaining lessons */
 .subjects{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:22px}
@@ -76,11 +73,9 @@ h1{font-size:2.1rem;font-weight:800;letter-spacing:-.035em;line-height:1.05;marg
 .subj::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--c)}
 .subj .name{font-weight:600;font-size:.95rem}
 .subj .row{display:flex;align-items:baseline;gap:6px;margin-top:2px}
-.subj .num{font-size:2.2rem;font-weight:700;color:var(--c);line-height:1.1}
 .subj .of{color:var(--muted);font-size:.85rem}
 .bar{height:6px;border-radius:3px;background:var(--soft);margin:8px 0 8px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--c);border-radius:3px;transition:width .3s}
-.subj .foot{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:.78rem;color:var(--muted)}
 .warn{color:var(--hist);font-weight:600}
 .step{display:flex;gap:4px}
 .step button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:var(--soft);color:var(--ink);font-size:1rem;line-height:1;cursor:pointer}
@@ -129,7 +124,6 @@ li.done .tt b{text-decoration:line-through}
 .del{border:0;background:none;color:var(--muted);font-size:1.3rem;line-height:1;cursor:pointer;padding:4px 6px;border-radius:6px}
 .empty{color:var(--muted);font-size:.88rem;padding:6px 0 4px}
 .add{margin-top:10px}
-.addbtn{width:100%;border:1.5px dashed var(--line);background:none;color:var(--muted);border-radius:10px;padding:8px;font:inherit;font-size:.88rem;cursor:pointer}
 .form{display:grid;grid-template-columns:1fr 84px;gap:8px}
 .hint{color:var(--muted);font-size:.85rem;margin:14px 0 0}
 .form select,.form input{width:100%;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:9px;padding:8px;font:inherit;font-size:.9rem}
@@ -171,10 +165,6 @@ input,textarea,select{font-size:16px}
 .numin{width:3.4ch;border:0;border-bottom:2px dashed transparent;background:transparent;padding:0;font-size:2.2rem;font-weight:700;color:var(--c);line-height:1.1;-moz-appearance:textfield}
 .numin::-webkit-inner-spin-button,.numin::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .numin:hover,.numin:focus{border-bottom-color:var(--c);outline:none}
-.dnotes{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
-.dnotes span{display:block;font-size:.8rem;font-weight:600;color:var(--muted);margin-bottom:6px}
-.dnotes textarea{width:100%;min-height:58px;resize:vertical;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:10px;padding:8px 10px;font:inherit;font-size:.9rem;line-height:1.45}
-.dnotes textarea:focus{outline:none;border-color:var(--prog)}
 .wknav{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
 .wkbtn{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:1.4rem;line-height:1;cursor:pointer}
 .wkmid{min-width:150px;text-align:center}
@@ -198,18 +188,10 @@ li.skipped .tt b{text-decoration:line-through}
 .okmark{width:28px;height:28px;border-radius:50%;background:var(--arab);color:#fff;display:grid;place-items:center;font-weight:700}
 .donerow{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:.9rem}
 .hide{display:block;margin:-4px 0 6px -6px}
-.done-n .ok{color:var(--arab);font-weight:600}
 .subj .row .step{margin-left:auto;align-self:center}
-.done-n{font-size:.8rem;color:var(--muted);margin-top:-2px}
-.todaycard{box-shadow:var(--shadow);display:flex;flex-direction:column;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:14px}
-.todaycard b{font-family:"Bricolage Grotesque",Figtree,sans-serif;font-size:1.1rem}
-.todaycard span{color:var(--muted);font-size:.9rem}
 .red{color:var(--eng)!important}
 .addbar{box-shadow:var(--shadow);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:16px;display:grid;gap:8px}
 .addbar input,.addbar select{width:100%;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:10px;padding:9px 10px;font:inherit;font-size:.95rem;min-width:0}
-.addrow{display:flex;gap:8px}
-.addrow>*{flex:1;min-width:0}
-.addrow .btn{flex:0 0 auto;padding:9px 18px}
 .due{display:flex;align-items:center;gap:6px;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:0 0 0 10px}
 .due span{font-size:.8rem;color:var(--muted)}
 .due input{border:0;background:none;padding:9px 6px 9px 0}
@@ -220,11 +202,6 @@ ul.card{box-shadow:var(--shadow);background:var(--panel);border:1px solid var(--
 .bell{width:26px;text-align:center;flex:none}
 .cal{white-space:nowrap;text-decoration:none}
 .hint.top{margin:-6px 0 14px 4px}
-.bnr{display:flex;align-items:center;gap:10px;background:var(--hist);color:#1a1200;border-radius:14px;padding:10px 12px;margin-bottom:10px}
-.bnr .bt{flex:1}.bnr b{display:block}.bnr small{opacity:.8}
-.bnr[hidden]{display:none}
-.bnr.upd{background:var(--prog);color:#fff}.bnr.upd .lnk{color:#fff}
-.bnr .lnk{color:#1a1200;background:rgba(255,255,255,.35)}
 .del.sm{font-size:1rem;padding:0 4px;float:right}
 .addsubj{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;color:var(--muted);font:inherit;font-weight:600;cursor:pointer;border-style:dashed;min-height:96px}
 .addsubj::before{display:none}
@@ -236,9 +213,7 @@ ul.card{box-shadow:var(--shadow);background:var(--panel);border:1px solid var(--
 li.tmenu{display:flex;flex-wrap:wrap;gap:6px;padding:0 0 10px 36px}
 li.tmenu button{border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:9px;padding:6px 10px;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
 li.tmenu button.danger,li.tmenu button.confirm{color:var(--eng)}
-.tc-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .btn.sm{padding:6px 10px;font-size:.8rem;flex:none}
-.wkdone{color:var(--arab)!important;font-weight:600;font-size:.85rem!important}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chips button{border:1px solid var(--line);background:none;color:var(--muted);border-radius:20px;padding:5px 11px;font:inherit;font-size:.8rem;cursor:pointer}
 .chips button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -307,7 +282,6 @@ li.tmenu button.danger,li.tmenu button.confirm{color:var(--eng)}
 .exam .exn b{display:block;font-size:1.25rem;font-weight:700;color:var(--c)}
 .exam .exn small{font-size:.66rem;color:var(--muted)}
 .exam .exn.soon{background:color-mix(in srgb,var(--eng) 16%,transparent)}
-.exday small{font-weight:700;color:var(--c)!important}
 .stats{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px 16px 10px;margin-top:14px;box-shadow:var(--shadow)}
 .sthead{display:flex;justify-content:space-between;align-items:baseline}
 .sthead .grp{margin:0}
@@ -327,23 +301,9 @@ li.tmenu button.danger,li.tmenu button.confirm{color:var(--eng)}
 .tmr{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:.86rem;color:var(--muted)}
 .tmr em{font-style:normal;font-weight:700;color:var(--ink);margin-right:6px}
 .newl{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-4px 0 12px;font-size:.8rem;color:var(--muted)}
-.newl.tc{margin:8px 0 0}
 .newl button{border:1px solid color-mix(in srgb,var(--c) 45%,transparent);background:color-mix(in srgb,var(--c) 12%,transparent);color:var(--ink);border-radius:20px;padding:4px 10px;font:inherit;font-size:.78rem;font-weight:600;cursor:pointer}
 .newl button:active{transform:scale(.95)}
 .stfocus{margin-top:10px;padding-top:8px;border-top:1px solid var(--line);font-size:.82rem;color:var(--muted);font-weight:600}
-.stats.trends{margin-top:18px}
-.stats.trends h3{margin-bottom:8px}
-.stats.trends .trendcard{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);min-height:40px}
-.stats.trends .trendcard:last-child{border-bottom:0}
-.stats.trends .tc-label{font-size:.86rem;font-weight:600}
-.stats.trends .tc-val{margin-left:auto;font-size:.86rem;font-weight:700}
-.stats.trends .tc-sub{font-size:.72rem;color:var(--muted);margin-left:6px}
-.stats.trends .trendchart{flex:1;min-width:0;display:flex;align-items:flex-end;height:36px;gap:3px}
-.stats.trends .trendchart .bar{flex:1;background:var(--line);border-radius:3px 3px 0 0}
-.stats.trends .trendchart .bar.high{background:var(--arab)}
-.stats.trends .trendchart .bar.med{background:var(--hist)}
-.stats.trends .trendchart .bar.low{background:var(--eng)}
-.bnr .ghostlnk{background:none!important;color:inherit!important;opacity:.7}
 .hbtns{display:flex;gap:8px;flex:none}
 header h1{font-size:clamp(1.3rem,6.1vw,2rem);white-space:nowrap}
 :root[data-style="luxe"] header h1{font-size:clamp(1.8rem,8.6vw,2.6rem)}
@@ -436,7 +396,6 @@ img[data-img].loaded{opacity:1;animation:none}
 .attq button{flex:1}
 .attq button{border:1px solid color-mix(in srgb,var(--arab) 50%,transparent);background:color-mix(in srgb,var(--arab) 14%,transparent);color:var(--ink);border-radius:20px;padding:6px 12px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
 .attq button.ab{border-color:color-mix(in srgb,var(--eng) 50%,transparent);background:color-mix(in srgb,var(--eng) 14%,transparent)}
-.attq.tc{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
 .calcard{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:var(--shadow)}
 .calnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .calnav b{font-size:1.05rem}
@@ -465,7 +424,6 @@ img[data-img].loaded{opacity:1;animation:none}
 .lstrip button b{color:var(--c)}
 .lstrip button:active{transform:scale(.95)}
 .sdg{margin:18px 0 8px 4px}
-.gavg{margin-left:6px;font-weight:700}
 .gcard{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:6px 14px 12px;box-shadow:var(--shadow)}
 .glist{list-style:none;margin:0;padding:0}
 .glist li{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
@@ -525,7 +483,6 @@ img[data-img].loaded{opacity:1;animation:none}
 .remchip button{border:0;background:none;color:var(--muted);font-size:.95rem;line-height:1;cursor:pointer;padding:0 4px}
 .bellbtn{font-size:.8rem;padding:2px 6px;opacity:.7}
 .postpone{font-size:.74rem;padding:2px 8px;border:1px solid var(--line);border-radius:20px}
-.exb{font-style:normal;font-size:.68rem;font-weight:700;color:#fff;background:var(--eng);border-radius:5px;padding:1px 6px;margin-left:4px;white-space:nowrap}
 #remLegacy .grp{margin:18px 0 8px 4px}
 .remwrap{display:grid;gap:8px}
 .due{min-height:42px}
@@ -546,8 +503,6 @@ img[data-img].loaded{opacity:1;animation:none}
 .fsub{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;font-weight:500}
 .fsub span{display:flex;align-items:center;gap:5px}
 .fsub i{width:7px;height:7px;border-radius:50%;background:var(--c)}
-.tcline{font-size:.82rem!important;line-height:1.5}
-.tcline em.wkdone{font-style:normal;font-size:inherit!important;white-space:nowrap;font-weight:600}
 .fblink{padding:0 0 12px}
 .fblink[hidden]{display:none}
 .fblink a{display:block;text-align:center;text-decoration:none}
@@ -556,10 +511,6 @@ img[data-img].loaded{opacity:1;animation:none}
 #studySeg button{flex:none;background:none!important;box-shadow:none!important;padding:4px 0;font-size:.95rem;color:var(--muted);border-radius:0;border-bottom:2px solid transparent}
 #studySeg button.on{color:var(--ink);border-bottom-color:var(--ink)}
 :root[data-style="luxe"] #studySeg button.on{color:var(--gold);border-bottom-color:var(--gold);background:none!important}
-.todaycard{gap:4px}
-.newl.tc{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);gap:6px}
-.newl.tc span{flex:none;font-size:.78rem}
-.newl.tc button{padding:3px 9px;font-size:.74rem}
 .tmr{font-size:.8rem}
 .lstrip{margin:2px 0 14px}
 .lstrip .lsl{font-size:.74rem}
@@ -572,7 +523,6 @@ img[data-img].loaded{opacity:1;animation:none}
 .day{padding:16px 16px 12px}
 .day h2{font-size:1.2rem}
 .dayhead{margin-bottom:6px}
-.tagsoft{font-size:.72rem;font-weight:600;color:var(--muted)}
 .session.slim{background:none;padding:2px 0;margin-bottom:6px;border:0!important}
 .session.slim span{font-size:.72rem}
 .session.slim input{font-size:.9rem}
@@ -585,8 +535,6 @@ li.task{padding:11px 0}
 .dayadds{display:flex;gap:8px;margin-top:10px;padding-top:0;border-top:0;flex-wrap:wrap}
 .dayadds button{border:1px solid var(--line);background:transparent;color:var(--muted);font:inherit;font-size:.8rem;font-weight:600;cursor:pointer;padding:5px 11px;border-radius:20px}
 .dayadds button:active{color:var(--ink);transform:scale(.95)}
-.dnotes{margin-top:8px;padding-top:8px}
-.dnotes textarea{min-height:44px;font-size:.88rem}
 /* ===== calmer everywhere ===== */
 .todoseg{background:none;border:0;padding:0;gap:18px;justify-content:flex-start;margin:-4px 0 14px 4px;width:auto;display:flex}
 .todoseg button{flex:none!important;background:none!important;box-shadow:none!important;padding:4px 0!important;font-size:.95rem!important;color:var(--muted);border-radius:0!important;border-bottom:2px solid transparent}
@@ -623,7 +571,6 @@ ul.card{padding:2px 14px}
 .setrow{padding:9px 0}
 .setrow small{font-size:.76rem}
 .btn.danger{color:var(--eng);border-color:color-mix(in srgb,var(--eng) 40%,transparent)}
-.dayadds .pgt{margin-left:auto;font-weight:500;opacity:.75;border-style:dashed}
 .ttlx{font-weight:500;color:var(--muted)}
 .ttl{width:100%;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:9px;padding:6px 8px;font:inherit;font-size:.92rem}
 .btn.sm{padding:6px 12px;font-size:.82rem;flex:none}
@@ -642,7 +589,6 @@ header>div:first-child{min-width:0;flex:1}
 header h1{overflow:hidden;text-overflow:ellipsis}
 .hbtns .gear{width:44px;height:44px;font-size:1.15rem}
 .hbtns .gear svg{width:21px;height:21px}
-.logbtn{display:block;margin:6px auto 0}
 .ncell b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .addhead{background:var(--ink);color:var(--bg);border-color:transparent}
 :root[data-style="luxe"] .addhead{background:linear-gradient(160deg,var(--gold2),var(--gold));color:var(--goldink)}
@@ -696,10 +642,6 @@ header h1{overflow:hidden;text-overflow:ellipsis}
 .tabbar button.on{color:var(--ink)}
 :root[data-style="luxe"] .tabbar button.on{color:var(--gold)}
 .tbi{display:block;width:24px;height:24px}
-.tbadd{color:var(--ink)}
-.tbadd .tbi{background:var(--ink);color:var(--bg);border-radius:12px;display:grid;place-items:center;width:34px;height:26px}
-.tbadd .tbi svg{width:18px;height:18px}
-:root[data-style="luxe"] .tbadd .tbi{background:linear-gradient(160deg,var(--gold2),var(--gold));color:var(--goldink)}
 .tbi svg{width:100%;height:100%}
 .tabbar em{position:absolute;top:2px;left:calc(50% + 6px);min-width:16px;height:16px;border-radius:8px;background:var(--line);color:var(--ink);
   font-style:normal;font-size:.62rem;font-weight:700;display:grid;place-items:center;padding:0 4px}
@@ -812,11 +754,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 :root[data-style="luxe"] h1{font-family:Fraunces,Georgia,serif;font-weight:400;font-style:italic;font-size:2.6rem;letter-spacing:-.02em;line-height:1.05;margin:6px 0 2px;font-variation-settings:"opsz" 144}
 :root[data-style="luxe"] .sub{font-size:.88rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 :root[data-style="luxe"] .gear{border-radius:50%;background:var(--panel);border:1px solid var(--line);color:var(--gold);box-shadow:var(--shadow)}
-:root[data-style="luxe"] .day,:root[data-style="luxe"] .subj,:root[data-style="luxe"] .todaycard,:root[data-style="luxe"] ul.card,:root[data-style="luxe"] .setgrp,:root[data-style="luxe"] .addbar,:root[data-style="luxe"] .strip button,:root[data-style="luxe"] .imp{
+:root[data-style="luxe"] .day,:root[data-style="luxe"] .subj,:root[data-style="luxe"] ul.card,:root[data-style="luxe"] .setgrp,:root[data-style="luxe"] .addbar,:root[data-style="luxe"] .strip button,:root[data-style="luxe"] .imp{
   background:linear-gradient(180deg,var(--hi),transparent 40%),var(--panel);
   border:1px solid var(--line);box-shadow:var(--shadow)}
 :root[data-style="luxe"] .day{border-radius:24px;padding:18px 18px 16px}
-:root[data-style="luxe"] .subj,:root[data-style="luxe"] .todaycard,:root[data-style="luxe"] ul.card,:root[data-style="luxe"] .setgrp,:root[data-style="luxe"] .addbar{border-radius:22px}
+:root[data-style="luxe"] .subj,:root[data-style="luxe"] ul.card,:root[data-style="luxe"] .setgrp,:root[data-style="luxe"] .addbar{border-radius:22px}
 :root[data-style="luxe"] .day h2{font-family:Fraunces,Georgia,serif;font-weight:500;font-size:1.5rem;letter-spacing:-.01em}
 :root[data-style="luxe"] .dnum{font-family:Manrope,system-ui,sans-serif;color:var(--muted);font-weight:500}
 :root[data-style="luxe"] .day.today{border-color:color-mix(in srgb,var(--gold) 55%,transparent);box-shadow:var(--shadow),0 0 0 1px color-mix(in srgb,var(--gold) 25%,transparent)}
@@ -829,14 +771,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 :root[data-style="luxe"] .chk:checked{box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 22%,transparent)}
 :root[data-style="luxe"] .kind.fixed{background:transparent;border:1px solid var(--line);color:var(--muted)}
 :root[data-style="luxe"] .amtin{border-radius:8px;background:transparent}
-:root[data-style="luxe"] .dnotes{border-top-color:var(--line)}
-:root[data-style="luxe"] .dnotes span,:root[data-style="luxe"] .grp,:root[data-style="luxe"] .setgrp h3{text-transform:uppercase;letter-spacing:.16em;font-size:.62rem;font-weight:700;color:var(--gold)}
-:root[data-style="luxe"] .dnotes textarea,:root[data-style="luxe"] .addbar input,:root[data-style="luxe"] .addbar select,:root[data-style="luxe"] .form select,:root[data-style="luxe"] .form input,:root[data-style="luxe"] .imp textarea,:root[data-style="luxe"] .addsubj input{background:transparent;border:1px solid var(--line);border-radius:12px}
-:root[data-style="luxe"] .addbtn{border:1px dashed color-mix(in srgb,var(--gold) 45%,transparent);color:var(--gold);border-radius:14px}
-:root[data-style="luxe"] .todaycard{padding:16px 18px;position:relative;overflow:hidden}
-:root[data-style="luxe"] .todaycard::before{content:"";position:absolute;inset:0 0 auto 0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.7}
-:root[data-style="luxe"] .todaycard b{font-family:Fraunces,Georgia,serif;font-weight:500;font-size:1.25rem}
-:root[data-style="luxe"] .wkdone{color:var(--gold)!important}
+:root[data-style="luxe"] .grp,:root[data-style="luxe"] .setgrp h3{text-transform:uppercase;letter-spacing:.16em;font-size:.62rem;font-weight:700;color:var(--gold)}
+:root[data-style="luxe"] .addbar input,:root[data-style="luxe"] .addbar select,:root[data-style="luxe"] .form select,:root[data-style="luxe"] .form input,:root[data-style="luxe"] .imp textarea,:root[data-style="luxe"] .addsubj input{background:transparent;border:1px solid var(--line);border-radius:12px}
 :root[data-style="luxe"] .wkbtn{border-radius:50%;background:var(--panel);border:1px solid var(--line);color:var(--gold);box-shadow:var(--shadow)}
 :root[data-style="luxe"] .wkmid b{font-family:Fraunces,Georgia,serif;font-weight:500;font-size:1.2rem}
 :root[data-style="luxe"] .lnk{color:var(--gold)}
@@ -862,9 +798,6 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 :root[data-style="luxe"] .addsubj{border:1px dashed color-mix(in srgb,var(--gold) 45%,transparent);color:var(--gold);background:transparent;box-shadow:none}
 :root[data-style="luxe"] .setsec{font-family:Fraunces,Georgia,serif;font-style:italic;font-weight:400;font-size:1.35rem}
 :root[data-style="luxe"] .sethead h2{font-family:Fraunces,Georgia,serif;font-weight:400;font-style:italic;font-size:1.9rem}
-:root[data-style="luxe"] .bnr{background:var(--panel);color:var(--ink);border:1px solid color-mix(in srgb,var(--gold) 45%,transparent);box-shadow:var(--shadow)}
-:root[data-style="luxe"] .bnr .lnk,:root[data-style="luxe"] .bnr.upd .lnk{color:var(--goldink);background:linear-gradient(160deg,var(--gold2),var(--gold));border-radius:10px;padding:6px 12px}
-:root[data-style="luxe"] .bnr.upd{background:var(--panel);color:var(--ink)}
 :root[data-style="luxe"] .toast{background:color-mix(in srgb,var(--ink) 92%,transparent);color:var(--bg);border-radius:999px;padding:11px 20px;font-weight:600;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 :root[data-style="luxe"] .donecard{opacity:.7}
 :root[data-style="luxe"] .okmark{background:linear-gradient(160deg,var(--gold2),var(--gold));color:var(--goldink)}
@@ -874,7 +807,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 :root[data-style="luxe"] .ring .trk{stroke:var(--line)}
 :root[data-style="luxe"] .flab{text-transform:uppercase;letter-spacing:.2em;font-size:.72rem;font-weight:700}
 :root[data-style="luxe"] body{font-family:Manrope,system-ui,-apple-system,"Segoe UI",sans-serif}
-:root[data-style="luxe"] .todaycard b,:root[data-style="luxe"] .wkmid b,:root[data-style="luxe"] .day h2,:root[data-style="luxe"] h1,:root[data-style="luxe"] .numin,:root[data-style="luxe"] .ftime,:root[data-style="luxe"] .setsec,:root[data-style="luxe"] .sethead h2{font-family:Fraunces,Georgia,"Times New Roman",serif}
+:root[data-style="luxe"] .wkmid b,:root[data-style="luxe"] .day h2,:root[data-style="luxe"] h1,:root[data-style="luxe"] .numin,:root[data-style="luxe"] .ftime,:root[data-style="luxe"] .setsec,:root[data-style="luxe"] .sethead h2{font-family:Fraunces,Georgia,"Times New Roman",serif}
 @media(max-width:520px){:root[data-style="luxe"] .subjects{grid-template-columns:1fr}}
 :root[data-style="luxe"] .subj{padding:16px 18px 14px}
 :root[data-style="luxe"] .subj .row{align-items:center}
@@ -896,7 +829,6 @@ ul.tickets>li.tk .tt{display:flex;flex-direction:column;gap:1px}
 ul.tickets>li.tk .tt>b{font-size:.86rem!important;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
 ul.tickets>li.tk .tsub{font-size:.72rem;color:var(--c,var(--muted));font-weight:700;letter-spacing:.03em;text-transform:uppercase;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 ul.tickets>li.tk .itrow{margin-top:5px}
-ul.tickets>li.tk .ttime{font-size:.73rem;color:var(--muted);white-space:nowrap;font-weight:600;font-variant-numeric:tabular-nums;background:var(--soft);border-radius:20px;padding:3px 9px;flex:none}
 ul.tickets>li.tk.done{opacity:.5}
 ul.tickets>li.tk.done .tt{opacity:1}
 ul.tickets>li.tk .del,ul.tickets>li.tk .dots-btn,ul.tickets>li.tk .cal{align-self:center;flex:none}
@@ -976,6 +908,18 @@ ul.tickets>li.tk.drag-over-bottom{box-shadow:0 3px 0 var(--prog)}
 .dsec.drag-over-top{box-shadow:0 -3px 0 var(--prog)}
 .dsec.drag-over-bottom{box-shadow:0 3px 0 var(--prog)}
 .dsec{border-radius:10px}
+/* ---- swipe, menus and inline edit on tickets ---- */
+li.tk{transition:transform .22s cubic-bezier(.2,.8,.2,1),background-color .2s;position:relative}
+li.tk.sw-done{background:color-mix(in srgb,var(--arab) 18%,var(--panel))!important}
+li.tk.sw-done::before{content:"✓ Done";position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--arab);font-weight:700;font-size:.82rem;pointer-events:none}
+li.tk.sw-del{background:color-mix(in srgb,var(--eng) 18%,var(--panel))!important}
+li.tk.sw-del::after{content:"✕ Delete";position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--eng);font-weight:700;font-size:.82rem;pointer-events:none}
+li.tk .tt>b[data-edit]{cursor:text}
+li.tk.editing{display:block;padding:12px}
+.tedit{display:grid;gap:8px;flex:1;min-width:0}
+.tedit input,.tedit select{width:100%;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:10px;padding:9px 10px;font:inherit;font-size:.9rem;min-width:0}
+.tedrow{display:flex;gap:8px}
+.tedit .acts{display:flex;justify-content:flex-end;gap:8px}
 </style>
 </head>
 <body>
@@ -1175,11 +1119,16 @@ ul.tickets>li.tk.drag-over-bottom{box-shadow:0 3px 0 var(--prog)}
   <div class="focus" id="focus" hidden role="dialog" aria-label="Focus timer"><div class="fbox"></div></div>
 
 <script>
-const APP_VERSION="2.8";
+const APP_VERSION="2.9";
 // Goes up with every published change, including small tweaks that keep the same version.
 // The update check compares this, so tweaks still reach installed apps.
-const APP_BUILD=1;
+const APP_BUILD=2;
 const CHANGES=[
+  ["2.9","Swipe any ticket: right to mark it done, left to delete (with Undo)",
+        "Every ticket has a ⋯ menu with Move up/down, Edit and Delete",
+        "Edit homework, exams and reminders in place: tap the title or use Edit",
+        "Fixed the quick-add Reminder button opening an empty screen",
+        "Removed leftover code from older versions, so the app is a little lighter"],
   ["2.8","Hold and drag anything on a day card to reorder it: lessons, homework, exams and reminders",
         "Hold a section title to move the whole section; the order is kept for every day",
         "Small fixes now arrive as updates without changing the version number"],
@@ -1407,23 +1356,51 @@ function renderBanner(){
 }
 
 // ---- tickets: one look for lessons, homework, exams and reminders ----
-function hwTicket(h){const sj=subj(h.s),over=h.due<todayIso&&!h.done;return `<li class="task tk hw ${h.done?"done":""}" style="--c:${col(sj)}" data-oid="${h.id}">
+let editItem=null;
+// ctx is the day key when the ticket sits on a day card (enables Move up/down), "" in the Tasks lists.
+function tMenuKey(kind,id,ctx){return kind+":"+id+":"+(ctx||"list")}
+function tMenuBtn(kind,id,ctx){const mk=tMenuKey(kind,id,ctx);return `<button class="dots-btn ${openMenu===mk?"on":""}" data-menu="${mk}" aria-label="More options" aria-expanded="${openMenu===mk}">⋯</button>`}
+function tMenu(kind,id,ctx,i,n,extra){if(openMenu!==tMenuKey(kind,id,ctx))return "";
+  return `<li class="tmenu">${ctx&&i>0?`<button data-tmove="up">↑ Move up</button>`:""}${ctx&&i<n-1?`<button data-tmove="down">↓ Move down</button>`:""}<button data-edit="${kind}:${id}">✎ Edit</button>${extra||""}<button class="danger" data-${{hw:"hwdel",ex:"exdel",rem:"remdel"}[kind]}="${id}">Delete</button></li>`}
+function editTicket(kind,it){const rem=kind==="rem",text=kind==="ex"?it.title:it.text,date=kind==="hw"?it.due:it.date;
+  return `<li class="task tk editing" style="--c:${rem?"var(--prog)":col(subj(it.s))}" data-oid="${it.id}"><div class="tedit">
+    <input data-ef="text" value="${esc(text)}" maxlength="80" aria-label="Name">
+    ${rem?"":`<select data-ef="s" aria-label="Subject">${subjOptions(it.s)}</select>`}
+    <div class="tedrow"><input type="date" data-ef="date" value="${date}" aria-label="${kind==="hw"?"Due":"Date"}">${rem?`<input type="time" data-ef="time" value="${it.time}" aria-label="Time">`:""}</div>
+    <div class="acts"><button class="btn ghost" data-editcancel>Cancel</button><button class="btn" data-editsave="${kind}:${it.id}">Save</button></div></div></li>`}
+function hwTicket(h,ctx="",i=0,n=1){if(editItem==="hw:"+h.id)return editTicket("hw",h);
+  const sj=subj(h.s),over=h.due<todayIso&&!h.done;return `<li class="task tk hw ${h.done?"done":""}" style="--c:${col(sj)}" data-oid="${h.id}">
     <input type="checkbox" class="chk" data-hwtick="${h.id}" ${h.done?"checked":""} aria-label="Done: ${esc(h.text)}">
-    <div class="tt"><b>${esc(h.text)}</b><small class="tsub">${esc(sj.name)} · ${over?`<span class="red">overdue</span>`:"due "+relDay(h.due).toLowerCase()}</small>${h.done?"":`<div class="itrow">${remChip(h,"hw")}${h.due<=todayIso?`<button class="lnk postpone" data-hwpost="${h.id}">+1 day</button>`:""}</div>`}</div>
-    <button class="del" data-hwdel="${h.id}" aria-label="Delete">×</button></li>`}
-function examTicket(x){const sj=subj(x.s),n=daysUntil(x.date);return `<li class="task tk exam" style="--c:${col(sj)}" data-oid="${x.id}">
-    <span class="tico ${n<=3?"soon":""}" title="${n===0?"Today":n+" days"}">${n===0?"!":n}</span>
-    <div class="tt"><b>${esc(x.title)}</b><small class="tsub">${esc(sj.name)} · ${n===0?"today":n===1?"tomorrow":"in "+n+" days"}</small><div class="itrow">${remChip(x,"ex")}${n>=1?`<button class="lnk postpone" data-revplan="${x.id}">${revCount(x)?"📚 "+revCount(x)+" revision days":"📚 Plan revision"}</button>`:""}</div></div>
-    <button class="del" data-exdel="${x.id}" aria-label="Delete exam">×</button></li>`}
-function remTicket(r){const past=(r.date+"T"+r.time)<=nowStamp();return `<li class="task tk rem ${past?"done":""}" style="--c:var(--prog)" data-oid="${r.id}">
+    <div class="tt"><b data-edit="hw:${h.id}">${esc(h.text)}</b><small class="tsub">${esc(sj.name)} · ${over?`<span class="red">overdue</span>`:"due "+relDay(h.due).toLowerCase()}</small>${h.done?"":`<div class="itrow">${remChip(h,"hw")}${h.due<=todayIso?`<button class="lnk postpone" data-hwpost="${h.id}">+1 day</button>`:""}</div>`}</div>
+    ${tMenuBtn("hw",h.id,ctx)}</li>${tMenu("hw",h.id,ctx,i,n,h.done?"":`<button data-hwpost="${h.id}">→ Next day</button>`)}`}
+function examTicket(x,ctx="",i=0,n=1){if(editItem==="ex:"+x.id)return editTicket("ex",x);
+  const sj=subj(x.s),n2=daysUntil(x.date);return `<li class="task tk exam" style="--c:${col(sj)}" data-oid="${x.id}">
+    <span class="tico ${n2<=3?"soon":""}" title="${n2===0?"Today":n2+" days"}">${n2===0?"!":n2}</span>
+    <div class="tt"><b data-edit="ex:${x.id}">${esc(x.title)}</b><small class="tsub">${esc(sj.name)} · ${n2===0?"today":n2===1?"tomorrow":"in "+n2+" days"}</small><div class="itrow">${remChip(x,"ex")}${n2>=1?`<button class="lnk postpone" data-revplan="${x.id}">${revCount(x)?"📚 "+revCount(x)+" revision days":"📚 Plan revision"}</button>`:""}</div></div>
+    ${tMenuBtn("ex",x.id,ctx)}</li>${tMenu("ex",x.id,ctx,i,n)}`}
+function remTicket(r,ctx="",i=0,n=1){if(editItem==="rem:"+r.id)return editTicket("rem",r);
+  const past=(r.date+"T"+r.time)<=nowStamp();return `<li class="task tk rem ${past?"done":""}" style="--c:var(--prog)" data-oid="${r.id}">
     <span class="tico">🔔</span>
-    <div class="tt"><b>${esc(r.text)}</b><small class="tsub">${relDay(r.date)} · ${t12(r.time)}</small></div>${past?"":`<a class="lnk cal" href="${icsFor(r)}" download="reminder.ics" aria-label="Add to calendar">📅</a>`}<button class="del" data-remdel="${r.id}" aria-label="Delete">×</button></li>`}
+    <div class="tt"><b data-edit="rem:${r.id}">${esc(r.text)}</b><small class="tsub">${relDay(r.date)} · ${t12(r.time)}</small></div>
+    ${past?"":`<a class="lnk cal" href="${icsFor(r)}" download="reminder.ics" aria-label="Add to calendar">📅</a>`}${tMenuBtn("rem",r.id,ctx)}</li>${tMenu("rem",r.id,ctx,i,n)}`}
 function tickets(items){return `<ul class="tickets">${items.join("")}</ul>`}
 
 let rowSwiping=false;
 let rowSwipeTimeout=null;
+// Swipe right = done, left = delete (with Undo). Exams have no "done", so they only swipe left.
+function swipeAct(li,dir){const id=li.dataset.oid,has=c=>li.classList.contains(c);
+  if(has("les")){const chk=li.querySelector(".chk[data-tick]");if(!chk)return;const key=chk.dataset.tick.split(":")[0];
+    if(dir>0){chk.checked=!chk.checked;chk.dispatchEvent(new Event("change",{bubbles:true}));return}
+    const extra=peek(key).extra.some(k=>k.id===id);snap();
+    change(()=>{const x=dayData(state,key);if(extra)x.extra=x.extra.filter(k=>k.id!==id);else x.skip.push(id);delete x.done[id];prune(key)});
+    undoToast(extra?"Lesson removed":"Lesson removed from this day");return}
+  if(has("hw")){const h=state.homework.find(h=>h.id===id);if(!h)return;
+    if(dir>0){change(()=>{h.done=!h.done;const r=remFor(h.id);if(r&&h.done)r.seen=true});alertMsg(h.done?"Marked done ✓":"Marked not done");return}
+    snap();change(()=>{state.homework=state.homework.filter(x=>x.id!==id);state.reminders=state.reminders.filter(r=>!(r.link&&r.link.id===id))});undoToast("Homework deleted");return}
+  if(has("exam")){snap();change(()=>{state.exams=state.exams.filter(x=>x.id!==id);state.reminders=state.reminders.filter(r=>!(r.link&&r.link.id===id))});undoToast("Exam deleted");return}
+  if(has("rem")){snap();change(()=>{state.reminders=state.reminders.filter(r=>r.id!==id)});undoToast(dir>0?"Reminder done ✓":"Reminder deleted")}}
 function bindSwipeRows(root){
-  root.querySelectorAll("li.hw:not([data-sw])").forEach(li=>{li.dataset.sw=1;
+  root.querySelectorAll("li.tk:not([data-sw]):not(.editing)").forEach(li=>{li.dataset.sw=1;const canDone=!li.classList.contains("exam");
     let x0=0,y0=0,dx=0,axis="",on=false;
     li.addEventListener("touchstart",e=>{
       if(e.target.closest("button,input,a,.lnk"))return;
@@ -1447,7 +1424,7 @@ function bindSwipeRows(root){
       if(e.cancelable)e.preventDefault();
       dx=Math.max(-140,Math.min(140,mx));li.style.transform=`translateX(${dx}px)`;
       const wasDone=li.classList.contains("sw-done"),wasDel=li.classList.contains("sw-del");
-      const isDone=dx>70,isDel=dx<-70;
+      const isDone=canDone&&dx>70,isDel=dx<-70;
       if((isDone&&!wasDone)||(isDel&&!wasDel))buzz(6);
       li.classList.toggle("sw-done",isDone);li.classList.toggle("sw-del",isDel)
     },{passive:false});
@@ -1456,17 +1433,8 @@ function bindSwipeRows(root){
       on=false;li.style.transition="";li.style.transform="";li.classList.remove("sw-done","sw-del");
       clearTimeout(rowSwipeTimeout);
       rowSwipeTimeout=setTimeout(()=>{rowSwiping=false},250);
-      const id=li.querySelector("[data-hwtick]")?.dataset.hwtick;
-      if(!id||axis!=="x")return;
-      if(dx>70){
-        const h=state.homework.find(h=>h.id===id);
-        change(()=>{if(h){h.done=!h.done;const r=remFor(h.id);if(r&&h.done)r.seen=true}});
-        alertMsg(h&&h.done?"Marked done ✓":"Marked not done");
-      }else if(dx<-70){
-        snap();
-        change(()=>{state.homework=state.homework.filter(h=>h.id!==id);state.reminders=state.reminders.filter(r=>!(r.link&&r.link.id===id))});
-        undoToast("Homework deleted");
-      }
+      if(axis!=="x")return;
+      if(dx>70&&canDone)swipeAct(li,1);else if(dx<-70)swipeAct(li,-1);
       dx=0;
     };
     li.addEventListener("touchend",finish,{passive:true});
@@ -1477,13 +1445,13 @@ function renderHomework(){
   const pend=hwPending().sort((a,b)=>a.due<b.due?-1:a.due>b.due?1:0);
   const done=state.homework.filter(h=>h.done);
   const groups=[["Overdue",h=>h.due<todayIso],["Today",h=>h.due===todayIso],["Tomorrow",h=>h.due===addDays(1)],["Later",h=>h.due>addDays(1)]];
-  const item=hwTicket;
+  const item=h=>hwTicket(h);
   let html="";
   groups.forEach(([name,f])=>{const g=pend.filter(f);if(g.length)html+=`<h3 class="grp ${name==="Overdue"?"red":""}">${name}</h3>${tickets(g.map(item))}`});
   if(!pend.length)html+=`<div class="estate"><span>🎉</span><b>No homework left</b><small>Nothing due. Enjoy it.</small><button class="btn" data-focusfield="hwText">Add homework</button></div>`;
   if(done.length)html+=`<button class="lnk more" data-hwshow>${hwShowDone?"Hide":"Show"} finished (${done.length})</button>`+(hwShowDone?`${tickets(done.map(item))}<button class="lnk" data-hwclear>Delete finished homework</button>`:"");
   document.getElementById("hwList").innerHTML=html;
-  bindSwipeRows(document.getElementById("hwList"));
+  bindSwipeRows(document.getElementById("hwList"));bindSwipeRows(document.getElementById("remLegacy"));
   const sel=document.getElementById("hwSubj");if(!sel.dataset.ready){sel.innerHTML=subjOptions();sel.dataset.ready=1}
   const dd=document.getElementById("hwDue");if(!dd.value)dd.value=addDays(1);
   syncRemSelect("hwRem");
@@ -1508,8 +1476,9 @@ function renderGrades(){
 }
 function renderExams(){
   const up=state.exams.filter(x=>x.date>=todayIso).sort((a,b)=>a.date<b.date?-1:1);
-  document.getElementById("exList").innerHTML=up.length?tickets(up.map(examTicket)):`<div class="estate"><span>📅</span><b>No exams coming up</b><small>Add one so you get a countdown and revision days.</small><button class="btn" data-focusfield="exText">Add exam</button></div>`;
+  document.getElementById("exList").innerHTML=up.length?tickets(up.map(x=>examTicket(x))):`<div class="estate"><span>📅</span><b>No exams coming up</b><small>Add one so you get a countdown and revision days.</small><button class="btn" data-focusfield="exText">Add exam</button></div>`;
   const sel=document.getElementById("exSubj");if(!sel.dataset.ready){sel.innerHTML=subjOptions();sel.dataset.ready=1}
+  bindSwipeRows(document.getElementById("exList"));
   const exd=document.getElementById("exDate");if(!exd.value)exd.value=addDays(7);
   syncRemSelect("exRem");
 }
@@ -1607,11 +1576,11 @@ function byDayOrder(key,list){const ord=peek(key).order||[];if(!ord.length)retur
 function daySections(key){
   const isToday=key===todayIso,out={};
   const hw=byDayOrder(key,state.homework.filter(h=>h.due===key||(isToday&&!h.done&&h.due<todayIso)).sort((a,b)=>(a.done-b.done)||(a.due<b.due?-1:1)));
-  if(hw.length)out.hw=dsec("hw","Homework",hw.filter(h=>!h.done).length,hw.length,tickets(hw.map(hwTicket)));
+  if(hw.length)out.hw=dsec("hw","Homework",hw.filter(h=>!h.done).length,hw.length,tickets(hw.map((h,i,a)=>hwTicket(h,key,i,a.length))));
   const ex=byDayOrder(key,state.exams.filter(x=>x.date===key));
-  if(ex.length)out.ex=dsec("ex","Exams",null,ex.length,tickets(ex.map(examTicket)));
+  if(ex.length)out.ex=dsec("ex","Exams",null,ex.length,tickets(ex.map((x,i,a)=>examTicket(x,key,i,a.length))));
   const rm=byDayOrder(key,state.reminders.filter(r=>r.date===key&&!r.link).sort((a,b)=>a.time<b.time?-1:1));
-  if(rm.length)out.rem=dsec("rem","Reminders",null,rm.length,tickets(rm.map(remTicket)));
+  if(rm.length)out.rem=dsec("rem","Reminders",null,rm.length,tickets(rm.map((r,i,a)=>remTicket(r,key,i,a.length))));
   return out}
 function dsec(id,name,left,total,body){return `<section class="dsec" data-oid="${id}"><h3 title="Hold to move this section">${name}${left!=null&&total?`<span>${left?left+" left":"all done"}</span>`:""}</h3>${body}</section>`}
 // The summary, class shortcuts and tomorrow line that used to live in the card above the week.
@@ -1816,22 +1785,7 @@ function examSoon(sid,key){const x=state.exams.filter(e=>e.s===sid&&e.date>=key)
 function renderReminders(){
   const n=nowStamp(),loose=state.reminders.filter(r=>!r.link&&(r.date+"T"+r.time)>n).sort((a,b)=>(a.date+a.time)<(b.date+b.time)?-1:1);
   const el=document.getElementById("remLegacy");if(!el)return;
-  el.innerHTML=`<div class="exhead"><h3 class="grp">Reminders</h3><button class="lnk" data-qa="remind">+ Custom reminder</button></div>`+(loose.length?tickets(loose.map(remTicket)):`<div class="emptybig sm">Custom reminders you add show up here.</div>`);
-}
-function OLD_renderReminders(){
-  const n=nowStamp(),all=state.reminders.slice().sort((a,b)=>(a.date+a.time)<(b.date+b.time)?-1:1);
-  const up=all.filter(r=>(r.date+"T"+r.time)>n),past=all.filter(r=>(r.date+"T"+r.time)<=n);
-  const item=(r,isPast)=>`<li class="task rem ${isPast?"done":""}">
-    <span class="bell">${isPast?"✓":"🔔"}</span>
-    <div class="tt"><b>${esc(r.text)}</b><small>${relDay(r.date)}, ${r.time}</small></div>
-    ${isPast?"":`<a class="lnk cal" href="${icsFor(r)}" download="reminder.ics">Add to calendar</a>`}
-    <button class="del" data-remdel="${r.id}" aria-label="Delete">×</button></li>`;
-  let html=up.length?`<ul class="card">${up.map(r=>item(r,false)).join("")}</ul>`:`<div class="estate sm"><span>🔔</span><b>No reminders yet</b><small>Add one from the ＋ button or with your homework.</small></div>`;
-  if(past.length)html+=`<button class="lnk more" data-remshow>${remShowPast?"Hide":"Show"} past (${past.length})</button>`+(remShowPast?`<ul class="card">${past.map(r=>item(r,true)).join("")}</ul><button class="lnk" data-remclear>Delete past reminders</button>`:"");
-  document.getElementById("remList").innerHTML=html;
-  const rd=document.getElementById("remDate"),rt=document.getElementById("remTime");
-  if(!rd.value)rd.value=todayIso;
-  if(!rt.value){const d=new Date();d.setHours(d.getHours()+1,0);rt.value=String(d.getHours()).padStart(2,"0")+":00"}
+  el.innerHTML=`<div class="exhead"><h3 class="grp">Reminders</h3><button class="lnk" data-qa="remind">+ Custom reminder</button></div>`+(loose.length?tickets(loose.map(r=>remTicket(r))):`<div class="emptybig sm">Custom reminders you add show up here.</div>`);
 }
 
 function nextFor(sid){
@@ -1865,13 +1819,6 @@ function applySettings(){
   document.querySelectorAll("[data-optopen]").forEach(b=>b.classList.toggle("on",b.dataset.optopen===st.openOn));
   document.querySelectorAll("[data-optfocus]").forEach(b=>b.classList.toggle("on",+b.dataset.optfocus===st.focusMin));
   document.querySelectorAll("[data-opttheme]").forEach(b=>b.classList.toggle("on",b.dataset.opttheme===st.theme));
-  renderSettingsPERSIST();
-}
-function renderSettingsPERSIST(){
-  const p=document.getElementById("perst"),pb=document.getElementById("reqPersist");
-  if(p&&pb){
-    if(state.persisted){p.textContent="Data protected";pb.hidden=true}else{p.textContent="Protect data";pb.hidden=false}
-  }
 }
 
 function renderHeader(){
@@ -1961,13 +1908,8 @@ document.addEventListener("touchend",e=>{
   lastTouchEnd=now;
 },{passive:false});
 let lastCompact=false,compactT=null,pendingCompact=null;
-let fabT=null,lastY=0,fabAcc=0;
 addEventListener("scroll",()=>{
-  const y=Math.max(0,scrollY),f=document.getElementById("fab");
-  if(f){const d=y-lastY;fabAcc=(fabAcc>0)===(d>0)?fabAcc+d:d;
-    if(fabAcc>26&&y>90)f.classList.add("tuck");else if(fabAcc<-18)f.classList.remove("tuck");
-    clearTimeout(fabT);fabT=setTimeout(()=>{f.classList.remove("tuck");fabAcc=0},900)}
-  lastY=y;
+  const y=Math.max(0,scrollY);
   const room=document.documentElement.scrollHeight-innerHeight;
   // Only block *turning on* for genuinely short pages. Never force it off mid-scroll —
   // collapsing the header shortens the page, which used to flip this back and forth.
@@ -2105,11 +2047,11 @@ function render(){
 
 function save(){state.updatedAt=Date.now();try{localStorage.setItem("study-planner",JSON.stringify(state))}catch(e){}}
 function change(fn){fn();state.editedAt=Date.now();save();render()}
-function persistStorage(){if(state.persisted)return;navigator.storage.persist().then(granted=>{state.persisted=granted;save();renderSettingsPERSIST()})}
+function persistStorage(){if(state.persisted)return;navigator.storage.persist().then(granted=>{state.persisted=granted;save()})}
 function prune(key){const x=state.dates[key];if(x&&!x.noPages&&!x.skip.length&&!x.extra.length&&!Object.keys(x.done).length&&!Object.keys(x.amt||{}).length&&!Object.keys(x.pg||{}).length&&!(x.order&&x.order.length))delete state.dates[key]}
 
 document.addEventListener("click",e=>{
-  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-reorder],[data-pdel],[data-optstyle],[data-optpos],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-ngo],[data-ndismiss],[data-ndismissall],[data-focusfield],[data-title],[data-titlesave],[data-titlecancel],[data-pgtoggle],[data-classopen],[data-notesopen],[data-addrem],[data-remedit],[data-remsave],[data-remcancel],[data-revplan],[data-qrem],[data-hwpost],[data-hwfor],[data-sub],[data-ssub],[data-lsgo],[data-newl],[data-bknow],[data-bklater],[data-exopen],[data-exdel],#exAdd,[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#remAdd,#reset");
+  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-reorder],[data-pdel],[data-optstyle],[data-optpos],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-ngo],[data-ndismiss],[data-ndismissall],[data-focusfield],[data-title],[data-titlesave],[data-titlecancel],[data-pgtoggle],[data-classopen],[data-notesopen],[data-addrem],[data-remedit],[data-remsave],[data-remcancel],[data-revplan],[data-qrem],[data-hwpost],[data-hwfor],[data-sub],[data-ssub],[data-lsgo],[data-newl],[data-bknow],[data-bklater],[data-exopen],[data-exdel],#exAdd,[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#reset");
   if(!b)return;
   const ds=b.dataset;
   if(ds.ndismiss!==undefined){
@@ -2165,8 +2107,8 @@ document.addEventListener("click",e=>{
     const exItem={id:uid(),title,s:document.getElementById("exSubj").value,date},rk=readRem("exRem");
     let okR=true;change(()=>{state.exams.push(exItem);okR=addLinkedRem(rk,"ex",exItem)});t.value="";
     if(rk&&!okR)alertMsg("Exam added. That reminder time has already passed.");else if(rk&&rk.date)offerPreset(rk,exItem.date);else alertMsg("Exam added");return}
-  if(ds.exdel){snap();change(()=>{state.exams=state.exams.filter(x=>x.id!==ds.exdel);state.reminders=state.reminders.filter(r=>!(r.link&&r.link.id===ds.exdel))});undoToast("Exam deleted");return}
-  if(ds.hwdel){snap();change(()=>{state.homework=state.homework.filter(h=>h.id!==ds.hwdel);state.reminders=state.reminders.filter(r=>!(r.link&&r.link.id===ds.hwdel))});undoToast("Homework deleted");return}
+  if(ds.exdel){openMenu=null;snap();change(()=>{state.exams=state.exams.filter(x=>x.id!==ds.exdel);state.reminders=state.reminders.filter(r=>!(r.link&&r.link.id===ds.exdel))});undoToast("Exam deleted");return}
+  if(ds.hwdel){openMenu=null;snap();change(()=>{state.homework=state.homework.filter(h=>h.id!==ds.hwdel);state.reminders=state.reminders.filter(r=>!(r.link&&r.link.id===ds.hwdel))});undoToast("Homework deleted");return}
   if(ds.hwshow!==undefined){hwShowDone=!hwShowDone;render();return}
   if(ds.hwclear!==undefined){snap();change(()=>state.homework=state.homework.filter(h=>!h.done));undoToast("Finished homework deleted");return}
   if(ds.revplan){const x=state.exams.find(e=>e.id===ds.revplan);if(!x)return;
@@ -2197,12 +2139,9 @@ document.addEventListener("click",e=>{
       if(!ok){const d=new Date();d.setHours(d.getHours()+1,0,0,0);state.reminders.push({id:uid(),text:(type==="hw"?"Homework: "+it.text:"Exam: "+it.title),date:iso(d),time:String(d.getHours()).padStart(2,"0")+":00",link:{type,id}});ok=true}});
     alertMsg("Reminder set 🔔");return}
   if(ds.hwfor){tab="todo";todoSub="hw";render();scrollTo(0,0);document.getElementById("hwSubj").value=ds.hwfor;setTimeout(()=>document.getElementById("hwText").focus(),80);return}
-  if(ds.hwpost){change(()=>{const h=state.homework.find(h=>h.id===ds.hwpost);if(h){const base=h.due<todayIso?todayIso:h.due;const d=new Date(base+"T12:00:00");d.setDate(d.getDate()+1);h.due=iso(d);
+  if(ds.hwpost){openMenu=null;change(()=>{const h=state.homework.find(h=>h.id===ds.hwpost);if(h){const base=h.due<todayIso?todayIso:h.due;const d=new Date(base+"T12:00:00");d.setDate(d.getDate()+1);h.due=iso(d);
       const r=remFor(h.id);if(r){state.reminders=state.reminders.filter(x=>x!==r);addLinkedRem("eve","hw",h)}}});alertMsg("Moved to "+relDay(state.homework.find(h=>h.id===ds.hwpost).due).toLowerCase());return}
-  if(b.id==="remAdd"){const t=document.getElementById("remText"),text=t.value.trim();if(!text){t.focus();return}
-    const date=document.getElementById("remDate").value||todayIso,time=document.getElementById("remTime").value||"18:00";
-    change(()=>state.reminders.push({id:uid(),text,date,time}));t.value="";return}
-  if(ds.remdel){snap();change(()=>state.reminders=state.reminders.filter(r=>r.id!==ds.remdel));undoToast("Reminder deleted");return}
+  if(ds.remdel){openMenu=null;snap();change(()=>state.reminders=state.reminders.filter(r=>r.id!==ds.remdel));undoToast("Reminder deleted");return}
   if(ds.remshow!==undefined){remShowPast=!remShowPast;render();return}
   if(ds.remclear!==undefined){const n=nowStamp();snap();undoToast("Past reminders deleted");change(()=>state.reminders=state.reminders.filter(r=>(r.date+"T"+r.time)>n));return}
   if(ds.remseen){change(()=>{const r=state.reminders.find(r=>r.id===ds.remseen);if(r)r.seen=true});return}
@@ -2290,7 +2229,6 @@ document.addEventListener("click",e=>{
     if(b.dataset.confirm){delete b.dataset.confirm;b.textContent="Clear";snap();undoToast("Ticks cleared");change(()=>DAY_ORDER.forEach(d=>{const key=iso(dateFor(week,d));if(state.dates[key]){state.dates[key].done={};prune(key)}}))}
     else{b.dataset.confirm="1";b.textContent="Tap again";setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent="Clear"}},3000)}
   }
-  if(b.id==="reqPersist"){persistStorage();return}
   if(b.id==="expIcs"){icsExport();return}
   if(b.id==="reSetup"){openSetup();return}
   if(b.dataset.copyweek!==undefined){
@@ -2464,7 +2402,6 @@ document.addEventListener("click",e=>{if(!e.target.closest("#undoBtn")||!undoSna
   document.getElementById("hwSubj").dataset.ready="";document.getElementById("exSubj").dataset.ready="";document.getElementById("gSubj").dataset.ready="";render();alertMsg("Restored")});
 document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;
   if(e.target.id==="hwText")document.getElementById("hwAdd").click();
-  if(e.target.id==="remText")document.getElementById("remAdd").click();
   if(e.target.id==="newSubj")document.querySelector("[data-subjsave]")?.click()});
 (()=>{
   const ORDER=["study","todo","school"];
@@ -2808,6 +2745,32 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("click",e=>{const b=e.target.closest("[data-fkind]");if(!b)return;formKind=b.dataset.fkind;render();
   const f=document.querySelector(`[data-form="${openForm}"]`);f?.querySelector(formKind==="les"?"select":"[name=text]")?.focus()});
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-tmove],[data-edit],[data-editsave],[data-editcancel]");if(!b)return;const ds=b.dataset;
+  if(ds.tmove){const menu=b.closest("li.tmenu"),li=menu&&menu.previousElementSibling,ul=li&&li.parentElement,box=ul&&ul.closest(".dsecs");if(!box)return;
+    const ids=[...ul.children].filter(x=>x.matches("li.tk")).map(x=>x.dataset.oid),i=ids.indexOf(li.dataset.oid),j=ds.tmove==="up"?i-1:i+1;
+    if(i<0||j<0||j>=ids.length)return;ids.splice(i,1);ids.splice(j,0,li.dataset.oid);buzz(6);
+    change(()=>{const x=dayData(state,box.dataset.dkey);x.order=[...(x.order||[]).filter(k=>!ids.includes(k)),...ids]});return}
+  if(ds.edit){if(e.target.closest("li.tk.les"))return;editItem=ds.edit;openMenu=null;render();
+    setTimeout(()=>{const el=document.querySelector("li.tk.editing [data-ef=text]");if(el){el.focus();el.select()}},40);return}
+  if(ds.editcancel!==undefined){editItem=null;render();return}
+  if(ds.editsave)saveEdit(b.closest("li.tk"),ds.editsave);
+});
+// Shift a date string by the number of days between two other dates (keeps a linked reminder the same distance before).
+function shiftDate(d,from,to){const x=new Date(d+"T12:00:00");x.setDate(x.getDate()+Math.round((new Date(to+"T12:00:00")-new Date(from+"T12:00:00"))/864e5));return iso(x)}
+function saveEdit(li,key){if(!li)return;const [kind,id]=key.split(":"),v=f=>li.querySelector(`[data-ef=${f}]`)?.value;
+  const text=(v("text")||"").trim();if(!text){li.querySelector("[data-ef=text]").focus();return}
+  const date=v("date");
+  change(()=>{
+    if(kind==="hw"){const h=state.homework.find(x=>x.id===id);if(!h)return;const r=remFor(id);if(r&&date&&date!==h.due)r.date=shiftDate(r.date,h.due,date);
+      h.text=text;h.s=v("s")||h.s;if(date)h.due=date}
+    else if(kind==="ex"){const x=state.exams.find(x=>x.id===id);if(!x)return;const r=remFor(id);if(r&&date&&date!==x.date)r.date=shiftDate(r.date,x.date,date);
+      x.title=text;x.s=v("s")||x.s;if(date)x.date=date}
+    else{const r=state.reminders.find(x=>x.id===id);if(!r)return;r.text=text;if(date)r.date=date;r.time=v("time")||r.time;r.seen=false}
+    editItem=null});
+  alertMsg("Saved")}
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.closest("li.tk.editing")&&e.target.tagName==="INPUT"){e.preventDefault();saveEdit(e.target.closest("li.tk"),e.target.closest("li.tk").querySelector("[data-editsave]").dataset.editsave)}
+  if(e.key==="Escape"&&editItem){editItem=null;render()}});
 document.addEventListener("keydown",e=>{if(e.target.id==="setupNewSubj"&&e.key==="Enter"){e.preventDefault();setupAddSubject()}});
 function openSheet(step){
   buzz(4);
@@ -2845,7 +2808,7 @@ function dragSheet(el,onClose){
 }
 function closeSheet(){const sh=document.getElementById("sheet"),bg=document.getElementById("sheetBg");sh.classList.remove("up");bg.classList.remove("up");setTimeout(()=>{sh.hidden=true;bg.hidden=true},220)}
 document.addEventListener("click",e=>{
-  if(e.target.closest("#fab,#fabTab,[data-qa-open]")){if(!state.settings.setupDone)openSetup();else openSheet();return}
+  if(e.target.closest("#fabTab,[data-qa-open]")){if(!state.settings.setupDone)openSetup();else openSheet();return}
   if(e.target.id==="sheetBg"){closeSheet();return}
   const b=e.target.closest("[data-qa],[data-qanote]");if(!b)return;const a=b.dataset.qa;
   if(b.dataset.qanote){closeSheet();tab="todo";todoSub="les";subjView=b.dataset.qanote;const n={id:uid(),s:subjView,title:"",text:"",imgs:[],created:Date.now(),updated:Date.now()};
@@ -2855,7 +2818,8 @@ document.addEventListener("click",e=>{
   if(a==="remind"){openSheet("remind");return}
   closeSheet();
   if(a==="grade"){tab="todo";todoSub="ex";render();setTimeout(()=>{document.getElementById("gradeBox")?.scrollIntoView({behavior:"smooth",block:"start"});document.getElementById("gName")?.focus()},120);return}
-  if(a==="hw"||a==="ex"||a==="rem"){tab="todo";todoSub=a;render();scrollTo(0,0);setTimeout(()=>document.getElementById({hw:"hwText",ex:"exText",rem:"remText"}[a])?.focus(),80);return}
+  if(a==="rem"){openSheet("remind");return}
+  if(a==="hw"||a==="ex"){tab="todo";todoSub=a;render();scrollTo(0,0);setTimeout(()=>document.getElementById({hw:"hwText",ex:"exText"}[a])?.focus(),80);return}
   if(a==="focus"){startFocus(null);return}
   if(a==="task"){tab="study";studySub="tt";week=0;selDay=today;openForm=today;formKind="les";render();
     setTimeout(()=>document.querySelector(`[data-form="${today}"]`)?.scrollIntoView({behavior:"smooth",block:"center"}),80)}
