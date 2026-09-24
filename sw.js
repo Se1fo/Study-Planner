@@ -1,12 +1,12 @@
 // Study Planner offline support
-const CACHE = "study-planner-v1.8";
+const CACHE = "study-planner-v1.9";
 // The app page lives in its own cache that survives service worker updates,
 // so with auto-update off the installed version stays put until the user updates.
 const PAGE_CACHE = "study-planner-page";
 const PREFS_CACHE = "study-planner-prefs";
 const PREFS_KEY = "/__prefs";
 const KEEP = [CACHE, PAGE_CACHE, PREFS_CACHE];
-const ASSETS = ["/manifest.json", "/icon-192.png"];
+const ASSETS = ["./manifest.json", "./icon-192.png", "./icon-512.png"];
 const PAGE_KEY = "./";
 
 // Fetch with a time limit so a slow network can't leave install (and the app's "Checking…") hanging.
