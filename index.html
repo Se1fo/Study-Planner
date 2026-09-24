@@ -916,7 +916,7 @@ ul.tickets>li.tmenu{padding:0 4px 2px;margin-top:-1px}
 .dsec h3{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0 2px 8px;font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .dsec h3 span{font-size:.72rem;font-weight:600;letter-spacing:0;text-transform:none}
 .day .newl{margin:0 0 4px}
-.day .tmr{display:flex;gap:8px;align-items:baseline;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:.84rem;color:var(--muted);line-height:1.45}
+.day .tmr{display:flex;gap:8px;align-items:baseline;margin:-4px 0 12px;padding:8px 12px;background:var(--soft);border-radius:12px;font-size:.84rem;color:var(--muted);line-height:1.45}
 .day .tmr em{font-style:normal;font-weight:700;color:var(--ink);flex:none}
 .day .empty{padding:6px 2px 4px}
 
@@ -965,6 +965,7 @@ ul.tickets>li.tmenu{padding:0 4px 2px;margin-top:-1px}
 .setrow .seg button{min-width:0;overflow:hidden;text-overflow:ellipsis;padding-left:4px;padding-right:4px}
 .setrow .seg:has([data-optopen]) button{font-size:.74rem}
 .day .dayadds{justify-content:flex-end}
+@media(max-width:600px){.day{padding-left:12px;padding-right:12px}}
 </style>
 </head>
 <body>
@@ -1164,8 +1165,10 @@ ul.tickets>li.tmenu{padding:0 4px 2px;margin-top:-1px}
   <div class="focus" id="focus" hidden role="dialog" aria-label="Focus timer"><div class="fbox"></div></div>
 
 <script>
-const APP_VERSION="2.6";
+const APP_VERSION="2.7";
 const CHANGES=[
+  ["2.7","Tomorrow's plan now sits near the top of today's card",
+        "Day cards give tickets a little more room on phones"],
   ["2.6","Subjects moved to a new Lessons tab in Tasks, next to Homework and Exams",
         "Study is now called Timetable",
         "Today's summary, class shortcuts and tomorrow's plan (in the evening) now live in today's card, with the focus timer in its header",
@@ -2146,12 +2149,12 @@ function render(){
       if(!tasksOn(d,key).length&&hasLastWeek&&week>0&&openForm!==d)list+=`<div class="actrow"><button class="lnk" data-copyweek="${d}">Same as last week</button></div>`;
     return `<article class="day ${d===selDay?"sel":""} ${isToday?"today":""}">
       <div class="dayhead"><h2>${DAY_NAMES[d]} <span class="dnum">${dLabel(dt)}</span></h2>${isToday?'<button class="focusbtn" id="focusStart" aria-label="Start focus timer">⏱ Focus</button>':""}</div>
-      ${isToday?tx.sum:""}
+      ${isToday?tx.sum+tx.tmr:""}
       ${day.session||classOpen===d?`<label class="session slim"><span>Class</span><input data-session="${d}" value="${esc(day.session)}" placeholder="Class name"></label>`:""}
       ${isToday?tx.cls:""}
       ${expanded.has(key)?`<button class="lnk hide" data-expand="${key}">Hide finished day</button>`:""}
       ${list}${secs}${!hasLessons&&!secs?`<div class="empty">Nothing planned. Free day.</div>`:""}
-      ${isToday?tx.tmr:""}
+
       ${openForm===d?`<div class="add">${form}</div>`:""}
       ${openForm===d?"":`<div class="dayadds"><button data-open="${d}">＋ Add</button>${day.session||classOpen===d?"":`<button data-classopen="${d}">＋ Class</button>`}</div>`}</article>`}).join("");
   bindSwipeRows(document.getElementById("days"));
