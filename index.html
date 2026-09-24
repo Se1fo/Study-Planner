@@ -329,6 +329,8 @@ li.tmenu button.danger,li.tmenu button.confirm{color:var(--eng)}
 .sthead{display:flex;justify-content:space-between;align-items:baseline}
 .sthead .grp{margin:0}
 .sthead span{font-size:.85rem;font-weight:600;color:var(--muted)}
+.sthead span b{color:var(--arab);font-size:1.05rem;font-weight:700;margin-right:1px}
+:root[data-style="luxe"] .sthead span b{color:var(--gold)}
 .bars{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;height:130px;margin-top:10px}
 .bar1{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
 .bar1 .stack{flex:1;width:100%;max-width:30px;display:flex;flex-direction:column-reverse;border-radius:8px;overflow:hidden;background:var(--soft)}
@@ -730,7 +732,11 @@ body,html,header,nav,main,article,button,label,span,b,small,em,h1,h2,h3,p,div{to
 input,textarea{touch-action:auto;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 .ntext{-webkit-user-select:text;user-select:text}
 .wrap,.loglist{-webkit-overflow-scrolling:touch}
-header{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bg);transition:padding .25s ease;min-height:56px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bg);transition:padding .25s ease,box-shadow .25s ease;min-height:56px}
+@supports (backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
+  body.compact header{background:color-mix(in srgb,var(--bg) 82%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5)}}
+body.compact header{box-shadow:0 1px 0 var(--line)}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
 body.compact header{padding-top:2px;margin-bottom:6px}
 body.compact .eyebrow,body.compact .sub{opacity:0;height:0;margin:0;overflow:hidden;pointer-events:none}
 body.compact header h1{font-size:1.15rem;transition:font-size .25s ease}
@@ -1015,6 +1021,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
     </section>
     <h4 class="setsec">System</h4>
     <section class="setgrp">
+      <div class="setrow verrow"><div class="vleft"><b>Version</b><span id="ver"></span><small id="offst">Checking…</small></div>
+        <div class="vacts"><button class="btn ghost" id="showChanges"><span class="chev2">›</span> Changes</button><button class="btn ghost" id="upd">Check Update</button></div></div>
+      <div id="changeBox" hidden></div>
       <div class="setrow"><div><b>Backup</b><small>One file with everything, photos included. <button class="inlink" id="mv">or share a link</button></small></div><button class="btn" id="fbSave">Save file</button></div>
       <div id="fbLink" class="fblink" hidden></div>
       <div class="setrow"><div><b>Restore</b><small>Replaces what's on this device. <button class="inlink" id="imp">or paste a link or code</button></small></div><button class="btn ghost" id="fbLoad">Choose file</button></div>
@@ -1024,9 +1033,6 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         <div class="acts"><button class="btn ghost" id="impcancel">Cancel</button><button class="btn ghost" id="impPaste">Paste &amp; load</button><button class="btn" id="impgo">Load</button></div>
         <div class="msg" id="impmsg"></div>
       </div>
-      <div class="setrow verrow"><div class="vleft"><b>Version</b><span id="ver"></span><small id="offst">Checking…</small></div>
-        <div class="vacts"><button class="btn ghost" id="showChanges"><span class="chev2">›</span> Changes</button><button class="btn ghost" id="upd">Check Update</button></div></div>
-      <div id="changeBox" hidden></div>
       <div class="setrow"><div><b>Start fresh</b><small>Clears everything except your subjects and settings.</small></div><button class="btn ghost danger" id="wipe">Clear</button></div>
     </section>
   </div>
@@ -1065,8 +1071,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   <div class="focus" id="focus" hidden role="dialog" aria-label="Focus timer"><div class="fbox"></div></div>
 
 <script>
-const APP_VERSION="2.1";
+const APP_VERSION="2.2";
 const CHANGES=[
+  ["2.2","Lessons done moved from the day card to the Last 7 days graph, leaving one clean line on the card",
+        "Version and Changes now sit at the top of System in Settings",
+        "Fixed the date flickering when scrolling to the very bottom of a page",
+        "The header now shrinks and frosts the same way on every tab, including Tasks"],
   ["2.1","Fixed the Lessons left row (and the day picker) not scrolling by touch",
         "Fixed the tab bar briefly moving or disappearing when swiping between tabs",
         "Fixed the header flickering when scrolling hard or bouncing at the top"],
@@ -1295,7 +1305,7 @@ function renderToday(){
     const all=[...tx,cls,line].filter(Boolean);
     tmr=`<div class="tmr"><em>Tomorrow:</em>${all.length?all.join(" · "):"Nothing planned"}</div>`}
   el.innerHTML=`<div class="tc-top"><b>${DAY_NAMES[today]}, ${dLabel(new Date())}</b><button class="btn ghost sm" id="focusStart">⏱ Focus timer</button></div>
-    <span class="tcline">${[...parts,...[wk?fmt(wk)+" lesson"+(wk===1?"":"s")+" done ✓":"",fm?fmtMin(fm)+" focused today":""].filter(Boolean).map(x=>`<em class="wkdone">${x}</em>`)].join(" · ")}</span>${newl}${tmr}`;
+    <span class="tcline">${[...parts,...(fm?[fmtMin(fm)+" focused today"]:[])].join(" · ")}</span>${newl}${tmr}`;
 }
 
 let rowSwiping=false;
@@ -1639,7 +1649,7 @@ function renderStats(){
   const days=[];for(let i=6;i>=0;i--)days.push(addDays(-i));
   const per=days.map(k=>{const x=state.dates[k],by={};if(x)Object.entries(x.done).forEach(([id,a])=>{const sid=(x.doneS&&x.doneS[id])||findSubj(id)||"other";by[sid]=(by[sid]||0)+a});return by});
   const tot=per.map(b=>Object.values(b).reduce((a,c)=>a+c,0)),mx=Math.max(1,...tot),sum=tot.reduce((a,c)=>a+c,0);
-  document.getElementById("stTotal").textContent=fmt(sum)+" lesson"+(sum===1?"":"s");
+  document.getElementById("stTotal").innerHTML=sum?`<b>${fmt(sum)}</b> done`:"Nothing yet";
   const fmins=days.reduce((a,k)=>a+((state.focusLog||{})[k]||0),0);
   const bySub={};days.forEach(k=>Object.entries((state.focusSub||{})[k]||{}).forEach(([sid,m])=>bySub[sid]=(bySub[sid]||0)+m));
   const subTxt=Object.entries(bySub).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([sid,m])=>`<span style="--c:${col(subj(sid))}"><i></i>${esc(subj(sid).name)} ${fmtMin(m)}</span>`).join("");
@@ -1923,8 +1933,10 @@ addEventListener("scroll",()=>{
     clearTimeout(fabT);fabT=setTimeout(()=>{f.classList.remove("tuck");fabAcc=0},900)}
   lastY=y;
   const room=document.documentElement.scrollHeight-innerHeight;
-  if(room<160){pendingCompact=null;clearTimeout(compactT);if(lastCompact){lastCompact=false;document.body.classList.remove("compact")}return}
-  const c=lastCompact?y>34:y>92;
+  // Only block *turning on* for genuinely short pages. Never force it off mid-scroll —
+  // collapsing the header shortens the page, which used to flip this back and forth.
+  if(!lastCompact&&room<160){pendingCompact=null;clearTimeout(compactT);return}
+  const c=lastCompact?y>28:y>92;
   if(c===lastCompact){pendingCompact=null;clearTimeout(compactT);return}
   // debounce: only commit the change once the scroll position has held still for a moment,
   // so a rubber-band bounce or a quick flick can't flip the header back and forth.
