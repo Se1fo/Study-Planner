@@ -1031,6 +1031,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         <label class="sw"><input type="checkbox" id="optSound"><span></span></label></div>
       <div class="setrow"><div><b>Confetti</b><small>When you finish all of today's study.</small></div>
         <label class="sw"><input type="checkbox" id="optConf"><span></span></label></div>
+      <div class="setrow"><div><b>Auto-update</b><small>Automatically check for updates and install when available.</small></div>
+        <label class="sw"><input type="checkbox" id="optAutoUpdate"><span></span></label></div>
       <div class="setrow"><div><b>Clear ticks</b><small>Unticks every task in the week you're viewing.</small></div><button class="btn ghost" id="reset">Clear</button></div>
     </section>
     <h4 class="setsec">Appearance</h4>
@@ -1050,7 +1052,6 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <div class="setrow verrow"><div class="vleft"><b>Version</b><span id="ver"></span><small id="offst">Checking…</small></div>
         <div class="vacts"><button class="btn ghost" id="showChanges"><span class="chev2">›</span> Changes</button><button class="btn ghost" id="upd">Check Update</button></div></div>
       <div id="changeBox" hidden></div>
-      <div class="setrow"><div><b>Protect data on iOS</b><small id="perst">Checking…</small></div><button class="btn ghost" id="reqPersist" hidden>Request protection</button></div>
       <div class="setrow"><div><b>Export schedule</b><small>Your timetable, exams and homework as a calendar file. Open it to add everything to Apple Calendar.</small></div><button class="btn ghost" id="expIcs">Export .ics</button></div>
       <div class="setrow"><div><b>First-run setup</b><small>Run the guided setup again to change subjects, school days and timetable.</small></div><button class="btn ghost" id="reSetup">Run setup</button></div>
       <div class="setrow"><div><b>Backup</b><small>One file with everything, photos included. <button class="inlink" id="mv">or share a link</button></small></div><button class="btn" id="fbSave">Save file</button></div>
@@ -2341,6 +2342,7 @@ document.addEventListener("change",e=>{
     change(()=>state.settings.badge=on);return}
   if(t.id==="optSound"){change(()=>state.settings.sound=t.checked);return}
   if(t.id==="optConf"){change(()=>state.settings.confetti=t.checked);return}
+  if(t.id==="optAutoUpdate"){change(()=>state.settings.autoUpdate=t.checked);return}
   if(t.id==="optAuto"){change(()=>{state.settings.autoTick=t.checked;if(t.checked)state.autoThrough=iso(new Date(Date.now()-864e5))});return}
   if(t.dataset.cpick){setColor(t.dataset.cpick,t.value);return}
   if(t.classList&&t.classList.contains("remsel")){const c=document.getElementById(t.id+"C");if(c){c.hidden=t.value!=="custom";if(t.value==="custom"){const d=document.getElementById(t.id+"D");if(!d.value)d.value=todayIso}}return}
@@ -2689,12 +2691,17 @@ async function checkUpdate(manual){
     const t=await r.text();const m=t.match(/const APP_VERSION="([^"]+)"/);
     if(m&&m[1]!==APP_VERSION){
       updateReady=true;renderBanner();
+      // Auto-update disabled - just show notification
+      // if(manual){
+      //   b.textContent="Updating…";alertMsg("Updating to "+m[1]+"…");
+      //   setTimeout(hardReload,400);return;
+      // } else {
+      //   alertMsg("New update (v"+m[1]+") found — updating…");
+      //   setTimeout(hardReload,1200);return;
+      // }
       if(manual){
-        b.textContent="Updating…";alertMsg("Updating to "+m[1]+"…");
-        setTimeout(hardReload,400);return;
-      } else {
-        alertMsg("New update (v"+m[1]+") found — updating…");
-        setTimeout(hardReload,1200);return;
+        b.textContent="Update";alertMsg("New update (v"+m[1]+") is ready. Click Update to install.");
+        return;
       }
     }
     else if(manual)alertMsg("You're on the latest version ("+APP_VERSION+")")}
@@ -2710,8 +2717,11 @@ document.addEventListener("click",e=>{
   if(b.id==="upd")checkUpdate(true);
   if(b.id==="mv")shareLink(b);
 });
-checkUpdate(false);
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate(false)});
+// Auto-update based on user preference
+if(state.settings.autoUpdate!==false){
+  checkUpdate(false);
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate(false)});
+}
 
 // transfer via link: #data=... imports if newer than what's here
 (()=>{const h=location.hash;if(!h.startsWith("#data="))return;
