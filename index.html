@@ -934,6 +934,8 @@ li.tk.editing{display:block;padding:12px}
 #syncBox>.setrow:first-child{flex-wrap:wrap}
 #syncBox>.setrow:first-child>div{flex:1 1 100%}
 #syncBox>.setrow:first-child>.btn[data-sync=google]{flex:1 1 100%}
+#syncBox>.setrow:first-child>.btn[data-sync=cancel]{flex:1 1 100%}
+#syncBox .syalt .synote{display:block;margin:6px 0 0}
 </style>
 </head>
 <body>
@@ -1139,7 +1141,7 @@ li.tk.editing{display:block;padding:12px}
 const APP_VERSION="3.0";
 // Goes up with every published change, including small tweaks that keep the same version.
 // The update check compares this, so tweaks still reach installed apps.
-const APP_BUILD=3;
+const APP_BUILD=4;
 const CHANGES=[
   ["3.0","Sync & backup: sign in (Settings → Account) to keep your planner safe in the cloud and the same on all your devices",
         "Sign in with Google or with email and a password",
@@ -1208,7 +1210,7 @@ let SUBJECTS=[...BASE_SUBJECTS,OTHER];
 function col(sj){return sj.c.startsWith("--")?`var(${sj.c})`:sj.c}
 const uid=()=>Math.random().toString(36).slice(2,9);
 // Cloud sync state; declared early because save() and render() read it during startup.
-const sync={ready:null,fn:null,auth:null,db:null,user:null,status:"",at:0,unsub:null,timer:null,applying:false,conflict:null,emailOpen:false,busy:false};
+const sync={ready:null,fn:null,auth:null,db:null,user:null,status:"",at:0,unsub:null,timer:null,applying:false,conflict:null,emailOpen:false,busy:false,attempt:0};
 const DEFAULT={
   v:2,updatedAt:0,
   remaining:{prog:0,arab:0,hist:0,eng:0},
@@ -2732,30 +2734,36 @@ function syncErr(e){const c=(e&&e.code)||"";
 async function syncSignIn(kind){
   const em=document.getElementById("syEmail"),pw=document.getElementById("syPass");
   if(kind!=="google"&&(!em.value.trim()||!pw.value)){(em.value.trim()?pw:em).focus();return}
-  sync.busy=true;setSync(kind==="google"?"Opening Google sign-in…":"Signing in…");
+  // The Google pop-up can fail silently (blocked, or closed where the browser can't tell us),
+  // leaving the promise pending forever. So: offer Cancel, and give up after a minute.
+  const attempt=++sync.attempt,current=()=>attempt===sync.attempt;
+  sync.busy=true;setSync(kind==="google"?"Waiting for Google… If no sign-in window opened, tap Cancel and use email instead.":"Signing in…");
+  if(kind==="google")setTimeout(()=>{if(current()&&sync.busy&&!sync.user){sync.busy=false;setSync("Google sign-in didn't finish. Try again, or use email instead.")}},60e3);
   try{await syncLoad();const f=sync.fn;
     if(kind==="google")await f.signInWithPopup(sync.auth,new f.GoogleAuthProvider());
     else if(kind==="create")await f.createUserWithEmailAndPassword(sync.auth,em.value.trim(),pw.value);
     else await f.signInWithEmailAndPassword(sync.auth,em.value.trim(),pw.value);
     sync.emailOpen=false}
-  catch(e){setSync(syncErr(e))}finally{sync.busy=false;renderSync()}}
+  catch(e){if(current())setSync(syncErr(e))}finally{if(current()){sync.busy=false;renderSync()}}}
 function renderSync(){const el=document.getElementById("syncBox");if(!el)return;const u=sync.user,st=sync.status;
   const keep=["syEmail","syPass"].map(i=>document.getElementById(i)?.value||""),focused=document.activeElement&&document.activeElement.id;
   const ago=sync.at&&st==="Synced"?(Date.now()-sync.at<60e3?" just now":" "+relTime(sync.at)):"";
   if(u){el.innerHTML=`<div class="setrow"><div><b>Sync &amp; backup is on</b><small>${esc(u.email||"Signed in")}${st?" · "+esc(st)+ago:""}</small></div><button class="btn ghost" data-sync="out">Sign out</button></div>`+
     (sync.conflict?`<div class="syconf"><b>This device and your cloud copy both have plans.</b><small>Which one should you keep? The other is replaced.</small>
       <div class="acts"><button class="btn ghost" data-sync="keep-local">This device</button><button class="btn" data-sync="keep-cloud">Cloud copy (${esc(relTime(sync.conflict.updatedAt))})</button></div></div>`:"");return}
-  el.innerHTML=`<div class="setrow"><div><b>Sync &amp; backup</b><small>Sign in to back up your planner and use it on all your devices. Photos stay on this device.</small></div><button class="btn" data-sync="google" ${sync.busy?"disabled":""}>Continue with Google</button></div>
+  el.innerHTML=`<div class="setrow"><div><b>Sync &amp; backup</b><small>Sign in to back up your planner and use it on all your devices. Photos stay on this device.</small></div>${sync.busy?`<button class="btn ghost" data-sync="cancel">Cancel</button>`:`<button class="btn" data-sync="google">Continue with Google</button>`}</div>
     ${sync.emailOpen?`<div class="syform"><input id="syEmail" type="email" placeholder="Email" autocomplete="email"><input id="syPass" type="password" placeholder="Password (6+ characters)" autocomplete="current-password">
       <div class="acts"><button class="lnk" data-sync="reset">Forgot password?</button><button class="btn ghost" data-sync="create">Create account</button><button class="btn" data-sync="email">Sign in</button></div></div>`
-      :`<div class="syalt"><button class="inlink" data-sync="useemail">or use email instead</button></div>`}
+      :`<div class="syalt"><button class="inlink" data-sync="useemail">or use email instead</button>${isIosHomeApp()?`<small class="synote">On an iPhone Home Screen app, Google's sign-in window often can't open. Email works everywhere.</small>`:""}</div>`}
     ${st?`<p class="synote">${esc(st)}</p>`:""}`;
   ["syEmail","syPass"].forEach((i,n)=>{const x=document.getElementById(i);if(x){x.value=keep[n];if(focused===i)x.focus()}})}
+function isIosHomeApp(){return /iPhone|iPad|iPod/.test(navigator.userAgent)&&(navigator.standalone===true||matchMedia("(display-mode: standalone)").matches)}
 function relTime(t){const m=Math.round((Date.now()-t)/60e3);return m<1?"just now":m<60?m+" min ago":m<1440?Math.round(m/60)+" h ago":relDay(iso(new Date(t))).toLowerCase()}
 document.addEventListener("click",async e=>{
   if(e.target.closest("[data-syncsetup]")){finishSetup();tab="set";render();scrollTo(0,0);return}
   const b=e.target.closest("[data-sync]");if(!b)return;const a=b.dataset.sync;
   if(a==="google"||a==="email"||a==="create"){syncSignIn(a);return}
+  if(a==="cancel"){sync.attempt++;sync.busy=false;sync.emailOpen=true;setSync("");document.getElementById("syEmail")?.focus();return}
   if(a==="useemail"){sync.emailOpen=true;renderSync();document.getElementById("syEmail")?.focus();return}
   if(a==="reset"){const em=document.getElementById("syEmail").value.trim();if(!em){document.getElementById("syEmail").focus();setSync("Type your email first, then tap Forgot password.");return}
     try{await syncLoad();await sync.fn.sendPasswordResetEmail(sync.auth,em);setSync("Check your email for a link to reset your password.")}catch(err){setSync(syncErr(err))}return}
