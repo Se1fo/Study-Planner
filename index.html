@@ -895,7 +895,8 @@ ul.tickets>li.tmenu{padding:0 4px 2px;margin-top:-1px}
 }
 .setrow .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr}
 .setrow .seg button{min-width:0;overflow:hidden;text-overflow:ellipsis;padding-left:4px;padding-right:4px}
-.setrow .seg:has([data-optopen]) button{font-size:.74rem}
+.setrow .seg:has([data-optopen]){grid-auto-columns:auto}
+.setrow .seg:has([data-optopen]) button{font-size:.76rem;padding-left:8px;padding-right:8px}
 .day .dayadds{justify-content:flex-end}
 @media(max-width:600px){.day{padding-left:12px;padding-right:12px}}
 /* ---- drag to reorder ---- */
@@ -920,6 +921,19 @@ li.tk.editing{display:block;padding:12px}
 .tedit input,.tedit select{width:100%;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:10px;padding:9px 10px;font:inherit;font-size:.9rem;min-width:0}
 .tedrow{display:flex;gap:8px}
 .tedit .acts{display:flex;justify-content:flex-end;gap:8px}
+/* ---- sync ---- */
+#syncBox .syalt{padding:0 0 12px}
+#syncBox .synote{margin:0 0 12px;color:var(--muted);font-size:.8rem;line-height:1.4}
+#syncBox .syform{display:grid;gap:8px;padding:0 0 14px}
+#syncBox .syform input{border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;font-size:.92rem;min-width:0}
+#syncBox .acts{display:flex;gap:8px;justify-content:flex-end;align-items:center;flex-wrap:wrap}
+#syncBox .acts .lnk{margin-right:auto}
+#syncBox .syconf{margin:0 0 14px;padding:12px;border-radius:12px;background:color-mix(in srgb,var(--hist) 12%,var(--soft));display:grid;gap:6px}
+#syncBox .syconf small{color:var(--muted);font-size:.82rem}
+.setup .srestore{display:block;margin:14px auto 0;font-size:.82rem}
+#syncBox>.setrow:first-child{flex-wrap:wrap}
+#syncBox>.setrow:first-child>div{flex:1 1 100%}
+#syncBox>.setrow:first-child>.btn[data-sync=google]{flex:1 1 100%}
 </style>
 </head>
 <body>
@@ -1020,6 +1034,8 @@ li.tk.editing{display:block;padding:12px}
   </div>
   <div id="pSet">
     <div class="sethead"><button class="lnk" data-tab="back">‹ Back</button><h2>Settings</h2></div>
+    <h4 class="setsec">Account</h4>
+    <section class="setgrp" id="syncBox"></section>
     <h4 class="setsec">Planner</h4>
     <section class="setgrp">
       <div class="setrow"><div><b>Auto-tick past days</b><small>After midnight, the day's tasks tick themselves.</small></div>
@@ -1099,7 +1115,8 @@ li.tk.editing{display:block;padding:12px}
     <div class="sgroup" data-sgroup="1"><h2>Your subjects</h2><p>Keep the ones you study and add any that are missing. You can change them later in Tasks → Lessons.</p>
       <div id="setupSubjList" class="schips"></div>
       <div class="sadd"><input id="setupNewSubj" placeholder="Add a subject" maxlength="24" enterkeyhint="done"><button class="btn ghost" data-sadd>Add</button></div>
-      <div class="sacts"><button class="btn full" data-snext>Next</button></div></div>
+      <div class="sacts"><button class="btn full" data-snext>Next</button></div>
+      <button class="inlink srestore" data-syncsetup>Already use Study Planner? Sign in to bring your planner here</button></div>
     <div class="sgroup" data-sgroup="2"><h2>School days</h2><p>Tap the days you have school. Attendance only counts these.</p>
       <div class="seg" id="setupSdays"></div>
       <div class="sacts"><button class="btn ghost full" data-sprev>Back</button><button class="btn full" data-snext>Next</button></div></div>
@@ -1119,11 +1136,16 @@ li.tk.editing{display:block;padding:12px}
   <div class="focus" id="focus" hidden role="dialog" aria-label="Focus timer"><div class="fbox"></div></div>
 
 <script>
-const APP_VERSION="2.9";
+const APP_VERSION="3.0";
 // Goes up with every published change, including small tweaks that keep the same version.
 // The update check compares this, so tweaks still reach installed apps.
-const APP_BUILD=2;
+const APP_BUILD=3;
 const CHANGES=[
+  ["3.0","Sync & backup: sign in (Settings → Account) to keep your planner safe in the cloud and the same on all your devices",
+        "Sign in with Google or with email and a password",
+        "Changes on one device show up on your others within a few seconds, and it still works offline",
+        "If a device already has different plans, you choose which copy to keep",
+        "Photos in notes stay on the device they were added on"],
   ["2.9","Swipe any ticket: right to mark it done, left to delete (with Undo)",
         "Every ticket has a ⋯ menu with Move up/down, Edit and Delete",
         "Edit homework, exams and reminders in place: tap the title or use Edit",
@@ -1185,6 +1207,8 @@ const PALETTE=["#8b5cf6","#0ea5e9","#f97316","#14b8a6","#e11d48","#84cc16","#a16
 let SUBJECTS=[...BASE_SUBJECTS,OTHER];
 function col(sj){return sj.c.startsWith("--")?`var(${sj.c})`:sj.c}
 const uid=()=>Math.random().toString(36).slice(2,9);
+// Cloud sync state; declared early because save() and render() read it during startup.
+const sync={ready:null,fn:null,auth:null,db:null,user:null,status:"",at:0,unsub:null,timer:null,applying:false,conflict:null,emailOpen:false,busy:false};
 const DEFAULT={
   v:2,updatedAt:0,
   remaining:{prog:0,arab:0,hist:0,eng:0},
@@ -1806,6 +1830,7 @@ function applySettings(){
   const sd=document.getElementById("optSound");if(sd)sd.checked=st.sound!==false;
   const cf=document.getElementById("optConf");if(cf)cf.checked=st.confetti!==false;
   const au=document.getElementById("optAutoUpdate");if(au)au.checked=st.autoUpdate===true;
+  renderSync();
   if(st.style==="luxe")document.documentElement.dataset.style="luxe";else delete document.documentElement.dataset.style;
   document.querySelectorAll("[data-optstyle]").forEach(b=>b.classList.toggle("on",b.dataset.optstyle===(st.style||"classic")));
   document.documentElement.style.fontSize=({s:"14px",m:"16px",l:"18px"})[st.size||"m"];
@@ -2045,7 +2070,7 @@ function render(){
   afterRender();
 }
 
-function save(){state.updatedAt=Date.now();try{localStorage.setItem("study-planner",JSON.stringify(state))}catch(e){}}
+function save(){state.updatedAt=Date.now();try{localStorage.setItem("study-planner",JSON.stringify(state))}catch(e){}if(sync.user&&!sync.applying)syncSoon()}
 function change(fn){fn();state.editedAt=Date.now();save();render()}
 function persistStorage(){if(state.persisted)return;navigator.storage.persist().then(granted=>{state.persisted=granted;save()})}
 function prune(key){const x=state.dates[key];if(x&&!x.noPages&&!x.skip.length&&!x.extra.length&&!Object.keys(x.done).length&&!Object.keys(x.amt||{}).length&&!Object.keys(x.pg||{}).length&&!(x.order&&x.order.length))delete state.dates[key]}
@@ -2635,6 +2660,113 @@ function hardReload(){
   if(swReg&&swReg.waiting){swReg.waiting.postMessage({type:"SKIP_WAITING"});setTimeout(go,3000);return}
   go();
 }
+
+// ===== cloud sync & backup (Firebase, free Spark plan) =====
+// The whole planner is stored as one private document: users/{uid}/data/planner.
+// Photos stay on the device (Firebase Storage needs the paid plan).
+const FB_CONFIG={apiKey:"AIzaSyABlcRz9ALXp2bvoTLF4jNFg0mQ2MxvM2U",authDomain:"study-planner-a2291.firebaseapp.com",projectId:"study-planner-a2291",
+  storageBucket:"study-planner-a2291.firebasestorage.app",messagingSenderId:"1054049409914",appId:"1:1054049409914:web:7c9eaa2b1d8c10c76754c3"};
+const FB_URL=n=>"https://www.gstatic.com/firebasejs/12.19.0/firebase-"+n+".js";
+const DEVICE_ID=(()=>{try{let d=localStorage.getItem("sp-device");if(!d){d=uid()+uid();localStorage.setItem("sp-device",d)}return d}catch(e){return uid()}})();
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}
+// The cloud version this device last matched. Local edits after it are "unsynced".
+function syncBase(){return +(lsGet("sp-sync-base:"+(sync.user&&sync.user.uid))||0)}
+function setSyncBase(v){lsSet("sp-sync-base:"+sync.user.uid,String(v))}
+function syncLoad(){
+  if(!sync.ready)sync.ready=Promise.all([import(FB_URL("app")),import(FB_URL("auth")),import(FB_URL("firestore"))]).then(([app,auth,fs])=>{
+    const a=app.initializeApp(FB_CONFIG);sync.fn={...auth,...fs};sync.auth=auth.getAuth(a);sync.db=fs.getFirestore(a);
+    auth.onAuthStateChanged(sync.auth,u=>onSyncUser(u));
+  }).catch(e=>{sync.ready=null;throw e});
+  return sync.ready}
+function syncRef(){return sync.fn.doc(sync.db,"users",sync.user.uid,"data","planner")}
+function setSync(t){sync.status=t;renderSync()}
+function isBlankPlanner(s){return !(s.homework||[]).length&&!(s.exams||[]).length&&!(s.notes||[]).length&&!(s.grades||[]).length&&!(s.reminders||[]).length
+  &&!Object.keys(s.att||{}).length&&!Object.keys(s.dates||{}).length&&!Object.values(s.days||{}).some(d=>d.tasks&&d.tasks.length)}
+async function onSyncUser(u){
+  if(sync.unsub){sync.unsub();sync.unsub=null}
+  const was=sync.user;sync.user=u;sync.conflict=null;
+  // Firebase also reports "no user" when it starts up; only clear messages on a real sign-out.
+  if(!u){lsSet("sp-sync",null);if(was)setSync("");else renderSync();return}
+  lsSet("sp-sync","1");setSync("Syncing…");
+  try{
+    const snap=await sync.fn.getDoc(syncRef()),base=syncBase();
+    if(!snap.exists())await syncPush();
+    else{const r=snap.data(),localDirty=(state.updatedAt||0)>base;
+      if(r.updatedAt===base){if(localDirty)await syncPush();else syncDone()}
+      else if(!localDirty&&base)applyRemote(r);
+      else if(isBlankPlanner(state))applyRemote(r,true);
+      else{sync.conflict=r;setSync("")}}
+    sync.unsub=sync.fn.onSnapshot(syncRef(),snap=>{
+      if(!snap.exists()||(snap.metadata&&snap.metadata.hasPendingWrites)||sync.conflict)return;
+      const r=snap.data(),base=syncBase();if(!r||r.updatedAt<=base)return;
+      // Both sides changed while connected: the newer edit wins.
+      if((state.updatedAt||0)>base&&(state.updatedAt||0)>r.updatedAt)syncSoon();else applyRemote(r)},
+      err=>setSync(syncErr(err)));
+  }catch(e){setSync(syncErr(e))}}
+function syncSoon(){clearTimeout(sync.timer);sync.timer=setTimeout(()=>syncPush().catch(e=>setSync(syncErr(e))),1200)}
+async function syncPush(){if(!sync.user)return;clearTimeout(sync.timer);
+  const data={state:JSON.stringify(state),updatedAt:state.updatedAt||Date.now(),device:DEVICE_ID,version:APP_VERSION};
+  if(!navigator.onLine)setSync("Offline. Will sync when you're back online.");
+  await sync.fn.setDoc(syncRef(),data);setSyncBase(data.updatedAt);syncDone()}
+function syncDone(){sync.at=Date.now();setSync("Synced")}
+function applyRemote(r,quiet){
+  let s;try{s=JSON.parse(r.state)}catch(e){setSync("The cloud copy couldn't be read.");return}
+  sync.applying=true;state=migrate(s);state.updatedAt=r.updatedAt;
+  try{localStorage.setItem("study-planner",JSON.stringify(state))}catch(e){}
+  setSyncBase(r.updatedAt);resetSubjSelects();subjView=null;noteOpen=null;editItem=null;openMenu=null;
+  if(state.settings.setupDone&&!document.getElementById("setup").hidden)closeSetupSheet();
+  render();sync.applying=false;syncDone();
+  if(!quiet)alertMsg("Updated from your other device")}
+function syncErr(e){const c=(e&&e.code)||"";
+  if(!c&&e&&/import|fetch|module/i.test(String(e.message||e)))return "Couldn't reach the sign-in service. Check your connection.";
+  return ({"auth/popup-blocked":"The sign-in window was blocked. Allow pop-ups, or use email instead.",
+    "auth/popup-closed-by-user":"","auth/cancelled-popup-request":"",
+    "auth/unauthorized-domain":"This website isn't allowed in Firebase yet (Authentication → Settings → Authorized domains).",
+    "auth/operation-not-allowed":"This sign-in method isn't turned on in Firebase yet.",
+    "auth/invalid-credential":"Wrong email or password.","auth/wrong-password":"Wrong email or password.","auth/user-not-found":"No account with that email. Tap Create account.",
+    "auth/invalid-email":"That email doesn't look right.","auth/email-already-in-use":"That email already has an account. Tap Sign in.",
+    "auth/weak-password":"Use a password with at least 6 characters.","auth/too-many-requests":"Too many tries. Wait a minute and try again.",
+    "auth/network-request-failed":"No connection. Try again when you're online.",
+    "permission-denied":"The cloud refused access. Check the Firestore rules.","unavailable":"Offline. Will sync when you're back online."})[c]??("Sync problem"+(c?" ("+c+")":"")+". Try again.")}
+async function syncSignIn(kind){
+  const em=document.getElementById("syEmail"),pw=document.getElementById("syPass");
+  if(kind!=="google"&&(!em.value.trim()||!pw.value)){(em.value.trim()?pw:em).focus();return}
+  sync.busy=true;setSync(kind==="google"?"Opening Google sign-in…":"Signing in…");
+  try{await syncLoad();const f=sync.fn;
+    if(kind==="google")await f.signInWithPopup(sync.auth,new f.GoogleAuthProvider());
+    else if(kind==="create")await f.createUserWithEmailAndPassword(sync.auth,em.value.trim(),pw.value);
+    else await f.signInWithEmailAndPassword(sync.auth,em.value.trim(),pw.value);
+    sync.emailOpen=false}
+  catch(e){setSync(syncErr(e))}finally{sync.busy=false;renderSync()}}
+function renderSync(){const el=document.getElementById("syncBox");if(!el)return;const u=sync.user,st=sync.status;
+  const keep=["syEmail","syPass"].map(i=>document.getElementById(i)?.value||""),focused=document.activeElement&&document.activeElement.id;
+  const ago=sync.at&&st==="Synced"?(Date.now()-sync.at<60e3?" just now":" "+relTime(sync.at)):"";
+  if(u){el.innerHTML=`<div class="setrow"><div><b>Sync &amp; backup is on</b><small>${esc(u.email||"Signed in")}${st?" · "+esc(st)+ago:""}</small></div><button class="btn ghost" data-sync="out">Sign out</button></div>`+
+    (sync.conflict?`<div class="syconf"><b>This device and your cloud copy both have plans.</b><small>Which one should you keep? The other is replaced.</small>
+      <div class="acts"><button class="btn ghost" data-sync="keep-local">This device</button><button class="btn" data-sync="keep-cloud">Cloud copy (${esc(relTime(sync.conflict.updatedAt))})</button></div></div>`:"");return}
+  el.innerHTML=`<div class="setrow"><div><b>Sync &amp; backup</b><small>Sign in to back up your planner and use it on all your devices. Photos stay on this device.</small></div><button class="btn" data-sync="google" ${sync.busy?"disabled":""}>Continue with Google</button></div>
+    ${sync.emailOpen?`<div class="syform"><input id="syEmail" type="email" placeholder="Email" autocomplete="email"><input id="syPass" type="password" placeholder="Password (6+ characters)" autocomplete="current-password">
+      <div class="acts"><button class="lnk" data-sync="reset">Forgot password?</button><button class="btn ghost" data-sync="create">Create account</button><button class="btn" data-sync="email">Sign in</button></div></div>`
+      :`<div class="syalt"><button class="inlink" data-sync="useemail">or use email instead</button></div>`}
+    ${st?`<p class="synote">${esc(st)}</p>`:""}`;
+  ["syEmail","syPass"].forEach((i,n)=>{const x=document.getElementById(i);if(x){x.value=keep[n];if(focused===i)x.focus()}})}
+function relTime(t){const m=Math.round((Date.now()-t)/60e3);return m<1?"just now":m<60?m+" min ago":m<1440?Math.round(m/60)+" h ago":relDay(iso(new Date(t))).toLowerCase()}
+document.addEventListener("click",async e=>{
+  if(e.target.closest("[data-syncsetup]")){finishSetup();tab="set";render();scrollTo(0,0);return}
+  const b=e.target.closest("[data-sync]");if(!b)return;const a=b.dataset.sync;
+  if(a==="google"||a==="email"||a==="create"){syncSignIn(a);return}
+  if(a==="useemail"){sync.emailOpen=true;renderSync();document.getElementById("syEmail")?.focus();return}
+  if(a==="reset"){const em=document.getElementById("syEmail").value.trim();if(!em){document.getElementById("syEmail").focus();setSync("Type your email first, then tap Forgot password.");return}
+    try{await syncLoad();await sync.fn.sendPasswordResetEmail(sync.auth,em);setSync("Check your email for a link to reset your password.")}catch(err){setSync(syncErr(err))}return}
+  if(a==="out"){try{await sync.fn.signOut(sync.auth)}catch(err){}alertMsg("Signed out. Your planner stays on this device.");return}
+  if(a==="keep-local"){sync.conflict=null;setSync("Syncing…");try{await syncPush();alertMsg("Your cloud copy now matches this device")}catch(err){setSync(syncErr(err))}onSyncUser(sync.user);return}
+  if(a==="keep-cloud"){const r=sync.conflict;sync.conflict=null;snap();applyRemote(r,true);undoToast("Loaded your cloud copy");onSyncUser(sync.user)}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.target.id==="syEmail"||e.target.id==="syPass")){e.preventDefault();syncSignIn("email")}});
+// Resume sync on start if this device was signed in, and catch up when the connection returns.
+if(lsGet("sp-sync")==="1")setTimeout(()=>syncLoad().catch(e=>setSync(syncErr(e))),800);
+addEventListener("online",()=>{if(lsGet("sp-sync")==="1"&&!sync.ready)syncLoad().catch(()=>{});else if(sync.user)onSyncUser(sync.user)});
 let lastUpdCheck=0,announcedVersion=null;
 // "2.10" is newer than "2.9"; a server copy that is the same or older never counts as an update.
 function verNewer(a,b){const x=String(a).split(".").map(Number),y=String(b).split(".").map(Number);
