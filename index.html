@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Study Planner">
@@ -26,7 +26,7 @@
 <style>
 :root{
   --shadow:0 1px 2px rgba(16,24,40,.04),0 2px 8px rgba(16,24,40,.05);
-  --bg:#f3f4f8; --panel:#ffffff; --ink:#161a24; --muted:#6a7185; --line:#e2e5ee; --soft:#eceef5;
+  --bg:#f3f4f8; --panel:#ffffff; --ink:#161a24; --muted:#5b6275; --line:#e2e5ee; --soft:#eceef5;
   --prog:#3b6fe0; --arab:#15936a; --hist:#c4820f; --eng:#d4467a; --other:#7b7f8f;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
@@ -613,7 +613,7 @@ body[data-tabpos="bottom"] .tabwrap{display:none}
 body[data-tabpos="bottom"] .wrap{padding-bottom:calc(108px + env(safe-area-inset-bottom,0px))}
 
 body[data-tabpos="bottom"] .searchbar{margin-top:2px}
-body[data-view="set"] .tabbar,body[data-view="search"] .tabbar,body[data-view="notif"] .tabbar{display:none!important}
+body[data-view="set"] .tabbar,body[data-view="search"] .tabbar,body[data-view="notif"] .tabbar,body[data-view="stats"] .tabbar{display:none!important}
 body[data-view="set"] .wrap,body[data-view="search"] .wrap,body[data-view="notif"] .wrap{padding-bottom:calc(56px + env(safe-area-inset-bottom,0px))}
 #splash{position:fixed;inset:0;z-index:100;display:grid;place-content:center;justify-items:center;gap:14px;background:var(--bg);transition:opacity .35s ease,transform .35s ease}
 #splash img{width:84px;height:84px;border-radius:22px;box-shadow:0 12px 30px -12px rgba(0,0,0,.6)}
@@ -1045,7 +1045,7 @@ button.gav{border:0;font:inherit;color:inherit;cursor:pointer;text-align:center}
 .mgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:10px;box-shadow:var(--shadow)}
 .mh{text-align:center;font-size:.7rem;font-weight:700;color:var(--muted);padding:2px 0 6px}
 .md{position:relative;min-height:64px;border:0;border-radius:10px;background:var(--soft);color:var(--ink);font:inherit;padding:5px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;overflow:hidden}
-.md.past{opacity:.55}
+.md.past{opacity:1}.md.past .mn{color:var(--muted);font-weight:600}
 .md.tod{box-shadow:inset 0 0 0 2px var(--ink)}
 .md.hol{background:color-mix(in srgb,var(--hist) 16%,var(--soft))}
 .mn{font-size:.82rem;font-weight:700}
@@ -1071,11 +1071,99 @@ button.gav{border:0;font:inherit;color:inherit;cursor:pointer;text-align:center}
 .sdhead .lnk{white-space:nowrap;flex:none}
 @media(max-width:360px){.qakinds{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:auto}.qakinds button{font-size:.64rem;padding:6px 3px}}
 .sdsum{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+/* ---- bin, reminder pop-up, notes ---- */
+.trlist{list-style:none;margin:0;padding:4px 0}
+.trlist li{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--line)}
+.trlist li:first-child{border-top:0}
+.trlist .btn{flex:none;padding:7px 12px}
+.trempty{display:block;margin:6px auto 12px}
+.rempop{position:fixed;left:12px;right:12px;top:calc(12px + env(safe-area-inset-top,0px));z-index:70;max-width:520px;margin:0 auto;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center;
+  background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--prog);border-radius:16px;padding:12px 14px;box-shadow:0 14px 40px rgba(0,0,0,.3);transform:translateY(-140%);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.rempop.up{transform:none}
+.rpi{font-size:1.4rem}
+.rpt{min-width:0}.rpt b{display:block;overflow-wrap:anywhere}.rpt small{color:var(--muted);font-size:.8rem}
+.rpa{grid-column:1/-1;display:flex;gap:8px}.rpa .btn{padding:9px}
+.nmeta{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.nmb{display:flex;gap:12px}
+.ntools{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+.ntools button{border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:8px;padding:5px 10px;font:inherit;font-size:.82rem;cursor:pointer;min-height:34px}
+.nvtitle{margin:6px 0 8px;font-size:1.3rem;overflow-wrap:anywhere}
+.nview{line-height:1.55;overflow-wrap:anywhere}
+.nview p{margin:0 0 6px}.nview h3{margin:12px 0 6px;font-size:1.1rem}.nview h4{margin:10px 0 4px;font-size:.98rem}
+.nview .nsp{height:8px}
+.nview ul{margin:4px 0 8px;padding-left:20px}
+.nview .nchk{list-style:none;padding-left:0}
+.nview .nchk label{display:flex;gap:10px;align-items:flex-start;padding:4px 0;cursor:pointer}
+.nview .nchk .chk{width:20px;height:20px;border-radius:6px;flex:none;margin-top:2px}
+.nview .nchk li.on span{text-decoration:line-through;color:var(--muted)}
+.nview .nfc{display:grid;gap:2px;padding:8px 12px;margin:6px 0;border-radius:12px;background:var(--soft);border-left:3px solid var(--c)}
+.nview .nfc span{color:var(--muted)}
+.nempty{color:var(--muted)}
+.nhead{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.nhead .grp{margin:10px 0 6px 4px}
+.nsort{width:140px;display:grid;grid-template-columns:1fr 1fr}.nsort button{padding:4px}
+/* ---- plan my week & stats ---- */
+.wkacts{flex-basis:100%;display:flex;justify-content:center;gap:18px}
+.wkacts .lnk{font-size:.82rem}
+.plday{flex-wrap:wrap}.plday b{min-width:84px}.plday span{display:flex;flex-wrap:wrap;gap:4px}
+.pchip{font-style:normal;font-size:.78rem;font-weight:700;border-radius:20px;padding:2px 9px;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--ink);border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
+#pStats{display:none}body[data-view="stats"] #pStats{display:block}
+.allstats{float:right;margin-top:-26px;font-size:.8rem}
+.statrange{display:grid;grid-template-columns:repeat(3,1fr);margin:0 0 14px;width:100%}
+.sttiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.sttiles div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center;display:grid;gap:2px;box-shadow:var(--shadow)}
+.sttiles b{font-size:1.2rem}.sttiles small{color:var(--muted);font-size:.72rem}
+.stcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:12px;box-shadow:var(--shadow)}
+.stcard .sthead{display:flex;justify-content:space-between;align-items:baseline}.stcard .sthead .grp{margin:0}.stcard .sthead span{font-size:.8rem;color:var(--muted)}
+.sbars{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;height:130px;margin:12px 0 4px;align-items:end}
+.stbar{display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
+.stbw{flex:1;width:100%;max-width:26px;display:flex;align-items:flex-end;border-bottom:1px solid var(--line)}
+.stbw i{display:block;width:100%;min-height:2px;background:var(--accent,var(--prog));border-radius:4px 4px 0 0}
+.stbar small{font-size:.66rem;color:var(--muted)}
+.stable summary{font-size:.78rem;color:var(--muted);cursor:pointer;margin-top:4px}
+.stable table,.stsub{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:6px}
+.stable td,.stable th,.stsub td,.stsub th{text-align:left;padding:5px 4px;border-top:1px solid var(--line)}
+.stable th,.stsub th{color:var(--muted);font-weight:600;font-size:.74rem}
+.stsub td{white-space:nowrap}.stsub td:first-child{display:flex;align-items:center;gap:6px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stsub td i{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+.stl{display:flex;align-items:center;gap:6px}.stl em{display:block;height:6px;border-radius:4px;background:var(--accent,var(--prog));min-width:2px;max-width:60px}
+.stcard .sthead span b{color:var(--ink)}
+.stsub{font-size:.78rem;table-layout:auto}.stsub td,.stsub th{padding:5px 3px}.stsub td:first-child{max-width:100px}
+.stcard{overflow-x:auto}
+/* ---- accessibility ---- */
+html{touch-action:manipulation}
+:focus-visible{outline:2px solid var(--accent,var(--prog));outline-offset:2px;border-radius:6px}
+button:focus:not(:focus-visible),input:focus:not(:focus-visible){outline:none}
+.del{min-width:32px;min-height:32px}
+@media (forced-colors:active){.chk{border:2px solid CanvasText}.chk:checked{background:Highlight}}
+/* Coloured text: in light mode blend toward the text colour so it keeps its hue but reads at 4.5:1+. Dark mode is unchanged. */
+:root{--tmix:32%}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tmix:0%}}
+:root[data-theme="dark"]{--tmix:0%}
+.red{color:color-mix(in srgb,var(--eng),var(--ink) var(--tmix))!important}
+.lnk:not(.danger),.inlink{color:color-mix(in srgb,var(--prog),var(--ink) var(--tmix))}
+:root[data-accent] .lnk:not(.danger){color:color-mix(in srgb,var(--accent),var(--ink) var(--tmix))}
+.streak{color:color-mix(in srgb,var(--hist),var(--ink) calc(var(--tmix)*1.6))}
+.cnow{color:color-mix(in srgb,var(--arab),var(--ink) calc(var(--tmix)*1.7))}
+ul.tickets>li.tk .tsub{color:color-mix(in srgb,var(--c,var(--muted)),var(--ink) calc(var(--tmix)*1.4))}
+.danger,.lnk.danger{color:color-mix(in srgb,var(--eng),var(--ink) var(--tmix))}
+/* Done tickets: grey + strike-through at full opacity (readable), instead of fading the whole ticket */
+ul.tickets>li.tk.done{opacity:1;background:var(--soft);border-left-color:color-mix(in srgb,var(--c,var(--muted)) 35%,transparent)}
+ul.tickets>li.tk.done .tt>b{color:var(--muted);text-decoration:line-through}
+ul.tickets>li.tk.done .tsub,ul.tickets>li.tk.done .amtin,ul.tickets>li.tk.done .amtl,ul.tickets>li.tk.done .ttlx{color:var(--muted)}
+li.done .tt{opacity:1}
+.attnums .gp{color:color-mix(in srgb,var(--arab),var(--ink) calc(var(--tmix)*1.6))}.attnums .ga{color:color-mix(in srgb,var(--eng),var(--ink) var(--tmix))}
+.cald.sp{background:color-mix(in srgb,var(--arab),#000 calc(var(--tmix)*.8));border-color:transparent}
+.cald.sa{background:color-mix(in srgb,var(--eng),#000 calc(var(--tmix)*.6));border-color:transparent}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cald.sp,:root:not([data-theme="light"]) .cald.sa{color:#0b0b0e}}
+:root[data-theme="dark"] .cald.sp,:root[data-theme="dark"] .cald.sa{color:#0b0b0e}
+.cls.now .ctime{color:var(--ink)}
+.tabbar{background:color-mix(in srgb,var(--bg) 94%,transparent)!important}
 </style>
 </head>
 <body>
 <div id="splash"><img src="icon-192.png" alt=""><span>Study Planner</span></div>
-<div class="wrap">
+<main class="wrap">
   <header>
     <div>
       <div class="eyebrow">Study planner</div>
@@ -1102,7 +1190,7 @@ button.gav{border:0;font:inherit;color:inherit;cursor:pointer;text-align:center}
       <div class="wkmid"><b id="wkLabel"></b><small id="wkDates"></small></div>
       <button class="wkbtn" data-wk="1" aria-label="Next week">›</button>
       <button class="lnk" data-wk="0" id="wkToday" hidden>Back to this week</button>
-      <button class="lnk wkrev" data-review>📊 Week review</button>
+      <div class="wkacts"><button class="lnk" data-review>📊 Week review</button><button class="lnk" data-plan>🪄 Plan my week</button></div>
     </div>
     <nav class="strip" id="strip" aria-label="Days"></nav>
     <section class="days" id="days"></section>
@@ -1147,11 +1235,16 @@ button.gav{border:0;font:inherit;color:inherit;cursor:pointer;text-align:center}
       <div id="subjList">
         <section class="subjects" id="subjects" aria-label="Your subjects"></section>
         <div id="gAvgs"></div>
-        <section class="stats"><div class="sthead"><h3 class="grp">Last 7 days</h3><span id="stTotal"></span></div><div class="bars" id="bars"></div><div class="stfocus" id="stFocus"></div></section>
+        <section class="stats"><div class="sthead"><h3 class="grp">Last 7 days</h3><span id="stTotal"></span></div><button class="lnk allstats" data-tab="stats">All stats ›</button><div class="bars" id="bars"></div><div class="stfocus" id="stFocus"></div></section>
         <p class="hint small">Tap a subject for its notes. Tap a number to edit it.</p>
       </div>
       <div id="subjDetail"></div>
     </div>
+  </div>
+  <div id="pStats">
+    <div class="sethead"><button class="lnk" data-tab="back">‹ Back</button><h2>Stats</h2></div>
+    <div class="seg statrange" role="group" aria-label="Time range"><button data-srange="8w">8 weeks</button><button data-srange="6m">6 months</button><button data-srange="12m">12 months</button></div>
+    <div id="statsBody"></div>
   </div>
   <div id="pNotif">
     <div class="sethead"><button class="lnk" data-tab="back">‹ Back</button><h2>Notifications</h2></div>
@@ -1183,6 +1276,7 @@ button.gav{border:0;font:inherit;color:inherit;cursor:pointer;text-align:center}
       <div class="setrow"><div><b>Clear ticks</b><small>Unticks every task in the week you're viewing.</small></div><button class="btn ghost" id="reset">Clear</button></div>
     </section>
     <section class="setgrp setpage" data-page="alerts" hidden>
+      <div class="setrow"><div><b>Reminder pop-ups</b><small id="notifTxt">Reminders pop up in the app when they're due. Allow notifications to also see them while the app is in the background.</small></div><button class="btn ghost" id="notifBtn">Allow</button></div>
       <div class="setrow"><div><b>Reminder options</b><small id="presetList">Custom times you save show up here.</small></div></div>
       <div class="setrow"><div><b>Badge on app icon</b><small>Shows how much homework is left on your home-screen icon. Your iPhone will ask for notification permission.</small></div>
         <label class="sw"><input type="checkbox" id="optBadge"><span></span></label></div>
@@ -1206,6 +1300,7 @@ button.gav{border:0;font:inherit;color:inherit;cursor:pointer;text-align:center}
       <div class="setrow"><div><b>Subject colors</b><small>Change them from the color dot on each subject.</small></div><button class="btn ghost" data-lsgo="all">Open</button></div>
     </section>
     <section class="setgrp setpage" data-page="data" hidden>
+      <div class="setrow"><div><b>Recently deleted</b><small>Restore anything you deleted in the last 30 days.</small></div><button class="btn ghost" data-sp="trash">Open</button></div>
       <div class="setrow"><div><b>Backup</b><small>One file with everything, photos included. <button class="inlink" id="mv">or share a link</button></small></div><button class="btn" id="fbSave">Save file</button></div>
       <div id="fbLink" class="fblink" hidden></div>
       <div class="setrow"><div><b>Restore</b><small>Replaces what's on this device. <button class="inlink" id="imp">or paste a link or code</button></small></div><button class="btn ghost" id="fbLoad">Choose file</button></div>
@@ -1217,6 +1312,7 @@ button.gav{border:0;font:inherit;color:inherit;cursor:pointer;text-align:center}
       </div>
       <div class="setrow"><div><b>Start fresh</b><small>Clears everything except your subjects and settings.</small></div><button class="btn ghost danger" id="wipe">Clear</button></div>
     </section>
+    <section class="setgrp setpage" data-page="trash" hidden><div id="trashBox"></div></section>
     <section class="setgrp setpage" data-page="about" hidden>
       <div class="setrow verrow"><div class="vleft"><b>Version</b><span id="ver"></span><small id="offst">Checking…</small></div>
         <div class="vacts"><button class="btn ghost" id="showChanges"><span class="chev2">›</span> Changes</button><button class="btn ghost" id="upd">Check Update</button></div></div>
@@ -1246,9 +1342,9 @@ button.gav{border:0;font:inherit;color:inherit;cursor:pointer;text-align:center}
   </div>
   <footer hidden>
   </footer>
-</div>
+</main>
   <div class="sheetbg" id="sheetBg" hidden></div>
-  <div class="sheet" id="sheet" hidden role="dialog" aria-label="Quick add"><span class="grabber"></span></div>
+  <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-label="Panel"><span class="grabber"></span></div>
   <div class="setup" id="setup" hidden role="dialog" aria-modal="true" aria-label="Welcome setup"><div class="sbox">
     <button class="sclose" data-sclose aria-label="Skip setup">✕</button>
     <div class="sdots" id="setupDots"><i></i><i></i><i></i></div>
@@ -1271,7 +1367,8 @@ button.gav{border:0;font:inherit;color:inherit;cursor:pointer;text-align:center}
     <button data-tab="todo"><span class="tbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11"/><path d="M9 12h11"/><path d="M9 18h11"/><path d="m3.5 6 1.2 1.2L7 5"/><path d="m3.5 12 1.2 1.2L7 11"/><path d="m3.5 18 1.2 1.2L7 17"/></svg></span>Tasks<em id="todoCount2" hidden></em></button>
     <button data-tab="school"><span class="tbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/><path d="m8.5 14.5 2 2 4-4"/></svg></span>Attendance<em id="attPct2"></em></button>
   </nav>
-  <div class="toast" id="toast" hidden></div>
+  <div class="toast" id="toast" hidden role="status" aria-live="polite"></div>
+  <div class="rempop" id="rempop" hidden role="alertdialog" aria-label="Reminder"></div>
   <div class="confetti" id="confetti" aria-hidden="true"></div>
   <div class="focus" id="focus" hidden role="dialog" aria-label="Focus timer"><div class="fbox"></div></div>
   <div class="quiz" id="quiz" hidden role="dialog" aria-label="Flashcards"><div class="qbox"></div></div>
@@ -1373,7 +1470,7 @@ function col(sj){return sj.c.startsWith("--")?`var(${sj.c})`:sj.c}
 const uid=()=>Math.random().toString(36).slice(2,9);
 // Declared early because render() reads them during startup.
 let setPage=null;
-const SET_PAGES=[["account","☁️","Account"],["planner","📅","Planner"],["alerts","🔔","Reminders & sounds"],["look","🎨","Appearance"],["data","🛟","Backup & data"],["about","ℹ️","About"]];
+const SET_PAGES=[["account","☁️","Account"],["planner","📅","Planner"],["alerts","🔔","Reminders & sounds"],["look","🎨","Appearance"],["data","🛟","Backup & data"],["about","ℹ️","About"],["trash","🗑️","Recently deleted"]];
 let installPrompt=null;
 // Cloud sync state; declared early because save() and render() read it during startup.
 const sync={ready:null,fn:null,auth:null,db:null,user:null,status:"",at:0,unsub:null,timer:null,applying:false,conflict:null,emailOpen:false,busy:false,attempt:0};
@@ -1414,7 +1511,7 @@ function migrate(s){
       if(k.amt!==undefined){const x=dayData(s,iso(dateFor(0,+d)));if(!(k.id in x.amt))x.amt[k.id]=k.amt;delete k.amt}})});
   s.subjects=s.subjects||BASE_SUBJECTS.map(x=>({...x}));
   s.homework=s.homework||[];s.exams=s.exams||[];s.notes=s.notes||[];s.pages=s.pages||{};s.att=s.att||{};s.grades=s.grades||[];s.focusLog=s.focusLog||{};s.created=s.created||Date.now();s.reminders=s.reminders||[];
-  s.dismissed=s.dismissed||[];s.topics=s.topics||{};s.cards=s.cards||{};s.holidays=s.holidays||[];
+  s.dismissed=s.dismissed||[];s.trash=(s.trash||[]).filter(t=>Date.now()-t.at<30*864e5);s.topics=s.topics||{};s.cards=s.cards||{};s.holidays=s.holidays||[];
   SUBJECTS=[...s.subjects,OTHER];
   if(!s.seenVersion&&s.editedAt)s.seenVersion="0.9";
   if(s.seenVersion&&!/^[0-9]+\.[0-9]+$/.test(s.seenVersion))s.seenVersion="0.9";
@@ -1591,17 +1688,47 @@ function tickets(items){return `<ul class="tickets">${items.join("")}</ul>`}
 let rowSwiping=false;
 let rowSwipeTimeout=null;
 // Swipe right = done, left = delete (with Undo). Exams have no "done", so they only swipe left.
+// ---- recently deleted: kept 30 days so anything can be restored ----
+function trashPut(kind,label,data){state.trash=[{id:uid(),kind,label:String(label||"").slice(0,80),at:Date.now(),data:JSON.parse(JSON.stringify(data))},...(state.trash||[])].slice(0,300)}
+function linkedRems(id){return state.reminders.filter(r=>r.link&&r.link.id===id)}
+function delHomework(id){const h=state.homework.find(x=>x.id===id);if(!h)return;trashPut("hw",h.text,{item:h,rems:linkedRems(id)});
+  state.homework=state.homework.filter(x=>x.id!==id);state.reminders=state.reminders.filter(r=>!(r.link&&r.link.id===id))}
+function delExam(id){const x=state.exams.find(e=>e.id===id);if(!x)return;trashPut("ex",x.title,{item:x,rems:linkedRems(id)});
+  dropRevision(id);state.exams=state.exams.filter(e=>e.id!==id);state.reminders=state.reminders.filter(r=>!(r.link&&r.link.id===id))}
+function delReminder(id){const r=state.reminders.find(x=>x.id===id);if(!r)return;trashPut("rem",r.text,{item:r});state.reminders=state.reminders.filter(x=>x.id!==id)}
+const TRASH_KIND={hw:"Homework",ex:"Exam",rem:"Reminder",note:"Note",grade:"Grade",fix:"Weekly lesson",extra:"Lesson",cls:"Class",topic:"Topic"};
+function restoreTrash(id){const t=(state.trash||[]).find(x=>x.id===id);if(!t)return false;const d=t.data;
+  const has=(arr,x)=>arr.some(y=>y.id===x.id);
+  if(t.kind==="hw"){if(!has(state.homework,d.item))state.homework.push(d.item);(d.rems||[]).forEach(r=>{if(!has(state.reminders,r))state.reminders.push(r)})}
+  else if(t.kind==="ex"){if(!has(state.exams,d.item))state.exams.push(d.item);(d.rems||[]).forEach(r=>{if(!has(state.reminders,r))state.reminders.push(r)})}
+  else if(t.kind==="rem"){if(!has(state.reminders,d.item))state.reminders.push(d.item)}
+  else if(t.kind==="note"){if(!has(state.notes,d.item))state.notes.push(d.item)}
+  else if(t.kind==="grade"){if(!has(state.grades,d.item))state.grades.push(d.item)}
+  else if(t.kind==="fix"){const day=state.days[d.d];if(day&&!has(day.tasks,d.item))day.tasks.push(d.item)}
+  else if(t.kind==="extra"){const x=dayData(state,d.key);if(!has(x.extra,d.item))x.extra.push(d.item)}
+  else if(t.kind==="cls"){const day=state.days[d.d];if(day&&!has(day.classes,d.item))day.classes.push(d.item)}
+  else if(t.kind==="topic"){state.topics[d.sid]=state.topics[d.sid]||[];if(!has(state.topics[d.sid],d.item))state.topics[d.sid].push(d.item)}
+  state.trash=state.trash.filter(x=>x.id!==id);return true}
+function renderTrash(){const el=document.getElementById("trashBox");if(!el)return;const tr=state.trash||[];
+  el.innerHTML=tr.length?`<ul class="trlist">${tr.map(t=>`<li><div class="tt"><b>${esc(t.label||TRASH_KIND[t.kind])}</b><small>${TRASH_KIND[t.kind]||"Item"} · deleted ${relTime(t.at)} · ${Math.max(1,30-Math.floor((Date.now()-t.at)/864e5))} days left</small></div>
+    <button class="btn ghost" data-trrestore="${t.id}">Restore</button><button class="del" data-trkill="${t.id}" aria-label="Delete forever">×</button></li>`).join("")}</ul>
+    <button class="lnk danger trempty" data-trempty>Empty the bin</button>`:`<div class="emptybig sm">Nothing here. Things you delete stay here for 30 days.</div>`}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-trrestore],[data-trkill],[data-trempty]");if(!b)return;const ds=b.dataset;
+  if(ds.trrestore){let ok=false;change(()=>{ok=restoreTrash(ds.trrestore)});if(ok)alertMsg("Restored ✓");return}
+  if(ds.trkill){change(()=>state.trash=state.trash.filter(x=>x.id!==ds.trkill));return}
+  if(ds.trempty!==undefined){if(!b.dataset.confirm){b.dataset.confirm=1;b.textContent="Tap again to empty the bin";setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent="Empty the bin"}},3000);return}
+    change(()=>state.trash=[]);alertMsg("Bin emptied")}});
 function swipeAct(li,dir){const id=li.dataset.oid,has=c=>li.classList.contains(c);
   if(has("les")){const chk=li.querySelector(".chk[data-tick]");if(!chk)return;const key=chk.dataset.tick.split(":")[0];
     if(dir>0){chk.checked=!chk.checked;chk.dispatchEvent(new Event("change",{bubbles:true}));return}
-    const extra=peek(key).extra.some(k=>k.id===id);snap();
-    change(()=>{const x=dayData(state,key);if(extra)x.extra=x.extra.filter(k=>k.id!==id);else x.skip.push(id);delete x.done[id];prune(key)});
+    const ex0=peek(key).extra.find(k=>k.id===id),extra=!!ex0;snap();
+    change(()=>{const x=dayData(state,key);if(extra){trashPut("extra",subj(ex0.s).name+(ex0.title?" · "+ex0.title:""),{key,item:ex0});x.extra=x.extra.filter(k=>k.id!==id)}else x.skip.push(id);delete x.done[id];prune(key)});
     undoToast(extra?"Lesson removed":"Lesson removed from this day");return}
   if(has("hw")){const h=state.homework.find(h=>h.id===id);if(!h)return;
     if(dir>0){change(()=>{h.done=!h.done;h.doneAt=h.done?Date.now():undefined;const r=remFor(h.id);if(r&&h.done)r.seen=true});if(h.done)tickSound();alertMsg(h.done?"Marked done ✓":"Marked not done");return}
-    snap();change(()=>{state.homework=state.homework.filter(x=>x.id!==id);state.reminders=state.reminders.filter(r=>!(r.link&&r.link.id===id))});undoToast("Homework deleted");return}
-  if(has("exam")){snap();change(()=>{dropRevision(id);state.exams=state.exams.filter(x=>x.id!==id);state.reminders=state.reminders.filter(r=>!(r.link&&r.link.id===id))});undoToast("Exam deleted");return}
-  if(has("rem")){snap();change(()=>{state.reminders=state.reminders.filter(r=>r.id!==id)});undoToast(dir>0?"Reminder done ✓":"Reminder deleted")}}
+    snap();change(()=>delHomework(id));undoToast("Homework deleted");return}
+  if(has("exam")){snap();change(()=>delExam(id));undoToast("Exam deleted");return}
+  if(has("rem")){snap();change(()=>{if(dir>0)state.reminders=state.reminders.filter(r=>r.id!==id);else delReminder(id)});undoToast(dir>0?"Reminder done ✓":"Reminder deleted")}}
 function bindSwipeRows(root){
   root.querySelectorAll("li.tk:not([data-sw]):not(.editing)").forEach(li=>{li.dataset.sw=1;const canDone=!li.classList.contains("exam");
     let x0=0,y0=0,dx=0,axis="",on=false;
@@ -1663,7 +1790,7 @@ function renderHomework(){
 
 function daysUntil(key){return Math.round((new Date(key+"T12:00:00")-new Date(todayIso+"T12:00:00"))/864e5)}
 function exLabel(n){return n===0?"Today":n===1?"Tomorrow":n+" days"}
-function gcol(p){return p>=85?"var(--arab)":p>=65?"var(--hist)":"var(--eng)"}
+function gcol(p){const c=p>=85?"var(--arab)":p>=65?"var(--hist)":"var(--eng)";return `color-mix(in srgb,${c},var(--ink) calc(var(--tmix)*1.7))`}
 // Overall grade averages on the Lessons tab; the full list lives on each subject's page.
 function renderGrades(){
   const gs=state.grades||[],subs=SUBJECTS.filter(x=>gradeAvg(x.id)!=null);
@@ -1761,11 +1888,37 @@ function compress(file){return new Promise((res,rej)=>{const u=URL.createObjectU
   im.onload=()=>{const M=1600,sc=Math.min(1,M/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);
     c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>b?res(b):rej(),"image/jpeg",.8)};
   im.onerror=()=>{URL.revokeObjectURL(u);rej()};im.src=u})}
-async function gcImages(){try{const used=new Set((state.notes||[]).flatMap(n=>n.imgs||[]));for(const k of await idb.keys())if(!used.has(k))await idb.del(k)}catch(e){}}
+async function gcImages(){try{const used=new Set([...(state.notes||[]),...(state.trash||[]).filter(t=>t.kind==="note").map(t=>t.data.item)].flatMap(n=>n.imgs||[]));for(const k of await idb.keys())if(!used.has(k))await idb.del(k)}catch(e){}}
 setTimeout(gcImages,4000);
 
 // ===== subject page & notes =====
-function noteTitle(n){return n.title.trim()||n.text.trim().split("\n")[0].slice(0,60)||"Untitled note"}
+// Light formatting: # heading, **bold**, - list, - [ ] checklist, and "question :: answer" flashcards.
+function noteHtml(text){const inl=t=>esc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/(^|[^*])\*([^*]+)\*/g,"$1<i>$2</i>");
+  let html="",list=null;const close=()=>{if(list){html+="</ul>";list=null}};
+  (text||"").split("\n").forEach((l,i)=>{let m;
+    if((m=l.match(/^\s*[-*] \[( |x|X)\] (.*)$/))){if(list!=="chk"){close();html+='<ul class="nchk">';list="chk"}
+      html+=`<li class="${m[1]!==" "?"on":""}"><label><input type="checkbox" class="chk" data-ncheck="${i}" ${m[1]!==" "?"checked":""}><span>${inl(m[2])}</span></label></li>`;return}
+    if((m=l.match(/^\s*[-*•] (.*)$/))){if(list!=="ul"){close();html+='<ul class="nul">';list="ul"}html+=`<li>${inl(m[1])}</li>`;return}
+    close();
+    if((m=l.match(/^(#{1,2}) (.*)$/))){html+=m[1].length===1?`<h3>${inl(m[2])}</h3>`:`<h4>${inl(m[2])}</h4>`;return}
+    const c=l.indexOf("::");if(c>0){html+=`<div class="nfc"><b>${inl(l.slice(0,c).trim())}</b><span>${inl(l.slice(c+2).trim())}</span></div>`;return}
+    html+=l.trim()?`<p>${inl(l)}</p>`:`<div class="nsp"></div>`});
+  close();return html||`<p class="nempty">Empty note. Tap Edit to write.</p>`}
+function notePlain(t){return (t||"").replace(/^\s*[-*] \[[ xX]\] /gm,"☐ ").replace(/^#{1,2} /gm,"").replace(/\*\*/g,"")}
+let noteMode="view",notesSort="recent";
+function insertAtCursor(ta,before,after,linePrefix){const s0=ta.selectionStart,e0=ta.selectionEnd,v=ta.value;
+  if(linePrefix){const ls=v.lastIndexOf("\n",s0-1)+1;ta.value=v.slice(0,ls)+linePrefix+v.slice(ls);ta.selectionStart=ta.selectionEnd=s0+linePrefix.length}
+  else{const sel=v.slice(s0,e0)||"text";ta.value=v.slice(0,s0)+before+sel+after+v.slice(e0);ta.selectionStart=s0+before.length;ta.selectionEnd=s0+before.length+sel.length}
+  ta.focus();ta.dispatchEvent(new Event("input",{bubbles:true}))}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-nfmt],[data-nmode],[data-npin],[data-nsort]");if(!b)return;const ds=b.dataset;
+  if(ds.nfmt){const ta=document.querySelector(".ntext");if(!ta)return;({chk:()=>insertAtCursor(ta,"","","- [ ] "),bold:()=>insertAtCursor(ta,"**","**"),h:()=>insertAtCursor(ta,"","","# "),ul:()=>insertAtCursor(ta,"","","- ")})[ds.nfmt]();return}
+  if(ds.nmode){noteMode=ds.nmode;render();if(noteMode==="edit")setTimeout(()=>document.querySelector(".ntext")?.focus(),40);return}
+  if(ds.npin){change(()=>{const n=state.notes.find(x=>x.id===ds.npin);if(n)n.pinned=!n.pinned});return}
+  if(ds.nsort){notesSort=ds.nsort;render()}});
+document.addEventListener("change",e=>{const t=e.target;if(!t.dataset||t.dataset.ncheck===undefined)return;const n=state.notes.find(x=>x.id===noteOpen);if(!n)return;
+  const ls=n.text.split("\n"),i=+t.dataset.ncheck;ls[i]=ls[i].replace(/\[( |x|X)\]/,t.checked?"[x]":"[ ]");if(t.checked){buzz(6);tickSound()}
+  change(()=>{n.text=ls.join("\n");n.updated=Date.now()})});
+function noteTitle(n){return n.title.trim()||notePlain(n.text).trim().split("\n")[0].slice(0,60)||"Untitled note"}
 // ---- classes with times ----
 function classesOf(d){return ((state.days[d]||{}).classes||[]).slice().sort((a,b)=>(a.start||"99")<(b.start||"99")?-1:1)}
 function hmNow(){const n=new Date();return String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0")}
@@ -1788,7 +1941,7 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-cledit],[d
   if(ds.classopen!==undefined){classEdit=ds.classopen+":new";render();setTimeout(()=>document.querySelector("li.cls.editing [data-cf=name]")?.focus(),40);return}
   if(ds.clcancel!==undefined){classEdit=null;render();return}
   if(ds.clsave){saveClass(b.closest("li.cls"),ds.clsave);return}
-  if(ds.cldel){const[d,id]=ds.cldel.split(":");snap();change(()=>{state.days[d].classes=state.days[d].classes.filter(c=>c.id!==id);classEdit=null});undoToast("Class removed");return}
+  if(ds.cldel){const[d,id]=ds.cldel.split(":");snap();change(()=>{const c=state.days[d].classes.find(x=>x.id===id);if(c)trashPut("cls",c.name+" · "+DAY_NAMES[d],{d,item:c});state.days[d].classes=state.days[d].classes.filter(c=>c.id!==id);classEdit=null});undoToast("Class removed");return}
   if(ds.cledit&&!e.target.closest("input,button")){classEdit=ds.cledit;render();setTimeout(()=>document.querySelector("li.cls.editing [data-cf=name]")?.focus(),40)}},true);
 document.addEventListener("keydown",e=>{const li=e.target.closest&&e.target.closest("li.cls.editing");if(!li)return;
   if(e.key==="Enter"){e.preventDefault();saveClass(li,li.querySelector("[data-clsave]").dataset.clsave)}if(e.key==="Escape"){classEdit=null;render()}});
@@ -1867,6 +2020,34 @@ function todayExtras(){
   const all=[...tx,tc,tt.join(", "),nh?nh+" homework due":""].filter(Boolean);
   const tmr=new Date().getHours()<18?"":`<div class="tmr"><em>Tomorrow</em><span>${all.length?all.join(" · "):"Nothing planned"}</span></div>`;
   return {sum,cls,tmr}}
+// ---- plan my week: spread each subject's fair share of lessons over the lightest days ----
+const PLAN_CAP=4;
+function weekPlan(off){const keys=DAY_ORDER.map(d=>iso(dateFor(off,d))).filter(k=>k>=todayIso&&!holidayOn(k));if(!keys.length)return {adds:[],left:0};
+  const t=totals(),wd=k=>new Date(k+"T12:00:00").getDay(),load={},need={},exam={};
+  keys.forEach(k=>load[k]=tasksOn(wd(k),k).filter(x=>!x.skipped&&!x.done).length);
+  SUBJECTS.filter(x=>x.id!=="other").forEach(sj=>{const left=Math.max(0,(state.remaining[sj.id]||0)-t[sj.id].done);if(!left)return;
+    const ex=state.exams.filter(e=>e.s===sj.id&&e.date>=todayIso).sort((a,b)=>a.date<b.date?-1:1)[0];exam[sj.id]=ex?ex.date:null;
+    const weeks=ex?Math.max(1,Math.ceil(daysUntil(ex.date)/7)):4,share=Math.ceil(left/weeks);
+    let planned=0;keys.forEach(k=>tasksOn(wd(k),k).forEach(x=>{if(x.s===sj.id&&!x.skipped&&!x.done)planned+=(x.amt||1)}));
+    const n=Math.min(left,share)-planned;if(n>0)need[sj.id]=n});
+  // Subjects with the nearest exam go first; one lesson at a time so subjects mix across the week.
+  const order=Object.keys(need).sort((a,b)=>(exam[a]||"9999")<(exam[b]||"9999")?-1:1),adds={};let left=0,moved=true;
+  while(moved){moved=false;for(const sid of order){if(!need[sid])continue;
+    const days=keys.filter(k=>(!exam[sid]||k<exam[sid])&&load[k]<PLAN_CAP).sort((a,b)=>load[a]-load[b]||(a<b?-1:1));
+    if(!days.length){left+=need[sid];need[sid]=0;continue}
+    const k=days[0];load[k]++;const key=k+"|"+sid;adds[key]=(adds[key]||0)+1;need[sid]--;moved=true}}
+  return {adds:Object.entries(adds).map(([key,amt])=>{const[k,s]=key.split("|");return{k,s,amt}}).sort((a,b)=>a.k<b.k?-1:1),left}}
+let planPreview=null;
+function planHtml(){const p=planPreview,by={};p.adds.forEach(a=>(by[a.k]=by[a.k]||[]).push(a));
+  return `<div class="shh"><b>Plan my week</b><button class="lnk" data-qa="close">Close</button></div>
+    ${p.adds.length?`<p class="rvsub">Here's a suggestion based on the lessons you have left and your exam dates. Nothing is added until you tap the button.</p>
+      <ul class="rvlist">${Object.entries(by).map(([k,as])=>`<li class="plday"><b>${relDay(k)}</b><span>${as.map(a=>`<i class="pchip" style="--c:${col(subj(a.s))}">${esc(subj(a.s).name)}${a.amt>1?" ×"+a.amt:""}</i>`).join("")}</span></li>`).join("")}</ul>
+      ${p.left?`<p class="rvsub">${p.left} more lesson${p.left>1?"s":""} didn't fit before the exams without overloading a day.</p>`:""}
+      <button class="btn full" data-planapply>Add ${p.adds.reduce((a,x)=>a+x.amt,0)} lessons to my week</button>`
+      :`<div class="rvgood">Nothing to add. Your week already covers your lessons left 🎉</div>`}`}
+document.addEventListener("click",e=>{if(e.target.closest("[data-plan]")){planPreview=weekPlan(Math.max(0,week));planPreview.off=Math.max(0,week);openSheet("plan");return}
+  if(e.target.closest("[data-planapply]")&&planPreview){const p=planPreview;snap();
+    change(()=>p.adds.forEach(a=>dayData(state,a.k).extra.push({id:uid(),s:a.s,amt:a.amt,label:"Planned"})));planPreview=null;closeSheet();undoToast("Added to your week")}});
 // ---- weekly review ----
 function reviewData(off){const keys=DAY_ORDER.map(d=>iso(dateFor(off,d)));let done=0,planned=0;const slipped=[];
   keys.forEach(k=>{const wd=new Date(k+"T12:00:00").getDay(),x=peek(k);if(holidayOn(k))return;
@@ -1905,7 +2086,7 @@ function addTopic(sid){const i=document.getElementById("tpNew"),t=i.value.trim()
   change(()=>{state.topics[sid]=[...topicsFor(sid),{id:uid(),t,done:false}]});setTimeout(()=>document.getElementById("tpNew")?.focus(),30)}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-tpadd],[data-tpdel],[data-quiz]");if(!b)return;
   if(b.dataset.tpadd){addTopic(b.dataset.tpadd);return}
-  if(b.dataset.tpdel){const[sid,id]=b.dataset.tpdel.split(":");snap();change(()=>{state.topics[sid]=topicsFor(sid).filter(t=>t.id!==id)});undoToast("Topic removed");return}
+  if(b.dataset.tpdel){const[sid,id]=b.dataset.tpdel.split(":");snap();change(()=>{const t=topicsFor(sid).find(x=>x.id===id);if(t)trashPut("topic",t.t,{sid,item:t});state.topics[sid]=topicsFor(sid).filter(t=>t.id!==id)});undoToast("Topic removed");return}
   if(b.dataset.quiz)startQuiz(b.dataset.quiz)});
 document.addEventListener("change",e=>{const t=e.target;if(!t.dataset||!t.dataset.tptick)return;const[sid,id]=t.dataset.tptick.split(":");
   if(t.checked){buzz(6);tickSound()}change(()=>{const x=topicsFor(sid).find(y=>y.id===id);if(x)x.done=t.checked});
@@ -1940,21 +2121,75 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-qz]");if(!
   else{tickSound();if(!quiz.missed.has(c.k))quiz.right++;else if(r.m>0)r.m--}
   quiz.i++;quiz.show=false;save();renderQuiz();if(quiz&&quiz.i>=quiz.deck.length&&quiz.right===quiz.total)doneChime()});
 
+// ---- due reminders pop up while the app is open (and as a system notification if allowed) ----
+let remQueue=[],remShown=null;
+function checkDueReminders(){const n=nowStamp();
+  state.reminders.filter(r=>!r.seen&&(r.date+"T"+r.time)<=n&&!r.popped&&r.date>=addDays(-1)).sort((a,b)=>(a.date+a.time)<(b.date+b.time)?-1:1).forEach(r=>{if(!remQueue.includes(r.id)&&remShown!==r.id)remQueue.push(r.id)});
+  if(!remShown&&remQueue.length)showRemPop()}
+function showRemPop(){const id=remQueue.shift(),r=state.reminders.find(x=>x.id===id);if(!r){remShown=null;if(remQueue.length)showRemPop();return}
+  remShown=id;r.popped=true;save();const el=document.getElementById("rempop");
+  el.innerHTML=`<span class="rpi" aria-hidden="true">🔔</span><div class="rpt"><b>${esc(r.text)}</b><small>${relDay(r.date)} · ${t12(r.time)}${remQueue.length?` · ${remQueue.length} more`:""}</small></div>
+    <div class="rpa"><button class="btn ghost" data-rp="snooze">Snooze 10 min</button><button class="btn" data-rp="done">Done</button></div>`;
+  el.hidden=false;requestAnimationFrame(()=>el.classList.add("up"));
+  tone([988,1319],.18,.14,.07);try{navigator.vibrate&&navigator.vibrate([30,60,30])}catch(e){}
+  if(document.hidden&&"Notification" in window&&Notification.permission==="granted")navigator.serviceWorker?.ready.then(reg=>reg.showNotification("Study Planner",{body:r.text,tag:"rem-"+r.id,icon:"icon-192.png"})).catch(()=>{})}
+function closeRemPop(){const el=document.getElementById("rempop");el.classList.remove("up");setTimeout(()=>{el.hidden=true;remShown=null;if(remQueue.length)showRemPop()},200)}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-rp]");if(!b)return;const r=state.reminders.find(x=>x.id===remShown);
+  if(r){if(b.dataset.rp==="done")change(()=>{r.seen=true});
+    else{const d=new Date(Date.now()+10*60e3);change(()=>{r.date=iso(d);r.time=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");r.popped=false});alertMsg("Snoozed for 10 minutes")}}
+  closeRemPop()});
+setInterval(checkDueReminders,20e3);setTimeout(checkDueReminders,1500);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkDueReminders()});
+function askNotify(){if(!("Notification" in window)){alertMsg("This browser can't show notifications");return}
+  Notification.requestPermission().then(p=>{alertMsg(p==="granted"?"Notifications on ✓":"Notifications stay off");renderSetPages()})}
+// ---- stats: study, focus and attendance over time ----
+let statRange="8w";
+function statBuckets(){const out=[];
+  if(statRange==="8w"){for(let i=7;i>=0;i--){const a=weekStart(-i),b=new Date(a);b.setDate(b.getDate()+6);out.push({a:iso(a),b:iso(b),label:dLabel(a),short:String(a.getDate())})}}
+  else{const n=statRange==="6m"?6:12,M=MONTHS;for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-i);const a=new Date(d.getFullYear(),d.getMonth(),1,12),b=new Date(d.getFullYear(),d.getMonth()+1,0,12);
+    out.push({a:iso(a),b:iso(b),label:M[a.getMonth()]+" "+a.getFullYear(),short:M[a.getMonth()].slice(0,1)})}}
+  return out}
+function inB(k,bk){return k>=bk.a&&k<=bk.b}
+function barChart(title,unit,rows,fmtV,max){const mx=max||Math.max(1,...rows.map(r=>r.v)),last=rows[rows.length-1];
+  return `<section class="stcard"><div class="sthead"><h3 class="grp">${title}</h3><span>${last?`This ${statRange==="8w"?"week":"month"}: <b>${last.none?"–":fmtV(last.v)}</b>`:""}</span></div>
+    <div class="sbars" role="img" aria-label="${esc(title)}: ${rows.map(r=>r.label+" "+fmtV(r.v)).join(", ")}">${rows.map(r=>`<div class="stbar" title="${esc(r.label)}: ${r.none?"no data":fmtV(r.v)}"><div class="stbw">${r.none?"":`<i style="height:${r.v/mx*100}%"></i>`}</div><small>${r.short}</small></div>`).join("")}</div>
+    <details class="stable"><summary>Show as table</summary><table><tr><th>${statRange==="8w"?"Week of":"Month"}</th><th>${unit}</th></tr>${rows.map(r=>`<tr><td>${esc(r.label)}</td><td>${r.none?"–":fmtV(r.v)}</td></tr>`).join("")}</table></details></section>`}
+function renderStatsPage(){const el=document.getElementById("statsBody");if(!el)return;const B=statBuckets(),from=B[0].a,to=B[B.length-1].b;
+  document.querySelectorAll("[data-srange]").forEach(b=>{b.classList.toggle("on",b.dataset.srange===statRange);b.setAttribute("aria-pressed",b.dataset.srange===statRange)});
+  const doneOn=k=>Object.values((state.dates[k]||{}).done||{}).reduce((a,v)=>a+(+v||0),0);
+  const days=[];for(let d=new Date(from+"T12:00:00");iso(d)<=to;d.setDate(d.getDate()+1))days.push(iso(d));
+  const lessons=B.map(bk=>({...bk,v:days.filter(k=>inB(k,bk)).reduce((a,k)=>a+doneOn(k),0)}));
+  const focus=B.map(bk=>({...bk,v:days.filter(k=>inB(k,bk)).reduce((a,k)=>a+((state.focusLog||{})[k]||0),0)}));
+  const att=B.map(bk=>{const c=attCounts(k=>inB(k,bk));return {...bk,v:c.pct==null?0:c.pct,none:c.pct==null}});
+  const hwDone=state.homework.filter(h=>h.done&&h.doneAt&&iso(new Date(h.doneAt))>=from).length;
+  const totL=lessons.reduce((a,r)=>a+r.v,0),totF=focus.reduce((a,r)=>a+r.v,0),ta=attCounts(k=>k>=from&&k<=to);
+  const per=SUBJECTS.filter(x=>x.id!=="other").map(x=>{let l=0,f=0;days.forEach(k=>{const dd=state.dates[k];if(dd)Object.entries(dd.done).forEach(([id,a])=>{if(((dd.doneS&&dd.doneS[id])||findSubj(id))===x.id)l+=+a||0});f+=((state.focusSub||{})[k]||{})[x.id]||0});
+    const ts=topicsFor(x.id);return {x,l,f,g:gradeAvg(x.id),tp:ts.length?Math.round(ts.filter(t=>t.done).length/ts.length*100):null}}).filter(r=>r.l||r.f||r.g!=null||r.tp!=null);
+  const mxL=Math.max(1,...per.map(r=>r.l));
+  el.innerHTML=`<div class="sttiles"><div><b>${fmt(totL)}</b><small>lessons done</small></div><div><b>${totF?fmtMin(totF):"–"}</b><small>focused</small></div><div><b>${hwDone}</b><small>homework done</small></div><div><b>${ta.pct==null?"–":fmt(ta.pct)+"%"}</b><small>attendance</small></div></div>
+    ${barChart("Lessons done","Lessons",lessons,v=>fmt(v))}
+    ${barChart("Focus time","Focus",focus,v=>v?fmtMin(v):"0")}
+    ${barChart("Attendance","Attendance",att,v=>fmt(v)+"%",100)}
+    ${per.length?`<section class="stcard"><h3 class="grp">By subject</h3><table class="stsub"><tr><th>Subject</th><th>Lessons</th><th>Focus</th><th>Grade</th><th>Topics</th></tr>
+      ${per.map(r=>`<tr><td><i style="--c:${col(r.x)}"></i>${esc(r.x.name)}</td><td><span class="stl"><em style="width:${r.l/mxL*100}%"></em>${fmt(r.l)}</span></td><td>${r.f?fmtMin(r.f):"–"}</td><td>${r.g==null?"–":fmt(r.g)+"%"}</td><td>${r.tp==null?"–":r.tp+"%"}</td></tr>`).join("")}</table></section>`:""}`}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-srange]");if(!b)return;statRange=b.dataset.srange;renderStatsPage()});
 function renderSubjectPage(){
   const list=document.getElementById("subjList"),det=document.getElementById("subjDetail");
   if(!subjView||!SUBJECTS.some(x=>x.id===subjView)){subjView=null;noteOpen=null;list.hidden=false;det.hidden=true;return}
   list.hidden=true;det.hidden=false;
-  const sj=subj(subjView),notes=(state.notes||[]).filter(n=>n.s===subjView).sort((a,b)=>b.updated-a.updated);
+  const sj=subj(subjView),notes=(state.notes||[]).filter(n=>n.s===subjView).sort((a,b)=>(!!b.pinned-!!a.pinned)||(notesSort==="az"?noteTitle(a).localeCompare(noteTitle(b)):b.updated-a.updated));
   const t=totals(),left=Math.max(0,(state.remaining[sj.id]||0)-t[sj.id].done);
   const hw=hwPending().filter(h=>h.s===sj.id).length,ex=state.exams.filter(x=>x.s===sj.id&&x.date>=todayIso).sort((a,b)=>a.date<b.date?-1:1)[0];
   const n=noteOpen&&notes.find(x=>x.id===noteOpen);
   if(noteOpen&&!n)noteOpen=null;
   let body;
   if(n){
+    const editing=noteMode==="edit"||(!n.title.trim()&&!n.text.trim());
     body=`<div class="neditor" style="--c:${col(sj)}">
-      <div class="nmeta">Edited ${relDay(iso(new Date(n.updated)))}</div>
-      <input class="ntitle" data-nfield="title" placeholder="Title" value="${esc(n.title)}" maxlength="80">
-      <textarea class="ntext" data-nfield="text" placeholder="Write your notes…\n\nTip: a line like  Capital of Egypt :: Cairo  becomes a flashcard.">${esc(n.text)}</textarea>
+      <div class="nmeta"><span>Edited ${relDay(iso(new Date(n.updated)))}</span><span class="nmb"><button class="lnk" data-npin="${n.id}">${n.pinned?"📌 Unpin":"📌 Pin"}</button>${editing?`<button class="lnk" data-nmode="view">Preview</button>`:`<button class="lnk" data-nmode="edit">✎ Edit</button>`}</span></div>
+      ${editing?`<input class="ntitle" data-nfield="title" placeholder="Title" value="${esc(n.title)}" maxlength="80">
+      <div class="ntools" role="toolbar" aria-label="Formatting"><button data-nfmt="chk" aria-label="Checklist item">☐ Checklist</button><button data-nfmt="bold" aria-label="Bold"><b>B</b></button><button data-nfmt="h" aria-label="Heading">H</button><button data-nfmt="ul" aria-label="Bullet list">• List</button></div>
+      <textarea class="ntext" data-nfield="text" placeholder="Write your notes…\n\n- [ ] a checklist item\n**bold**, # heading\nCapital of Egypt :: Cairo  (a flashcard)">${esc(n.text)}</textarea>`
+      :`<h2 class="nvtitle">${esc(n.title||noteTitle(n))}</h2><div class="nview">${noteHtml(n.text)}</div>`}
       <div class="pgrid">${(n.imgs||[]).map(id=>`<img data-img="${id}" data-viewimg="${id}" alt="Note photo">`).join("")}<button class="addph" data-addphoto>＋<br>Add photo</button></div>
       <div class="nacts"><button class="lnk danger" data-notedel="${n.id}">Delete note</button><button class="btn" data-noteclose>Done</button></div>
     </div>`;
@@ -1963,10 +2198,10 @@ function renderSubjectPage(){
     body=`      ${topicsHtml(sj.id)}
       ${gradesHtml(sj.id)}
       ${nc?`<button class="btn full qstart" data-quiz="${sj.id}">🃏 Practice ${nc} flashcard${nc>1?"s":""}</button>`:`<p class="qhint">Tip: in a note, write <b>Question :: Answer</b> on a line and it becomes a flashcard you can practise here.</p>`}
-      <h3 class="grp">Notes</h3>
+      <div class="nhead"><h3 class="grp">Notes</h3>${notes.length>1?`<div class="seg nsort"><button data-nsort="recent" class="${notesSort==="recent"?"on":""}">Recent</button><button data-nsort="az" class="${notesSort==="az"?"on":""}">A–Z</button></div>`:""}</div>
       <button class="btn full newnote" data-notenew>＋ New note</button>
       <div class="nlist">${notes.length?notes.map(x=>`<div class="ncard" data-noteopen="${x.id}">
-        <div class="nt"><b>${esc(noteTitle(x))}</b><small>${relDay(iso(new Date(x.updated)))}${x.imgs&&x.imgs.length?" · "+x.imgs.length+" photo"+(x.imgs.length>1?"s":""):""}${x.text.trim()?" · "+esc(x.text.trim().replace(/\s+/g," ").slice(0,60)):""}</small></div>
+        <div class="nt"><b>${x.pinned?"📌 ":""}${esc(noteTitle(x))}</b><small>${relDay(iso(new Date(x.updated)))}${x.imgs&&x.imgs.length?" · "+x.imgs.length+" photo"+(x.imgs.length>1?"s":""):""}${x.text.trim()?" · "+esc(notePlain(x.text).trim().replace(/\s+/g," ").slice(0,60)):""}</small></div>
         ${x.imgs&&x.imgs.length?`<img class="thumb" data-img="${x.imgs[0]}" alt="">`:""}</div>`).join(""):`<div class="estate"><span>🗒️</span><b>No notes yet</b><small>Write what you learned in ${esc(sj.name)}, add photos of the board or your book.</small></div>`}</div>`;
   }
   det.innerHTML=`<div class="sdhead" style="--c:${col(sj)}"><button class="lnk" data-subjback>‹ ${n?esc(sj.name):"Subjects"}</button>${n?"":`<h2><i></i><span class="snm">${esc(sj.name)}</span></h2>`}</div>
@@ -1988,15 +2223,15 @@ document.addEventListener("click",async e=>{
   if(ds.gfor){const x=state.exams.find(e=>e.id===ds.gfor);if(!x)return;tab="todo";todoSub="les";subjView=x.s;noteOpen=null;render();
     setTimeout(()=>{const nm=document.getElementById("gName");if(!nm)return;nm.value=x.title;nm.dataset.ex=x.id;nm.closest(".grades").scrollIntoView({behavior:"smooth",block:"center"});document.getElementById("gScore").focus()},60);return}
   if(ds.gskip){change(()=>{const x=state.exams.find(e=>e.id===ds.gskip);if(x)x.nograde=true});return}
-  if(ds.gdel){snap();change(()=>state.grades=state.grades.filter(g=>g.id!==ds.gdel));undoToast("Grade deleted");return}
+  if(ds.gdel){snap();change(()=>{const g=state.grades.find(x=>x.id===ds.gdel);if(g)trashPut("grade",g.name+" · "+subj(g.s).name,{item:g});state.grades=state.grades.filter(x=>x.id!==ds.gdel)});undoToast("Grade deleted");return}
   if(ds.subjback!==undefined){if(noteOpen)noteOpen=null;else subjView=null;render();scrollTo(0,0);return}
   if(ds.notenew!==undefined){const n={id:uid(),s:subjView,title:"",text:"",imgs:[],created:Date.now(),updated:Date.now()};
-    change(()=>{state.notes=state.notes||[];state.notes.push(n);noteOpen=n.id});scrollTo(0,0);setTimeout(()=>document.querySelector(".ntitle")?.focus(),60);return}
-  if(ds.noteopen){noteOpen=ds.noteopen;render();scrollTo(0,0);return}
+    noteMode="edit";change(()=>{state.notes=state.notes||[];state.notes.push(n);noteOpen=n.id});scrollTo(0,0);setTimeout(()=>document.querySelector(".ntitle")?.focus(),60);return}
+  if(ds.noteopen){noteOpen=ds.noteopen;noteMode="view";render();scrollTo(0,0);return}
   if(ds.noteclose!==undefined){const n=state.notes.find(x=>x.id===noteOpen);
     if(n&&!n.title.trim()&&!n.text.trim()&&!(n.imgs||[]).length)state.notes=state.notes.filter(x=>x!==n);
     noteOpen=null;save();render();return}
-  if(ds.notedel){snap();change(()=>{state.notes=state.notes.filter(x=>x.id!==ds.notedel);noteOpen=null});undoToast("Note deleted");return}
+  if(ds.notedel){snap();change(()=>{const n=state.notes.find(x=>x.id===ds.notedel);if(n)trashPut("note",noteTitle(n),{item:n});state.notes=state.notes.filter(x=>x.id!==ds.notedel);noteOpen=null});undoToast("Note deleted");return}
   if(ds.addphoto!==undefined){document.getElementById("photoIn").click();return}
   if(ds.viewimg){const v=document.getElementById("viewer");v.dataset.id=ds.viewimg;document.getElementById("viewImg").src=imgURL[ds.viewimg]||"";v.hidden=false;return}
   if(ds.viewClose!==undefined){document.getElementById("viewer").hidden=true;return}
@@ -2222,14 +2457,14 @@ function moveInd(){
   const on=document.querySelector(".tabs button.on"),ind=document.getElementById("tabInd");
   if(!on||!ind||!on.offsetWidth)return;const first=!ind.dataset.ok;if(first)ind.style.transition="none";ind.style.width=on.offsetWidth+"px";ind.style.transform=`translateX(${on.offsetLeft-4}px)`;if(first){ind.dataset.ok=1;requestAnimationFrame(()=>requestAnimationFrame(()=>ind.style.transition=""))}
 }
-const STACKED=["set","search","notif"];
+const STACKED=["set","search","notif","stats"];
 function afterRender(){
   if(tab!==lastTab){
     if(lastTab)scrollMem[lastTab]=scrollY;
     const stacked=STACKED.includes(tab),wasStacked=STACKED.includes(lastTab);
     if(lastTab!==null&&(stacked||wasStacked)){const w=document.querySelector(".wrap");
       w.classList.remove("slidein","slideout");void w.offsetWidth;w.classList.add(stacked?"slidein":"slideout")}
-    const pnl=document.getElementById({study:"pStudy",todo:"pTodo",school:"pSchool",set:"pSet",search:"pSearch",notif:"pNotif"}[tab]);
+    const pnl=document.getElementById({study:"pStudy",todo:"pTodo",school:"pSchool",set:"pSet",search:"pSearch",notif:"pNotif",stats:"pStats"}[tab]);
     if(pnl&&lastTab!==null){pnl.classList.remove("enter");void pnl.offsetWidth;pnl.classList.add("enter")}lastTab=tab}
   const det=document.getElementById("subjDetail");
   if(det&&!det.hidden&&det.dataset.k!==(subjView||"")+"/"+(noteOpen||"")){det.dataset.k=(subjView||"")+"/"+(noteOpen||"");
@@ -2283,16 +2518,6 @@ function bindDaySortables(){
 }
 let restoreScroll=null;
 addEventListener("resize",()=>{requestAnimationFrame(moveInd);renderHeader()});
-["gesturestart","gesturechange","gestureend"].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
-document.addEventListener("touchmove",e=>{if(e.touches.length>1&&e.cancelable)e.preventDefault()},{passive:false});
-let lastTouchEnd=0;
-document.addEventListener("touchend",e=>{
-  const now=Date.now();
-  if(now-lastTouchEnd<=300&&!e.target.closest("input,textarea")){
-    e.preventDefault();
-  }
-  lastTouchEnd=now;
-},{passive:false});
 let lastCompact=false,compactT=null,pendingCompact=null;
 addEventListener("scroll",()=>{
   const y=Math.max(0,scrollY);
@@ -2321,7 +2546,8 @@ function render(){
   applySettings();
   const t=totals();
   document.body.dataset.view=tab;
-  document.querySelectorAll("button[data-tab]").forEach(b=>{b.classList.toggle("on",b.dataset.tab===tab);b.setAttribute("aria-selected",b.dataset.tab===tab)});
+  document.querySelectorAll("button[data-tab]").forEach(b=>{const on=b.dataset.tab===tab;b.classList.toggle("on",on);
+    if(b.getAttribute("role")==="tab")b.setAttribute("aria-selected",on);else if(b.closest(".tabbar"))on?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current")});
   const tl=SUBJECTS.reduce((a,s)=>a+Math.max(0,(state.remaining[s.id]||0)-t[s.id].done),0);
   // Study badge: today's lessons still to do. Lessons tab badge: lessons left overall.
   const todayLeft=tasksOn(today,todayIso).filter(k=>!k.skipped&&!k.done).length;
@@ -2334,7 +2560,7 @@ function render(){
   document.querySelectorAll("[data-sub]").forEach(b=>b.classList.toggle("on",b.dataset.sub===todoSub));
   document.getElementById("sHw").hidden=todoSub!=="hw";document.getElementById("sEx").hidden=todoSub!=="ex";document.getElementById("sLes").hidden=todoSub!=="les";
 
-  renderBanner();renderHomework();renderExams();renderGrades();renderReminders();renderStats();renderSubjectPage();renderSchool();renderNextUp();
+  renderBanner();renderHomework();renderExams();renderGrades();renderReminders();renderStats();renderSubjectPage();renderSchool();renderNextUp();if(tab==="stats")renderStatsPage();
   document.getElementById("weekView").hidden=ttView!=="week";document.getElementById("monthView").hidden=ttView!=="month";
   document.querySelectorAll("[data-tview]").forEach(b=>{b.classList.toggle("on",b.dataset.tview===ttView);b.setAttribute("aria-selected",b.dataset.tview===ttView)});
   if(ttView==="month")renderMonth();
@@ -2363,7 +2589,7 @@ function render(){
   const ws=weekStart(week),we=dateFor(week,DAY_ORDER[6]);
   document.getElementById("wkLabel").textContent=(week===0?"This week":week===1?"Next week":week===-1?"Last week":"Week of "+dLabel(ws));
   document.getElementById("wkDates").textContent=dLabel(ws)+" – "+dLabel(we);
-  document.getElementById("wkToday").hidden=week===0;document.querySelector("[data-review]").hidden=week>0;
+  document.getElementById("wkToday").hidden=week===0;document.querySelector("[data-review]").hidden=week>0;document.querySelector("[data-plan]").hidden=week<0;
   if(week<0&&DAY_ORDER.every(d=>isComplete(d,iso(dateFor(week,d)))))document.getElementById("wkLabel").textContent+=" ✓";
 
   document.getElementById("strip").innerHTML=DAY_ORDER.map(d=>{
@@ -2436,7 +2662,7 @@ function render(){
       ${openForm===d?`<div class="add">${form}</div>`:""}
       ${openForm===d?"":`<div class="dayadds"><button data-open="${d}">＋ Add</button><button data-classopen="${d}">＋ Class</button></div>`}</article>`}).join("");
   bindSwipeRows(document.getElementById("days"));
-  afterRender();
+  afterRender();labelControls();
 }
 
 function save(){state.updatedAt=Date.now();try{localStorage.setItem("study-planner",JSON.stringify(state))}catch(e){}if(sync.user&&!sync.applying)syncSoon()}
@@ -2472,7 +2698,7 @@ document.addEventListener("click",e=>{
   if(ds.tab){buzz(4);if(ds.tab==="set")setPage=null;if(ds.tab==="todo"&&tab==="todo"&&todoSub==="les"){subjView=null;noteOpen=null}
     if(ds.tab!=="back"&&scrollMem[ds.tab]!=null&&ds.tab!==tab)restoreScroll=scrollMem[ds.tab];
     if(ds.tab==="back"&&scrollMem[prevTab]!=null)restoreScroll=scrollMem[prevTab];if(ds.tab==="back"){tab=prevTab||"week"}else{if(tab!=="set"&&tab!=="search"&&tab!=="notif")prevTab=tab;tab=ds.tab}
-    if(tab!=="set"&&tab!=="search"&&tab!=="notif")try{localStorage.setItem("sp-tab",tab)}catch(err){}
+    if(!STACKED.includes(tab))try{localStorage.setItem("sp-tab",tab)}catch(err){}
     render();if(restoreScroll==null)scrollTo(0,0);if(tab==="search"){const q=document.getElementById("q");q.value="";renderSearch();setTimeout(()=>q.focus(),60)}return}
   if(b.id==="hwAdd"){const t=document.getElementById("hwText"),text=t.value.trim();if(!text){t.focus();return}
     const due=document.getElementById("hwDue").value||addDays(1);
@@ -2505,10 +2731,10 @@ document.addEventListener("click",e=>{
     const exItem={id:uid(),title,s:document.getElementById("exSubj").value,date},rk=readRem("exRem");
     let okR=true,nr=0;change(()=>{state.exams.push(exItem);okR=addLinkedRem(rk,"ex",exItem);if(state.settings.autoRev!==false)nr=planRevision(exItem)});t.value="";
     if(rk&&!okR)alertMsg("Exam added. That reminder time has already passed.");else if(rk&&rk.date)offerPreset(rk,exItem.date);else alertMsg(nr?"Exam added with "+nr+" revision session"+(nr>1?"s":""):"Exam added");return}
-  if(ds.exdel){openMenu=null;snap();change(()=>{dropRevision(ds.exdel);state.exams=state.exams.filter(x=>x.id!==ds.exdel);state.reminders=state.reminders.filter(r=>!(r.link&&r.link.id===ds.exdel))});undoToast("Exam deleted");return}
-  if(ds.hwdel){openMenu=null;snap();change(()=>{state.homework=state.homework.filter(h=>h.id!==ds.hwdel);state.reminders=state.reminders.filter(r=>!(r.link&&r.link.id===ds.hwdel))});undoToast("Homework deleted");return}
+  if(ds.exdel){openMenu=null;snap();change(()=>delExam(ds.exdel));undoToast("Exam deleted");return}
+  if(ds.hwdel){openMenu=null;snap();change(()=>delHomework(ds.hwdel));undoToast("Homework deleted");return}
   if(ds.hwshow!==undefined){hwShowDone=!hwShowDone;render();return}
-  if(ds.hwclear!==undefined){snap();change(()=>state.homework=state.homework.filter(h=>!h.done));undoToast("Finished homework deleted");return}
+  if(ds.hwclear!==undefined){snap();change(()=>state.homework.filter(h=>h.done).map(h=>h.id).forEach(delHomework));undoToast("Finished homework deleted");return}
   if(ds.revplan){const x=state.exams.find(e=>e.id===ds.revplan);if(!x)return;
     if(revCount(x)){snap();change(()=>Object.keys(state.dates).forEach(k=>{state.dates[k].extra=state.dates[k].extra.filter(t=>t.rev!==x.id);prune(k)}));undoToast("Revision days removed");return}
     let n=0;snap();change(()=>{n=planRevision(x)});
@@ -2533,7 +2759,7 @@ document.addEventListener("click",e=>{
   if(ds.hwfor){tab="todo";todoSub="hw";render();scrollTo(0,0);document.getElementById("hwSubj").value=ds.hwfor;setTimeout(()=>document.getElementById("hwText").focus(),80);return}
   if(ds.hwpost){openMenu=null;change(()=>{const h=state.homework.find(h=>h.id===ds.hwpost);if(h){const base=h.due<todayIso?todayIso:h.due;const d=new Date(base+"T12:00:00");d.setDate(d.getDate()+1);h.due=iso(d);
       const r=remFor(h.id);if(r){state.reminders=state.reminders.filter(x=>x!==r);addLinkedRem("eve","hw",h)}}});alertMsg("Moved to "+relDay(state.homework.find(h=>h.id===ds.hwpost).due).toLowerCase());return}
-  if(ds.remdel){openMenu=null;snap();change(()=>state.reminders=state.reminders.filter(r=>r.id!==ds.remdel));undoToast("Reminder deleted");return}
+  if(ds.remdel){openMenu=null;snap();change(()=>delReminder(ds.remdel));undoToast("Reminder deleted");return}
   if(ds.remshow!==undefined){remShowPast=!remShowPast;render();return}
   if(ds.remclear!==undefined){const n=nowStamp();snap();undoToast("Past reminders deleted");change(()=>state.reminders=state.reminders.filter(r=>(r.date+"T"+r.time)>n));return}
   if(ds.remseen){change(()=>{const r=state.reminders.find(r=>r.id===ds.remseen);if(r)r.seen=true});return}
@@ -2594,8 +2820,8 @@ document.addEventListener("click",e=>{
   if(ds.sel!==undefined){selDay=+ds.sel;openForm=null;render();return}
   if(ds.step){change(()=>{const done=totals()[ds.step].done,cur=state.remaining[ds.step]||0;state.remaining[ds.step]=Math.max(done,cur+ +ds.by)});return}
   if(ds.delfix){const[d,id]=ds.delfix.split(":");
-    openMenu=null;snap();change(()=>{state.days[d].tasks=state.days[d].tasks.filter(k=>k.id!==id)});undoToast("Removed from every "+DAY_NAMES[d]);return}
-  if(ds.delextra){const[key,id]=ds.delextra.split(":");openMenu=null;snap();undoToast("Task removed");change(()=>{const x=dayData(state,key);x.extra=x.extra.filter(k=>k.id!==id);delete x.done[id];prune(key)});return}
+    openMenu=null;snap();change(()=>{const k=state.days[d].tasks.find(x=>x.id===id);if(k)trashPut("fix",subj(k.s).name+" · every "+DAY_NAMES[d],{d,item:k});state.days[d].tasks=state.days[d].tasks.filter(k=>k.id!==id)});undoToast("Removed from every "+DAY_NAMES[d]);return}
+  if(ds.delextra){const[key,id]=ds.delextra.split(":");openMenu=null;snap();undoToast("Task removed");change(()=>{const x=dayData(state,key),k=x.extra.find(y=>y.id===id);if(k)trashPut("extra",subj(k.s).name+(k.title?" · "+k.title:""),{key,item:k});x.extra=x.extra.filter(k=>k.id!==id);delete x.done[id];prune(key)});return}
   if(ds.skip){const[key,id]=ds.skip.split(":");openMenu=null;snap();change(()=>{const x=dayData(state,key);x.skip.push(id);delete x.done[id]});undoToast("Task removed from this day");return}
   if(ds.unskip){const[key,id]=ds.unskip.split(":");change(()=>{const x=dayData(state,key);x.skip=x.skip.filter(i=>i!==id);prune(key)});return}
   if(ds.open!==undefined){openForm=+ds.open;formKind="les";render();document.querySelector(`[data-form="${openForm}"] select`)?.focus();return}
@@ -3175,13 +3401,21 @@ function setSummary(k){const st=state.settings;
   if(k==="planner")return "Week starts "+DAY_NAMES[st.weekStart].slice(0,3)+" · "+(st.focusMin||25)+" min focus";
   if(k==="alerts")return (st.sound===false?"Sounds off":"Sounds on")+" · "+((st.remPresets||[]).length?(st.remPresets.length+" saved time"+(st.remPresets.length>1?"s":"")):"No saved times");
   if(k==="look")return (st.style==="luxe"?"Luxe":"Classic")+" · "+({auto:"Auto",light:"Light",dark:"Dark"}[st.theme]||"Auto")+" theme";
-  if(k==="data")return state.lastBackup?"Last backup "+relTime(state.lastBackup):"No backup yet";
+  if(k==="data")return (state.lastBackup?"Last backup "+relTime(state.lastBackup):"No backup yet")+((state.trash||[]).length?" · "+state.trash.length+" in the bin":"");
   if(k==="about")return "Version "+APP_VERSION+(updateReady?" · update ready":"")}
+// Give unlabeled form controls an accessible name from their row title or placeholder.
+function labelControls(root){document.querySelectorAll("h3.grp:not([aria-level]),.stcard h3:not([aria-level])").forEach(h=>h.setAttribute("aria-level","2"));(root||document).querySelectorAll("input:not([type=hidden]):not([aria-label]),select:not([aria-label]),textarea:not([aria-label])").forEach(el=>{
+  if(el.id&&document.querySelector(`label[for="${el.id}"]`))return;const lab=el.closest("label");if(lab&&lab.textContent.trim())return;
+  const row=el.closest(".setrow"),t=row&&row.querySelector("b")?.textContent||el.placeholder||(el.name==="s"?"Subject":el.name)||"";if(t)el.setAttribute("aria-label",t.trim())})}
 function renderSetPages(){const menu=document.getElementById("setMenu");if(!menu)return;
+  const nb=document.getElementById("notifBtn");if(nb){const perm="Notification" in window?Notification.permission:"unsupported";nb.hidden=perm!=="default";
+    if(perm==="granted")document.getElementById("notifTxt").textContent="Reminders pop up in the app, and as notifications while it's in the background ✓";}
   menu.hidden=!!setPage;document.querySelectorAll(".setpage").forEach(el=>el.hidden=el.dataset.page!==setPage);
   document.getElementById("setBackMain").hidden=!!setPage;document.getElementById("setBackMenu").hidden=!setPage;
+  document.getElementById("setBackMenu").dataset.sp=setPage==="trash"?"data":"";document.getElementById("setBackMenu").textContent=setPage==="trash"?"‹ Backup & data":"‹ Settings";
   document.getElementById("setTitle").textContent=setPage?SET_PAGES.find(x=>x[0]===setPage)[2]:"Settings";
-  if(!setPage)menu.innerHTML=SET_PAGES.map(([k,ic,t])=>`<button class="smrow" data-sp="${k}"><span class="smi">${ic}</span><span class="smt"><b>${t}</b><small>${esc(setSummary(k))}</small></span><span class="chev">›</span></button>`).join("")}
+  if(setPage==="trash")renderTrash();
+  if(!setPage)menu.innerHTML=SET_PAGES.filter(x=>x[0]!=="trash").map(([k,ic,t])=>`<button class="smrow" data-sp="${k}"><span class="smi">${ic}</span><span class="smt"><b>${t}</b><small>${esc(setSummary(k))}</small></span><span class="chev">›</span></button>`).join("")}
 function openSetPage(k){if(tab!=="set"){prevTab=tab;tab="set"}setPage=k||null;render();scrollTo(0,0)}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-sp]");if(!b)return;e.stopPropagation();buzz(4);openSetPage(b.dataset.sp)},true);
 
@@ -3199,7 +3433,7 @@ function installSheet(){const ios=isIOS();
     <ol class="inststeps">${ios?`<li>Open this page in <b>Safari</b>.</li><li>Tap the <b>Share</b> button <span class="kbd">⬆︎</span> at the bottom (or top on iPad).</li><li>Scroll down and tap <b>Add to Home Screen</b>, then <b>Add</b>.</li>`
       :`<li>Open your browser's menu <span class="kbd">⋮</span>.</li><li>Tap <b>Install app</b> or <b>Add to Home screen</b>.</li><li>Confirm, then open Study Planner from your home screen.</li>`}</ol>
     <p class="rvsub">The installed app opens full screen, works offline and keeps your data on this device.</p>`}
-document.addEventListener("click",e=>{if(e.target.closest("#instBtn"))doInstall()});
+document.addEventListener("click",e=>{if(e.target.closest("#instBtn"))doInstall();if(e.target.closest("#notifBtn"))askNotify()});
 document.addEventListener("click",e=>{if(e.target.closest("#expIcs"))icsExport()});
 let lastUpdCheck=0,announcedVersion=null;
 // "2.10" is newer than "2.9"; a server copy that is the same or older never counts as an update.
@@ -3380,6 +3614,7 @@ function openSheet(step){
       <p class="rvsub">It replaces the lessons and classes in your weekly timetable. Your homework, exams, notes and grades stay as they are.</p>
       <button class="btn full" data-ttimport="yes">Copy into my timetable</button>`;
     sh.hidden=false;bg.hidden=false;requestAnimationFrame(()=>{sh.classList.add("up");bg.classList.add("up")});return}
+  if(step==="plan"){sh.innerHTML=`<span class="grabber"></span>`+planHtml();sh.hidden=false;bg.hidden=false;requestAnimationFrame(()=>{sh.classList.add("up");bg.classList.add("up")});return}
   if(step==="install"){sh.innerHTML=`<span class="grabber"></span>`+installSheet();sh.hidden=false;bg.hidden=false;requestAnimationFrame(()=>{sh.classList.add("up");bg.classList.add("up")});return}
   if(step==="review"){sh.innerHTML=`<span class="grabber"></span>`+reviewHtml();sh.hidden=false;bg.hidden=false;requestAnimationFrame(()=>{sh.classList.add("up");bg.classList.add("up")});return}
   if(step==="log"){sh.innerHTML=`<div class="shh"><b>What's new</b><button class="lnk" data-qa="close">Close</button></div>
@@ -3392,7 +3627,7 @@ function openSheet(step){
   sh.innerHTML=GRAB+(step==="note"
     ?`<div class="shh"><b>New note for…</b><button class="lnk" data-qa="close">Cancel</button></div><div class="qgrid">${SUBJECTS.filter(x=>x.id!=="other").map(x=>`<button data-qanote="${x.id}" style="--c:${col(x)}"><i></i>${esc(x.name)}</button>`).join("")}</div>`
     :quickAddHtml());
-  sh.hidden=false;bg.hidden=false;requestAnimationFrame(()=>{sh.classList.add("up");bg.classList.add("up")})}
+  sh.hidden=false;bg.hidden=false;labelControls(sh);requestAnimationFrame(()=>{sh.classList.add("up");bg.classList.add("up")})}
 let qaKind="hw";
 const QA_KINDS=[["les","Lesson","📚"],["hw","Homework","📝"],["ex","Exam","📅"],["rem","Reminder","🔔"],["note","Note","🗒️"]];
 function quickAddHtml(){const k=qaKind,sel=subjOptions(),d=new Date();d.setHours(d.getHours()+1,0,0,0);
@@ -3423,7 +3658,7 @@ function quickSave(){const f=document.querySelector(".qaform");if(!f)return;cons
     if(k==="rem"){state.reminders.push({id:uid(),text:v("text"),date,time:v("time")||"18:00"});msg="Reminder set for "+relDay(date).toLowerCase()}});
   closeSheet();alertMsg(msg)}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-qak],[data-qsave]");if(!b)return;
-  if(b.dataset.qak){qaKind=b.dataset.qak;document.getElementById("sheet").innerHTML=`<span class="grabber"></span>`+quickAddHtml();document.querySelector(".qaform [name=text],.qaform select")?.focus();return}
+  if(b.dataset.qak){qaKind=b.dataset.qak;document.getElementById("sheet").innerHTML=`<span class="grabber"></span>`+quickAddHtml();labelControls(document.getElementById("sheet"));document.querySelector(".qaform [name=text],.qaform select")?.focus();return}
   quickSave()});
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.closest&&e.target.closest(".qaform")&&e.target.tagName==="INPUT"&&e.target.type!=="checkbox"){e.preventDefault();quickSave()}});
 function dragSheet(el,onClose){
