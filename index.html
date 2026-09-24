@@ -883,14 +883,29 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 
 /* ---- tickets: lessons, homework, exams and reminders share one look ---- */
 [hidden]{display:none!important}
-ul.tickets{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
-ul.tickets>li.task{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 10px 12px 14px;box-shadow:var(--shadow);min-height:56px}
-ul.tickets>li.task:first-child{border-top:1px solid var(--line)}
-ul.tickets>li.tmenu{padding:0 4px 2px;margin-top:-2px}
-.day ul.tickets>li.task{background:var(--soft);border-color:transparent;box-shadow:none}
-ul.tickets>li.task .del,ul.tickets>li.task .dots-btn{align-self:center;flex:none}
-ul.tickets>li.task .exn{align-self:center}
-:root[data-style="luxe"] ul.tickets>li.task{border-radius:14px}
+ul.tickets{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+ul.tickets>li.tk{display:flex;align-items:center;gap:10px;padding:9px 8px 9px 13px;background:linear-gradient(90deg,color-mix(in srgb,var(--c,var(--ink)) 7%,var(--panel)),var(--panel) 46%);border:1px solid color-mix(in srgb,var(--line) 75%,transparent);border-left:3px solid color-mix(in srgb,var(--c,var(--muted)) 70%,transparent);border-radius:13px;box-shadow:var(--shadow);min-height:0}
+ul.tickets>li.tk:first-child{border-top:1px solid color-mix(in srgb,var(--line) 75%,transparent)}
+ul.tickets>li.tk.exam{border-left-style:double;border-left-width:5px}
+ul.tickets>li.tk .chk{width:21px;height:21px;border-radius:50%;border-width:2px;background:var(--panel)}
+ul.tickets>li.tk .chk:checked{background:var(--c);border-color:var(--c)}
+ul.tickets>li.tk .chk:checked::after{width:4.5px;height:8px;border-width:0 2px 2px 0}
+ul.tickets>li.tk .tico{width:21px;height:21px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:.72rem;font-weight:800;background:color-mix(in srgb,var(--c,var(--ink)) 16%,transparent);color:var(--c,var(--ink))}
+ul.tickets>li.tk .tico.soon{background:color-mix(in srgb,var(--eng) 20%,transparent);color:var(--eng)}
+ul.tickets>li.tk .tt{display:flex;flex-direction:column;gap:1px}
+ul.tickets>li.tk .tt>b{font-size:.86rem!important;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25}
+ul.tickets>li.tk .tsub{font-size:.72rem;color:var(--c,var(--muted));font-weight:700;letter-spacing:.03em;text-transform:uppercase;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ul.tickets>li.tk .itrow{margin-top:5px}
+ul.tickets>li.tk .ttime{font-size:.73rem;color:var(--muted);white-space:nowrap;font-weight:600;font-variant-numeric:tabular-nums;background:var(--soft);border-radius:20px;padding:3px 9px;flex:none}
+ul.tickets>li.tk.done{opacity:.5}
+ul.tickets>li.tk.done .tt{opacity:1}
+ul.tickets>li.tk .del,ul.tickets>li.tk .dots-btn,ul.tickets>li.tk .cal{align-self:center;flex:none}
+ul.tickets>li.tmenu{padding:0 4px 2px;margin-top:-1px}
+:root[data-style="luxe"] ul.tickets>li.tk{border-radius:8px;background:linear-gradient(90deg,color-mix(in srgb,var(--c,var(--gold)) 10%,var(--panel)),var(--panel) 46%)}
+:root[data-style="luxe"] ul.tickets>li.tk .chk{border-radius:2px}
+.form .fkind{display:grid;grid-template-columns:repeat(3,1fr);margin-bottom:10px;width:100%}
+.form .fkind button{padding:7px 4px}
+.form .fnote{margin:2px 2px 0;color:var(--muted);font-size:.8rem}
 /* ---- day card ---- */
 .dayhead{align-items:center}
 .focusbtn{border:1px solid var(--line);background:var(--soft);color:var(--ink);font:inherit;font-size:.8rem;font-weight:700;border-radius:20px;padding:6px 12px;cursor:pointer;flex:none}
@@ -938,6 +953,9 @@ ul.tickets>li.task .exn{align-self:center}
 .setup .seg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .setup .seg button{padding:8px 0;font-size:.78rem}
 
+.days{grid-template-columns:minmax(0,1fr)}
+.day{min-width:0}
+.form .fkind,.form .fnote{grid-column:1/-1}
 @media(min-width:900px){
   /* 7 days in 4 columns: the selected day takes two cells, so the week always fills two full rows */
   .days{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-flow:row dense;align-items:start}
@@ -962,7 +980,7 @@ ul.tickets>li.task .exn{align-self:center}
 
   <button class="searchbar" data-tab="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search homework, notes, exams…</span></button>
   <div class="tabwrap"><div class="tabs" role="tablist"><span class="tabind" id="tabInd"></span>
-    <button data-tab="study" role="tab">Study <em id="leftTotal"></em></button>
+    <button data-tab="study" role="tab">Timetable <em id="leftTotal"></em></button>
     <button data-tab="todo" role="tab">Tasks <em id="todoCount" hidden></em></button>
     <button data-tab="school" role="tab">Attendance <em id="attPct"></em></button>
   </div></div>
@@ -1053,7 +1071,7 @@ ul.tickets>li.task .exn{align-self:center}
       <div class="setrow wide"><div><b>Week starts on</b><small>The first day of your study week.</small></div>
         <div class="seg"><button data-optws="5">Fri</button><button data-optws="6">Sat</button><button data-optws="0">Sun</button><button data-optws="1">Mon</button><button data-optws="2">Tue</button><button data-optws="3">Wed</button><button data-optws="4">Thu</button></div></div>
       <div class="setrow"><div><b>Open the app on</b></div>
-        <div class="seg"><button data-optopen="last">Last tab</button><button data-optopen="study">Study</button><button data-optopen="todo">Tasks</button><button data-optopen="school">Attendance</button></div></div>
+        <div class="seg"><button data-optopen="last">Last tab</button><button data-optopen="study">Timetable</button><button data-optopen="todo">Tasks</button><button data-optopen="school">Attendance</button></div></div>
       <div class="setrow"><div><b>Focus timer length</b><small>Where the timer starts.</small></div>
         <div class="seg" id="optFocus"><button data-optfocus="15">15 min</button><button data-optfocus="25">25 min</button><button data-optfocus="45">45 min</button><button data-optfocus="60">60 min</button></div></div>
       <div class="setrow"><div><b>Reminder options</b><small id="presetList">Custom times you save show up here.</small></div></div>
@@ -1129,14 +1147,14 @@ ul.tickets>li.task .exn{align-self:center}
     <div class="sgroup" data-sgroup="2"><h2>School days</h2><p>Tap the days you have school. Attendance only counts these.</p>
       <div class="seg" id="setupSdays"></div>
       <div class="sacts"><button class="btn ghost full" data-sprev>Back</button><button class="btn full" data-snext>Next</button></div></div>
-    <div class="sgroup" data-sgroup="3"><h2>You're all set</h2><p>Open Study and use ＋ Task on a day to plan your lessons.</p>
-      <div class="sacts"><button class="btn ghost full" data-sprev>Back</button><button class="btn full" data-sdone>Open Study</button></div></div>
+    <div class="sgroup" data-sgroup="3"><h2>You're all set</h2><p>Open your timetable and use ＋ Add on a day to plan lessons, homework and exams.</p>
+      <div class="sacts"><button class="btn ghost full" data-sprev>Back</button><button class="btn full" data-sdone>Open Timetable</button></div></div>
   </div></div>
   <div class="viewer" id="viewer" hidden><span class="grabber light"></span><img id="viewImg" alt=""><div class="vbar"><button class="btn ghost" data-view-del>Delete photo</button><button class="btn" data-view-close>Close</button></div></div>
   <input type="file" id="photoIn" accept="image/*" multiple hidden>
 
   <nav class="tabbar" id="tabBar" aria-label="Main">
-    <button data-tab="study"><span class="tbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H19v3H6.5"/></svg></span>Study<em id="leftTotal2"></em></button>
+    <button data-tab="study"><span class="tbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H19v3H6.5"/></svg></span>Timetable<em id="leftTotal2"></em></button>
     <button data-tab="todo"><span class="tbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11"/><path d="M9 12h11"/><path d="M9 18h11"/><path d="m3.5 6 1.2 1.2L7 5"/><path d="m3.5 12 1.2 1.2L7 11"/><path d="m3.5 18 1.2 1.2L7 17"/></svg></span>Tasks<em id="todoCount2" hidden></em></button>
     <button data-tab="school"><span class="tbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/><path d="m8.5 14.5 2 2 4-4"/></svg></span>Attendance<em id="attPct2"></em></button>
   </nav>
@@ -1148,8 +1166,11 @@ ul.tickets>li.task .exn{align-self:center}
 const APP_VERSION="2.6";
 const CHANGES=[
   ["2.6","Subjects moved to a new Lessons tab in Tasks, next to Homework and Exams",
-        "Today's summary, class shortcuts and tomorrow's plan now live in today's card, with the focus timer in its header",
-        "Each day is split into Lessons, Homework, Exams and Reminders, all shown as the same tickets",
+        "Study is now called Timetable",
+        "Today's summary, class shortcuts and tomorrow's plan (in the evening) now live in today's card, with the focus timer in its header",
+        "Each day is split into Lessons, Homework, Exams and Reminders, all in the same colour-edged ticket style",
+        "＋ Add on a day lets you pick a lesson, homework or an exam",
+        "Hide pages moved into each lesson's ⋯ menu",
         "The bell tells you when a new version is ready, even with Auto-update off",
         "Fixed the black box that covered the screen on first launch; the welcome setup works again",
         "Evened out spacing and alignment across the app, and the desktop week now fills two full rows"],
@@ -1241,6 +1262,7 @@ function peek(key){const x=state.dates[key]||{skip:[],extra:[],done:{}};return {
 
 let state=migrate(load()||structuredClone(DEFAULT));
 let tab=(()=>{const o=state.settings.openOn;if(o&&o!=="last")return o;try{const t=localStorage.getItem("sp-tab");return t&&t!=="set"&&t!=="search"&&t!=="notif"?t:"week"}catch(e){return "week"}})();
+let formKind="les";
 let week=0, selDay=today, openForm=null, openMenu=null, setupStep=1;
 const expanded=new Set();
 function isComplete(wd,key){return key<todayIso&&tasksOn(wd,key).filter(k=>!k.skipped).every(k=>k.done)}
@@ -1325,7 +1347,7 @@ function notifItems(){
   const studyLeft=studyTasks.filter(k=>!k.done);
   if(studyTasks.length&&studyLeft.length&&!dis.has("studytoday")){
     const sNames=[...new Set(studyLeft.map(k=>subj(k.s).name))].slice(0,3).join(", ");
-    out.push({k:"studytoday",icon:"📚",t:studyLeft.length===1?"1 study task left today":studyLeft.length+" study tasks left today",s:sNames,act:"Study",go:"study",canDismiss:true});
+    out.push({k:"studytoday",icon:"📚",t:studyLeft.length===1?"1 study task left today":studyLeft.length+" study tasks left today",s:sNames,act:"Timetable",go:"study",canDismiss:true});
   }
   state.exams.filter(x=>x.date>=todayIso&&daysUntil(x.date)<=5).forEach(x=>{
     if(dis.has("ex:"+x.id))return;
@@ -1365,15 +1387,17 @@ function renderBanner(){
 }
 
 // ---- tickets: one look for lessons, homework, exams and reminders ----
-function hwTicket(h){const sj=subj(h.s);return `<li class="task hw ${h.done?"done":""}" style="--c:${col(sj)}">
+function hwTicket(h){const sj=subj(h.s),over=h.due<todayIso&&!h.done;return `<li class="task tk hw ${h.done?"done":""}" style="--c:${col(sj)}">
     <input type="checkbox" class="chk" data-hwtick="${h.id}" ${h.done?"checked":""} aria-label="Done: ${esc(h.text)}">
-    <div class="tt"><b>${esc(h.text)}</b><small>${esc(sj.name)} · ${h.due<todayIso&&!h.done?`<span class="red">overdue, was due ${relDay(h.due).toLowerCase()}</span>`:"due "+relDay(h.due).toLowerCase()}</small>${h.done?"":`<div class="itrow">${remChip(h,"hw")}${h.due<=todayIso?`<button class="lnk postpone" data-hwpost="${h.id}">+1 day</button>`:""}</div>`}</div>
+    <div class="tt"><b>${esc(h.text)}</b><small class="tsub">Homework · ${esc(sj.name)} · ${over?`<span class="red">overdue</span>`:"due "+relDay(h.due).toLowerCase()}</small>${h.done?"":`<div class="itrow">${remChip(h,"hw")}${h.due<=todayIso?`<button class="lnk postpone" data-hwpost="${h.id}">+1 day</button>`:""}</div>`}</div>
     <button class="del" data-hwdel="${h.id}" aria-label="Delete">×</button></li>`}
-function examTicket(x){const sj=subj(x.s),n=daysUntil(x.date);return `<li class="task exam" style="--c:${col(sj)}">
-    <div class="exn ${n<=3?"soon":""}"><b>${n===0?"!":n}</b><small>${n===0?"today":n===1?"day":"days"}</small></div>
-    <div class="tt"><b>${esc(x.title)}</b><small>${esc(sj.name)} · ${relDay(x.date)}</small><div class="itrow">${remChip(x,"ex")}${n>=1?`<button class="lnk postpone" data-revplan="${x.id}">${revCount(x)?"📚 "+revCount(x)+" revision days":"📚 Plan revision"}</button>`:""}</div></div>
+function examTicket(x){const sj=subj(x.s),n=daysUntil(x.date);return `<li class="task tk exam" style="--c:${col(sj)}">
+    <span class="tico ${n<=3?"soon":""}" title="${n===0?"Today":n+" days"}">${n===0?"!":n}</span>
+    <div class="tt"><b>${esc(x.title)}</b><small class="tsub">Exam · ${esc(sj.name)} · ${n===0?"today":n===1?"tomorrow":"in "+n+" days"}</small><div class="itrow">${remChip(x,"ex")}${n>=1?`<button class="lnk postpone" data-revplan="${x.id}">${revCount(x)?"📚 "+revCount(x)+" revision days":"📚 Plan revision"}</button>`:""}</div></div>
     <button class="del" data-exdel="${x.id}" aria-label="Delete exam">×</button></li>`}
-function remTicket(r){const past=(r.date+"T"+r.time)<=nowStamp();return `<li class="task rem ${past?"done":""}"><span class="bell">🔔</span><div class="tt"><b>${esc(r.text)}</b><small>${relDay(r.date)}, ${t12(r.time)}</small></div>${past?"":`<a class="lnk cal" href="${icsFor(r)}" download="reminder.ics" aria-label="Add to calendar">📅</a>`}<button class="del" data-remdel="${r.id}" aria-label="Delete">×</button></li>`}
+function remTicket(r){const past=(r.date+"T"+r.time)<=nowStamp();return `<li class="task tk rem ${past?"done":""}" style="--c:var(--prog)">
+    <span class="tico">🔔</span>
+    <div class="tt"><b>${esc(r.text)}</b><small class="tsub">Reminder · ${relDay(r.date)} · ${t12(r.time)}</small></div>${past?"":`<a class="lnk cal" href="${icsFor(r)}" download="reminder.ics" aria-label="Add to calendar">📅</a>`}<button class="del" data-remdel="${r.id}" aria-label="Delete">×</button></li>`}
 function tickets(items){return `<ul class="tickets">${items.join("")}</ul>`}
 
 let rowSwiping=false;
@@ -1579,7 +1603,7 @@ function todayExtras(){
   const nh=state.homework.filter(h=>!h.done&&h.due===tk).length;
   const tx=state.exams.filter(x=>x.date===tk).map(x=>`<b class="red">${esc(x.title)}</b>`);
   const all=[...tx,state.days[twd].session?"Class: "+esc(state.days[twd].session):"",tt.join(", "),nh?nh+" homework due":""].filter(Boolean);
-  const tmr=`<div class="tmr"><em>Tomorrow</em><span>${all.length?all.join(" · "):"Nothing planned"}</span></div>`;
+  const tmr=new Date().getHours()<18?"":`<div class="tmr"><em>Tomorrow</em><span>${all.length?all.join(" · "):"Nothing planned"}</span></div>`;
   return {sum,cls,tmr}}
 function renderSubjectPage(){
   const list=document.getElementById("subjList"),det=document.getElementById("subjDetail");
@@ -2088,6 +2112,7 @@ function render(){
         ${!isLast?`<button data-reorder="${key}:${k.id}:down">↓ Move down</button>`:""}
         ${key===todayIso&&!k.done?`<button data-focus="${key}:${k.id}:${k.s}:${k.amt??""}">⏱ Focus</button>`:""}
         <button data-title="${key}:${k.id}">✎ ${k.title?"Rename":"Add title"}</button>
+        <button data-pgtoggle="${key}">${peek(key).noPages?"Show pages":"Hide pages"} this day</button>
         ${key>=todayIso&&!k.done?`<button data-move="${key}:${k.id}:${k.kind}:${k.s}:${k.amt??""}">→ Tomorrow</button>`:""}
         ${k.kind==="fixed"
           ?`<button data-skip="${key}:${k.id}">Remove from this day</button><button class="danger" data-delfix="${d}:${k.id}">Remove every ${DAY_NAMES[d].slice(0,3)}</button>`
@@ -2096,21 +2121,25 @@ function render(){
         <span class="chk off"></span>
         <div class="tt"><input class="ttl" id="ttlIn" value="${esc(k.title||"")}" placeholder="Title for ${esc(s.name)}" maxlength="40"></div>
         <button class="btn sm" data-titlesave="${key}:${k.id}:${k.kind}:${d}">Save</button><button class="lnk" data-titlecancel>Cancel</button></li>`;
-      return `<li class="task ${k.done?"done":""}" style="--c:${col(s)}" data-tid="${k.id}">
+      return `<li class="task tk les ${k.done?"done":""}" style="--c:${col(s)}" data-tid="${k.id}">
         <input type="checkbox" class="chk" data-tick="${key}:${k.id}:${k.s}:${k.amt||0}:${k.pg||0}" ${k.done?"checked":""} aria-label="Done: ${s.name}">
-        <div class="tt"><b>${s.name}${k.title?` <span class="ttlx">${esc(k.title)}</span>`:""}</b><small class="amtrow"><input class="amtin" data-amt="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.amt??""}" placeholder="–" aria-label="${s.name} lessons on ${dLabel(dt)}"> <span class="amtl">lessons</span>${peek(key).noPages?"":`<input class="amtin" data-pg="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.pg??""}" placeholder="–" aria-label="${s.name} pages on ${dLabel(dt)}"> <span class="amtl">pages</span>`} ${tag?`<i class="kind ${k.kind}">${tag}</i>`:""}</small></div>${acts}</li>${menu}`}).join("")}</ul></section>`
+        <div class="tt"><b>${s.name}${k.title?` <span class="ttlx">${esc(k.title)}</span>`:""}</b><small class="tsub">Lesson${tag?" · "+tag:""}</small><div class="itrow amtrow"><input class="amtin" data-amt="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.amt??""}" placeholder="–" aria-label="${s.name} lessons on ${dLabel(dt)}"> <span class="amtl">lessons</span>${peek(key).noPages?"":`<input class="amtin" data-pg="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.pg??""}" placeholder="–" aria-label="${s.name} pages on ${dLabel(dt)}"> <span class="amtl">pages</span>`}</div></div>${acts}</li>${menu}`}).join("")}</ul></section>`
       :"";
+    const fk=formKind,kinds=[["les","Lesson"],["hw","Homework"],["ex","Exam"]];
     const form=openForm===d?`<div class="form" data-form="${d}">
-        <select name="s">${subjOptions()}</select>
+        <div class="seg fkind" role="tablist">${kinds.map(([k,l])=>`<button data-fkind="${k}" class="${fk===k?"on":""}" role="tab" aria-selected="${fk===k}">${l}</button>`).join("")}</div>
+        ${fk==="les"?`<select name="s">${subjOptions()}</select>
         <input name="amt" type="number" min="0" step="any" placeholder="Lessons" inputmode="decimal" aria-label="Lessons on ${dLabel(dt)}">
         <input name="title" class="ftitle" placeholder="Title (optional), e.g. Unit 3" maxlength="40">
         <input name="pg" class="fpg" type="number" min="0" step="any" placeholder="Pages (optional)" inputmode="decimal" aria-label="Pages">
         <div class="rep" role="radiogroup">
           <label><input type="radio" name="rep${d}" value="every" checked> Every ${DAY_NAMES[d]}</label>
           <label><input type="radio" name="rep${d}" value="once"> Only ${dLabel(dt)}</label>
-        </div>
-        <div class="acts"><button class="btn ghost" data-cancel>Cancel</button><button class="btn" data-save="${d}">Add task</button></div>
-      </div>`:`<button class="addbtn" data-open="${d}">+ Add task</button>`;
+        </div>`:`<input name="text" class="ftitle" placeholder="${fk==="hw"?"Homework, e.g. Essay page 40":"Exam name, e.g. Arabic midterm"}" maxlength="${fk==="hw"?80:60}">
+        <select name="s" class="ftitle">${subjOptions()}</select>
+        <p class="fnote">${fk==="hw"?"Due":"On"} ${DAY_NAMES[d]}, ${dLabel(dt)}</p>`}
+        <div class="acts"><button class="btn ghost" data-cancel>Cancel</button><button class="btn" data-save="${d}">Add ${fk==="les"?"lesson":fk==="hw"?"homework":"exam"}</button></div>
+      </div>`:"";
       const lastKey=iso(dateFor(week-1,d));
       const hasLastWeek=!!state.days[d]&&state.days[d].tasks&&state.days[d].tasks.length;
       if(!tasksOn(d,key).length&&hasLastWeek&&week>0&&openForm!==d)list+=`<div class="actrow"><button class="lnk" data-copyweek="${d}">Same as last week</button></div>`;
@@ -2123,7 +2152,7 @@ function render(){
       ${list}${secs}${!hasLessons&&!secs?`<div class="empty">Nothing planned. Free day.</div>`:""}
       ${isToday?tx.tmr:""}
       ${openForm===d?`<div class="add">${form}</div>`:""}
-      ${openForm===d?"":`<div class="dayadds"><button data-open="${d}">＋ Task</button>${day.session||classOpen===d?"":`<button data-classopen="${d}">＋ Class</button>`}${tasks.some(k=>!k.skipped)?`<button class="pgt" data-pgtoggle="${key}">${peek(key).noPages?"＋ Pages":"Hide pages"}</button>`:""}</div>`}</article>`}).join("");
+      ${openForm===d?"":`<div class="dayadds"><button data-open="${d}">＋ Add</button>${day.session||classOpen===d?"":`<button data-classopen="${d}">＋ Class</button>`}</div>`}</article>`}).join("");
   bindSwipeRows(document.getElementById("days"));
   afterRender();
 }
@@ -2292,10 +2321,14 @@ document.addEventListener("click",e=>{
   if(ds.delextra){const[key,id]=ds.delextra.split(":");openMenu=null;snap();undoToast("Task removed");change(()=>{const x=dayData(state,key);x.extra=x.extra.filter(k=>k.id!==id);delete x.done[id];prune(key)});return}
   if(ds.skip){const[key,id]=ds.skip.split(":");openMenu=null;snap();change(()=>{const x=dayData(state,key);x.skip.push(id);delete x.done[id]});undoToast("Task removed from this day");return}
   if(ds.unskip){const[key,id]=ds.unskip.split(":");change(()=>{const x=dayData(state,key);x.skip=x.skip.filter(i=>i!==id);prune(key)});return}
-  if(ds.open!==undefined){openForm=+ds.open;render();document.querySelector(`[data-form="${openForm}"] select`)?.focus();return}
+  if(ds.open!==undefined){openForm=+ds.open;formKind="les";render();document.querySelector(`[data-form="${openForm}"] select`)?.focus();return}
   if(ds.cancel!==undefined){openForm=null;render();return}
   if(ds.save!==undefined){
     const d=+ds.save,f=document.querySelector(`[data-form="${d}"]`);
+    if(formKind!=="les"){const t=f.querySelector("[name=text]"),text=t.value.trim();if(!text){t.focus();return}
+      const sj=f.querySelector("[name=s]").value,key=iso(dateFor(week,d));
+      change(()=>{if(formKind==="hw")state.homework.push({id:uid(),text,s:sj,due:key,done:false});else state.exams.push({id:uid(),title:text,s:sj,date:key});openForm=null});
+      alertMsg(formKind==="hw"?"Homework added":"Exam added");return}
     const raw=parseFloat(f.querySelector("[name=amt]").value);
     const amt=isNaN(raw)?null:Math.max(0,raw);
     const rawPg=parseFloat(f.querySelector("[name=pg]").value);
@@ -2825,6 +2858,8 @@ document.addEventListener("click",e=>{
   if(ds.sd!==undefined){const d=+ds.sd,a=state.settings.schoolDays||[];state.settings.schoolDays=a.includes(d)?a.filter(x=>x!==d):[...a,d];save();renderSetup();return}
   if(ds.sdel){const id=ds.sdel;state.subjects=state.subjects.filter(x=>x.id!==id);delete state.remaining[id];SUBJECTS=[...state.subjects,OTHER];resetSubjSelects();save();renderSetup();return}
 });
+document.addEventListener("click",e=>{const b=e.target.closest("[data-fkind]");if(!b)return;formKind=b.dataset.fkind;render();
+  const f=document.querySelector(`[data-form="${openForm}"]`);f?.querySelector(formKind==="les"?"select":"[name=text]")?.focus()});
 document.addEventListener("keydown",e=>{if(e.target.id==="setupNewSubj"&&e.key==="Enter"){e.preventDefault();setupAddSubject()}});
 function openSheet(step){
   buzz(4);
@@ -2874,7 +2909,7 @@ document.addEventListener("click",e=>{
   if(a==="grade"){tab="todo";todoSub="ex";render();setTimeout(()=>{document.getElementById("gradeBox")?.scrollIntoView({behavior:"smooth",block:"start"});document.getElementById("gName")?.focus()},120);return}
   if(a==="hw"||a==="ex"||a==="rem"){tab="todo";todoSub=a;render();scrollTo(0,0);setTimeout(()=>document.getElementById({hw:"hwText",ex:"exText",rem:"remText"}[a])?.focus(),80);return}
   if(a==="focus"){startFocus(null);return}
-  if(a==="task"){tab="study";studySub="tt";week=0;selDay=today;openForm=today;render();
+  if(a==="task"){tab="study";studySub="tt";week=0;selDay=today;openForm=today;formKind="les";render();
     setTimeout(()=>document.querySelector(`[data-form="${today}"]`)?.scrollIntoView({behavior:"smooth",block:"center"}),80)}
 });
 
