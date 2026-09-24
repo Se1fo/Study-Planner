@@ -1257,12 +1257,12 @@ const SWATCHES=["#ef4444","#f97316","#f59e0b","#eab308","#84cc16","#22c55e","#14
 let colorOpen=null;
 let hwShowDone=false,remShowPast=false,addingSubj=false;
 
-let updateReady=false;
+let updateReady=false,newVersion=null;
 function notifItems(){
   const out=[],n=nowStamp();
   const dis=new Set(state.dismissed||[]);
   if(updateReady&&!dis.has("upd")){
-    out.push({k:"upd",icon:"✨",t:"New version "+APP_VERSION+" is ready",s:"Tap update to load the latest features instantly.",act:"Update now",go:"update",cls:"n-upd",btnCls:"updbtn",canDismiss:false});
+    out.push({k:"upd",icon:"✨",t:"New version"+(newVersion?" "+newVersion:"")+" is ready",s:"Tap update to load the latest features instantly.",act:"Update now",go:"update",cls:"n-upd",btnCls:"updbtn",canDismiss:false});
   }
   remDue().forEach(r=>{
     if(!dis.has("rem:"+r.id))out.push({k:"rem:"+r.id,icon:"🔔",t:r.text,s:relDay(r.date)+", "+r.time,act:"Done",go:"remseen:"+r.id,canDismiss:true});
@@ -1788,6 +1788,7 @@ function applySettings(){
   try{if("setAppBadge" in navigator){const n=hwPending().length;if(st.badge&&n)navigator.setAppBadge(n).catch(()=>{});else navigator.clearAppBadge().catch(()=>{})}}catch(e){}
   const sd=document.getElementById("optSound");if(sd)sd.checked=st.sound!==false;
   const cf=document.getElementById("optConf");if(cf)cf.checked=st.confetti!==false;
+  const au=document.getElementById("optAutoUpdate");if(au)au.checked=st.autoUpdate===true;
   if(st.style==="luxe")document.documentElement.dataset.style="luxe";else delete document.documentElement.dataset.style;
   document.querySelectorAll("[data-optstyle]").forEach(b=>b.classList.toggle("on",b.dataset.optstyle===(st.style||"classic")));
   document.documentElement.style.fontSize=({s:"14px",m:"16px",l:"18px"})[st.size||"m"];
@@ -2354,7 +2355,7 @@ document.addEventListener("change",e=>{
     change(()=>state.settings.badge=on);return}
   if(t.id==="optSound"){change(()=>state.settings.sound=t.checked);return}
   if(t.id==="optConf"){change(()=>state.settings.confetti=t.checked);return}
-  if(t.id==="optAutoUpdate"){change(()=>state.settings.autoUpdate=t.checked);return}
+  if(t.id==="optAutoUpdate"){change(()=>state.settings.autoUpdate=t.checked);syncSwPrefs();if(t.checked)checkUpdate(false);return}
   if(t.id==="optAuto"){change(()=>{state.settings.autoTick=t.checked;if(t.checked)state.autoThrough=iso(new Date(Date.now()-864e5))});return}
   if(t.dataset.cpick){setColor(t.dataset.cpick,t.value);return}
   if(t.classList&&t.classList.contains("remsel")){const c=document.getElementById(t.id+"C");if(c){c.hidden=t.value!=="custom";if(t.value==="custom"){const d=document.getElementById(t.id+"D");if(!d.value)d.value=todayIso}}return}
@@ -2660,61 +2661,78 @@ if(state.settings.setupDone!==true && !state.settings.setupDone){
 }
 
 
-let swReg=null;
+let swReg=null,applyingUpdate=false;
+// Tell the service worker the auto-update choice; it can't read localStorage itself.
+function syncSwPrefs(){
+  const m={type:"SET_PREFS",autoUpdate:state.settings.autoUpdate===true};
+  try{if(swReg&&swReg.active)swReg.active.postMessage(m)}catch(e){}
+  try{const c=navigator.serviceWorker&&navigator.serviceWorker.controller;if(c)c.postMessage(m)}catch(e){}
+}
+function onWaitingWorker(w){
+  updateReady=true;renderBanner();
+  const b=document.getElementById("upd");if(b&&!b.disabled)b.textContent="Update";
+  // Only swap to the new version on our own when auto-update is on.
+  if(state.settings.autoUpdate===true)w.postMessage({type:"SKIP_WAITING"});
+}
 (function(){const st=document.getElementById("offst");
   if(!("serviceWorker" in navigator)){st.textContent="offline mode unavailable";return}
+  // Never leave the label on "Checking…" forever (e.g. a slow first download of the offline copy).
+  const stuck=setTimeout(()=>{if(st.textContent==="Checking…")st.textContent=navigator.serviceWorker.controller?"works offline":"offline mode still setting up"},10000);
   navigator.serviceWorker.register("sw.js").then(reg=>{
     swReg=reg;
+    if(reg.active){st.textContent="works offline";clearTimeout(stuck)}
+    syncSwPrefs();
+    if(reg.waiting&&navigator.serviceWorker.controller)onWaitingWorker(reg.waiting);
     reg.addEventListener("updatefound",()=>{
       const newWorker=reg.installing;
       if(!newWorker)return;
       newWorker.addEventListener("statechange",()=>{
-        if(newWorker.state==="installed"&&navigator.serviceWorker.controller){
-          updateReady=true;renderBanner();
-          newWorker.postMessage({type:"SKIP_WAITING"});
-        }
+        if(newWorker.state==="installed"&&navigator.serviceWorker.controller)onWaitingWorker(newWorker);
       });
     });
     return navigator.serviceWorker.ready;
-  }).then(()=>{st.textContent="works offline";persistStorage();return navigator.storage.persist()})
-    .catch(()=>{st.textContent="offline mode not set up (upload sw.js)"});
+  }).then(()=>{clearTimeout(stuck);st.textContent="works offline";syncSwPrefs();try{persistStorage()}catch(e){}})
+    .catch(()=>{clearTimeout(stuck);st.textContent="offline mode not set up (upload sw.js)"});
 
   let refreshing=false;
   navigator.serviceWorker.addEventListener("controllerchange",()=>{
-    if(refreshing)return;
+    syncSwPrefs();
+    // A new worker took over. Reload only if the user asked to update or has auto-update on.
+    if(refreshing||!(applyingUpdate||state.settings.autoUpdate===true))return;
     refreshing=true;
-    window.location.reload();
+    const u=location.pathname+"?v="+Date.now();
+    try{location.replace(u)}catch(e){location.href=u}
   });
 })();
+// Drop the "?v=" left behind by an update reload.
+try{if(/[?&]v=/.test(location.search))history.replaceState(null,"",location.pathname+location.hash)}catch(e){}
 document.getElementById("ver").textContent="v"+APP_VERSION;
 function hardReload(){
-  try{
-    if("caches" in window){
-      caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).catch(()=>{});
-    }
-  }catch(e){}
-  const u=location.pathname+"?v="+Date.now();
-  try{location.replace(u)}catch(e){location.href=u}
-  setTimeout(()=>location.reload(),1000);
+  applyingUpdate=true;
+  const go=()=>{const u=location.pathname+"?v="+Date.now();try{location.replace(u)}catch(e){location.href=u}};
+  // If a new service worker is waiting, let it take over first (controllerchange then reloads).
+  if(swReg&&swReg.waiting){swReg.waiting.postMessage({type:"SKIP_WAITING"});setTimeout(go,3000);return}
+  go();
 }
+function withTimeout(p,ms){return Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),ms))])}
 async function checkUpdate(manual){const b=document.getElementById("upd"),st=document.getElementById("offst");
   if(manual){b.textContent="Checking…";b.disabled=true;st.textContent="Checking…"}
   try{
-    if(swReg){try{await swReg.update()}catch(err){}}
+    if(swReg){try{await withTimeout(swReg.update(),8000)}catch(err){}}
     const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),8000);
     const r=await fetch(location.pathname+"?check="+Date.now(),{cache:"no-store",signal:ctl.signal});clearTimeout(to);
     const t=await r.text();const m=t.match(/const APP_VERSION="([^"]+)"/);
     if(m&&m[1]!==APP_VERSION){
-      updateReady=true;renderBanner();
-      if(manual){b.textContent="Update";st.textContent="New version available";alertMsg("New update (v"+m[1]+") is ready. Click Update to install.");return}
+      newVersion=m[1];updateReady=true;renderBanner();
+      if(manual){b.textContent="Update";st.textContent="New version available";alertMsg("New update (v"+m[1]+") is ready. Tap Update to install.")}
     }
-    else if(manual){b.textContent="Check";st.textContent="Up to date";alertMsg("You're on the latest version ("+APP_VERSION+")")}
+    else if(manual){b.textContent="Check Update";st.textContent="Up to date";alertMsg("You're on the latest version ("+APP_VERSION+")")}
   }
   catch(e){
-    if(manual){b.textContent="Check";st.textContent="Offline or error";alertMsg(navigator.onLine===false?"You're offline. Connect to check for updates.":"Couldn't check. Are you online?")}
+    if(manual){b.textContent="Check Update";st.textContent="Offline or error";alertMsg(navigator.onLine===false?"You're offline. Connect to check for updates.":"Couldn't check. Are you online?")}
     else{st.textContent="Offline or error"}
   }
-  if(manual){b.disabled=false}
+  finally{if(manual)b.disabled=false}
 }
 document.addEventListener("click",e=>{
   const sc=e.target.closest("#showChanges");
@@ -2723,14 +2741,12 @@ document.addEventListener("click",e=>{
       if(state.seenVersion!==APP_VERSION){state.seenVersion=APP_VERSION;save()}}
     box.hidden=!open;sc.classList.toggle("on",open);return}
   const b=e.target.closest("#upd,#mv");if(!b)return;
-  if(b.id==="upd")checkUpdate(true);
+  if(b.id==="upd"){if(updateReady)hardReload();else checkUpdate(true)}
   if(b.id==="mv")shareLink(b);
 });
 // Auto-update based on user preference
-if(state.settings.autoUpdate!==false){
-  checkUpdate(false);
-  document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate(false)});
-}
+if(state.settings.autoUpdate===true)checkUpdate(false);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&state.settings.autoUpdate===true)checkUpdate(false)});
 
 // transfer via link: #data=... imports if newer than what's here
 (()=>{const h=location.hash;if(!h.startsWith("#data="))return;
