@@ -1,0 +1,28 @@
+(()=>{const T=todayIso,A=n=>addDays(n),wd=new Date().getDay(),tw=new Date(A(1)+"T12:00:00").getDay();
+state.settings.setupDone=true;
+state.remaining={prog:6,arab:4,hist:3,eng:5};state.pages={prog:40};
+state.days[wd].tasks=[{id:"t1",s:"prog",amt:1,title:"Unit 3"},{id:"t2",s:"arab",amt:2}];
+state.days[wd].session="English class";
+state.days[tw].tasks=[{id:"t3",s:"hist",amt:1},{id:"t4",s:"eng",amt:1}];
+state.homework=[{id:"h1",text:"Essay page 40",s:"eng",due:T,done:false},{id:"h2",text:"Maths sheet",s:"prog",due:A(1),done:false},{id:"h3",text:"Read chapter 2",s:"hist",due:A(-1),done:false}];
+state.exams=[{id:"e1",title:"Arabic midterm",s:"arab",date:A(3)},{id:"e2",title:"History quiz",s:"hist",date:T}];
+state.reminders=[{id:"r1",text:"Bring calculator",date:T,time:"23:50"}];
+state.focusLog={[T]:35};
+const x=dayData(state,T);x.done={t1:1};
+save()})();
+(()=>{const T=todayIso;state.notes.push({id:"n1",s:"prog",title:"Vocab",text:"What is HTML :: Markup language\nloop :: repeats code",imgs:[],created:Date.now(),updated:Date.now()});
+state.topics={prog:[{id:"a",t:"Unit 1: Basics",done:true},{id:"b",t:"Unit 2: Loops",done:true},{id:"c",t:"Unit 3: Functions",done:false}]};
+const y=addDays(-1);dayData(state,y).done.z1=1;const y2=addDays(-2);dayData(state,y2).done.z2=1;
+state.holidays=[{id:"h",name:"Winter break",from:addDays(20),to:addDays(27)}];
+state.focusSub={[T]:{prog:25,arab:10}};save()})();
+(()=>{const n=new Date(),p=x=>String(x).padStart(2,"0"),h=n.getHours(),m=n.getMinutes();
+ const now=p(h)+":"+p(m),sub=(mins)=>{const d=new Date(n.getTime()+mins*60000);return p(d.getHours())+":"+p(d.getMinutes())};
+ state.days[today].classes=[{id:"c1",name:"English class",start:sub(-20),end:sub(25)},{id:"c2",name:"Maths",start:sub(40),end:sub(85)},{id:"c3",name:"Library",start:"",end:""}];
+ const tw=new Date(addDays(1)+"T12:00:00").getDay();state.days[tw].classes=[{id:"c4",name:"History",start:"08:00",end:"08:45"}];save()})();
+(()=>{state.grades=[{id:"g1",s:"prog",name:"Quiz 1",score:17,max:20,date:addDays(-5)},{id:"g2",s:"prog",name:"Midterm",score:41,max:50,date:addDays(-2)}];state.homework[0].pri=true;state.homework[0].est=30;state.homework[1].est=45;save()})();
+(()=>{for(let i=1;i<120;i++){const k=addDays(-i),x=dayData(state,k);x.done["p"+i]=(i%3)+1;x.doneS=x.doneS||{};x.doneS["p"+i]=["prog","arab","hist","eng"][i%4];
+  state.focusLog[k]=(i*7)%50;state.focusSub[k]={[["prog","arab","hist","eng"][i%4]]:(i*7)%50};if(i%7<5)state.att[k]=i%11?"p":"a"}
+ state.remaining={prog:12,arab:8,hist:6,eng:5};
+ state.notes.push({id:"nv",s:"prog",title:"Loops",pinned:true,text:"# Loops\nThey **repeat** code.\n- for loops\n- while loops\n- [x] Read chapter 3\n- [ ] Do exercises\nloop :: repeats code",imgs:[],created:Date.now(),updated:Date.now()});
+ state.trash=[{id:"t1",kind:"hw",label:"Old worksheet",at:Date.now()-2*864e5,data:{item:{id:"hx",text:"Old worksheet",s:"eng",due:todayIso,done:false},rems:[]}}];
+ state.reminders.push({id:"rnow",text:"Pack your PE kit",date:todayIso,time:"00:01"});save()})();
