@@ -1,7 +1,8 @@
 // Study Planner offline support
-const CACHE = "study-planner-v1.9";
-// The app page lives in its own cache that survives service worker updates,
-// so with auto-update off the installed version stays put until the user updates.
+const CACHE = "study-planner-v2.0";
+// The app page, and the app.js / styles.css builds it references (?b=<build>), live in their own
+// cache that survives service worker updates, so with auto-update off the installed version stays
+// put, as a matching set, until the user updates.
 const PAGE_CACHE = "study-planner-page";
 const PREFS_CACHE = "study-planner-prefs";
 const PREFS_KEY = "/__prefs";
@@ -46,8 +47,17 @@ self.addEventListener("install", e => {
     }
     // Only save the page the first time; after that it's replaced when the user updates (or auto-update is on).
     const pc = await caches.open(PAGE_CACHE);
-    if (!(await pc.match(PAGE_KEY))) {
-      try { const res = await fetchWithTimeout(PAGE_KEY); if (res.ok) await pc.put(PAGE_KEY, res); } catch (err) {}
+    let page = await pc.match(PAGE_KEY);
+    if (!page) {
+      try { const res = await fetchWithTimeout(PAGE_KEY); if (res.ok) { await pc.put(PAGE_KEY, res.clone()); page = res; } } catch (err) {}
+    }
+    // Save the app.js / styles.css builds the saved page uses, so it works offline straight away.
+    if (page) {
+      const html = await page.clone().text();
+      for (const m of new Set(html.match(/(?:app\.js|styles\.css)\?b=\d+/g) || [])) {
+        if (await pc.match(m)) continue;
+        try { const res = await fetchWithTimeout(m); if (res.ok) await pc.put(m, res); } catch (err) {}
+      }
     }
   })());
   // No skipWaiting here: the page decides when the new worker takes over (right away if auto-update is on).
@@ -96,6 +106,25 @@ self.addEventListener("fetch", e => {
       const hit = await cachedPage(req);
       if (hit) return hit;
       return networkPage(req);
+    })());
+    return;
+  }
+
+  // The app's code and styles: each build is a fixed file (?b=<build>), so a saved copy is always right.
+  if (url.origin === self.location.origin && /\/(app\.js|styles\.css)$/.test(url.pathname)) {
+    e.respondWith((async () => {
+      const pc = await caches.open(PAGE_CACHE);
+      const hit = await pc.match(req);
+      if (hit) return hit;
+      const res = await fetch(req);
+      if (res.ok) {
+        await pc.put(req, res.clone());
+        // Keep the two newest builds of this file (the pinned one and the latest); drop older ones.
+        const same = (await pc.keys()).filter(k => new URL(k.url).pathname === url.pathname)
+          .sort((a, b) => (+new URL(b.url).searchParams.get("b") || 0) - (+new URL(a.url).searchParams.get("b") || 0));
+        for (const k of same.slice(2)) await pc.delete(k);
+      }
+      return res;
     })());
     return;
   }

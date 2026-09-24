@@ -1,0 +1,12 @@
+(()=>{const T=todayIso,A=n=>addDays(n),wd=new Date().getDay(),tw=new Date(A(1)+"T12:00:00").getDay();
+state.settings.setupDone=true;
+state.remaining={prog:6,arab:4,hist:3,eng:5};state.pages={prog:40};
+state.days[wd].tasks=[{id:"t1",s:"prog",amt:1,title:"Unit 3"},{id:"t2",s:"arab",amt:2}];
+state.days[wd].session="English class";
+state.days[tw].tasks=[{id:"t3",s:"hist",amt:1},{id:"t4",s:"eng",amt:1}];
+state.homework=[{id:"h1",text:"Essay page 40",s:"eng",due:T,done:false},{id:"h2",text:"Maths sheet",s:"prog",due:A(1),done:false},{id:"h3",text:"Read chapter 2",s:"hist",due:A(-1),done:false}];
+state.exams=[{id:"e1",title:"Arabic midterm",s:"arab",date:A(3)},{id:"e2",title:"History quiz",s:"hist",date:T}];
+state.reminders=[{id:"r1",text:"Bring calculator",date:T,time:"23:50"}];
+state.focusLog={[T]:35};
+const x=dayData(state,T);x.done={t1:1};
+save()})();
