@@ -161,6 +161,7 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area
 @media(max-width:400px){.tabs button{font-size:.8rem}.tabs em{margin-left:2px;padding:1px 5px}}
 #pStudy,#pTodo,#pSchool,#pSet{display:none}
 #pWeek[hidden],#pSubj[hidden]{display:none}
+[hidden]{display:none !important}
 body[data-view="set"] #pSet{display:block}
 body[data-view="set"] .searchbar,body[data-view="search"] .searchbar,body[data-view="notif"] .searchbar,body[data-view="set"] .tabwrap,body[data-view="search"] .tabwrap,body[data-view="notif"] .tabwrap,body[data-view="set"] .fab,body[data-view="search"] .fab,body[data-view="notif"] .fab{display:none}
 body[data-view="search"] #pSearch,body[data-view="notif"] #pNotif{display:block}
@@ -713,7 +714,10 @@ header h1{overflow:hidden;text-overflow:ellipsis}
 #showChanges.on .chev2{transform:rotate(90deg)}
 #changeBox[hidden]{display:none}
 .loglist.open{max-height:none;padding:0 0 10px}
-.sfilters:empty{display:none}
+.settabs{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap}
+.smtab{padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font:inherit;font-size:.78rem;cursor:pointer;flex:1 0 auto;min-width:64px;transition:all .15s}
+.smtab:active{transform:scale(.96)}
+.smtab.on{background:var(--bg);color:var(--ink);border-color:var(--line);box-shadow:var(--shadow)}
 .wrapchips{flex-wrap:wrap;margin-bottom:6px}
 .wrapchips .clr{color:var(--muted);border-style:dashed}
 .searchbar{display:flex;align-items:center;gap:9px;width:100%;margin:0 0 12px;padding:10px 14px;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:14px;font:inherit;font-size:.9rem;cursor:pointer;text-align:left;box-shadow:var(--shadow)}
@@ -1014,8 +1018,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   </div>
   <div id="pSet">
     <div class="sethead"><button class="lnk" data-tab="back">‹ Back</button><h2>Settings</h2></div>
-    <h4 class="setsec">Planner</h4>
-    <section class="setgrp">
+    <div class="settabs"><button class="smtab on" data-st="planner">Planner</button><button class="smtab" data-st="appearance">Appearance</button><button class="smtab" data-st="system">System</button></div>
+    <section class="setgrp" id="pSetPlanner">
       <div class="setrow"><div><b>Auto-tick past days</b><small>After midnight, the day's tasks tick themselves.</small></div>
         <label class="sw"><input type="checkbox" id="optAuto"><span></span></label></div>
       <div class="setrow wide"><div><b>Week starts on</b><small>The first day of your study week.</small></div>
@@ -1034,8 +1038,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
       <div class="setrow"><div><b>Export schedule</b><small>Your timetable, exams and homework as a calendar file. Open it to add everything to Apple Calendar.</small></div><button class="btn ghost" id="expIcs">Export .ics</button></div>
       <div class="setrow"><div><b>Clear ticks</b><small>Unticks every task in the week you're viewing.</small></div><button class="btn ghost" id="reset">Clear</button></div>
     </section>
-    <h4 class="setsec">Appearance</h4>
-    <section class="setgrp">
+    <section class="setgrp" id="pSetAppearance" hidden>
       <div class="setrow"><div><b>Style</b><small>The overall look of the app.</small></div>
         <div class="seg"><button data-optstyle="classic">Classic</button><button data-optstyle="luxe">Luxe</button></div></div>
       <div class="setrow"><div><b>Theme</b><small>Auto follows your phone.</small></div>
@@ -1046,8 +1049,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
         <div class="seg"><button data-optsize="s">Small</button><button data-optsize="m">Normal</button><button data-optsize="l">Large</button></div></div>
       <div class="setrow"><div><b>Subject colors</b><small>Change them from the color dot on each subject.</small></div><button class="btn ghost" data-tab="subj">Open</button></div>
     </section>
-    <h4 class="setsec">System</h4>
-    <section class="setgrp">
+    <section class="setgrp" id="pSetSystem" hidden>
       <div class="setrow verrow"><div class="vleft"><b>Version</b><span id="ver"></span><small id="offst">Checking…</small></div>
         <div class="vacts"><button class="btn ghost" id="showChanges"><span class="chev2">›</span> Changes</button><button class="btn ghost" id="upd">Check Update</button></div></div>
       <div id="changeBox" hidden></div>
@@ -1160,7 +1162,8 @@ const DEFAULT={
     3:{session:"",tasks:[],notes:""},
     4:{session:"",tasks:[],notes:""}
   },
-  dates:{}
+  dates:{},
+  settings:{autoUpdate:false}
 };
 
 // ---- dates ----
@@ -1185,7 +1188,7 @@ function migrate(s){
   SUBJECTS=[...s.subjects,OTHER];
   if(!s.seenVersion&&s.editedAt)s.seenVersion="0.9";
   if(s.seenVersion&&!/^[0-9]+\.[0-9]+$/.test(s.seenVersion))s.seenVersion="0.9";
-  s.settings=Object.assign({autoTick:true,focusMin:25,theme:"auto",style:"classic",tabPos:"bottom",schoolDays:[0,1,2,3,4],size:"m",weekStart:5,openOn:"last",confetti:true,sound:true},s.settings||{});
+  s.settings=Object.assign({autoTick:true,focusMin:25,theme:"auto",style:"classic",tabPos:"bottom",schoolDays:[0,1,2,3,4],size:"m",weekStart:5,openOn:"last",confetti:true,sound:true,autoUpdate:false},s.settings||{});
   setOrder(s.settings.weekStart);
   s.v=4;return s}
 function dayData(s,key){const x=s.dates[key]||(s.dates[key]={skip:[],extra:[],done:{}});x.amt=x.amt||{};return x}
@@ -1798,6 +1801,7 @@ function applySettings(){
   document.querySelectorAll("[data-optopen]").forEach(b=>b.classList.toggle("on",b.dataset.optopen===st.openOn));
   document.querySelectorAll("[data-optfocus]").forEach(b=>b.classList.toggle("on",+b.dataset.optfocus===st.focusMin));
   document.querySelectorAll("[data-opttheme]").forEach(b=>b.classList.toggle("on",b.dataset.opttheme===st.theme));
+  const verEl=document.getElementById("ver");if(verEl)verEl.textContent="v"+APP_VERSION;
   renderSettingsPERSIST();
 }
 function renderSettingsPERSIST(){
@@ -1823,7 +1827,14 @@ function moveInd(){
   if(!on||!ind||!on.offsetWidth)return;const first=!ind.dataset.ok;if(first)ind.style.transition="none";ind.style.width=on.offsetWidth+"px";ind.style.transform=`translateX(${on.offsetLeft-4}px)`;if(first){ind.dataset.ok=1;requestAnimationFrame(()=>requestAnimationFrame(()=>ind.style.transition=""))}
 }
 const STACKED=["set","search","notif"];
+let settingsTab="planner";
 function afterRender(){
+  if(tab===lastTab&&tab!=="set")return;
+  if(tab==="set"&&lastTab!=="set"){
+    settingsTab="planner";
+    document.querySelectorAll(".smtab").forEach(t=>t.classList.toggle("on",t.dataset.st===settingsTab));
+    document.querySelectorAll(".setgrp").forEach(g=>g.hidden=!g.id.toLowerCase().endsWith(settingsTab));
+  }
   if(tab!==lastTab){
     if(lastTab)scrollMem[lastTab]=scrollY;
     const stacked=STACKED.includes(tab),wasStacked=STACKED.includes(lastTab);
@@ -2114,7 +2125,7 @@ function persistStorage(){if(state.persisted)return;navigator.storage.persist().
 function prune(key){const x=state.dates[key];if(x&&!x.noPages&&!x.skip.length&&!x.extra.length&&!Object.keys(x.done).length&&!Object.keys(x.amt||{}).length&&!Object.keys(x.pg||{}).length)delete state.dates[key]}
 
 document.addEventListener("click",e=>{
-  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-reorder],[data-pdel],[data-optstyle],[data-optpos],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-ngo],[data-ndismiss],[data-ndismissall],[data-focusfield],[data-title],[data-titlesave],[data-titlecancel],[data-pgtoggle],[data-classopen],[data-notesopen],[data-addrem],[data-remedit],[data-remsave],[data-remcancel],[data-revplan],[data-qrem],[data-hwpost],[data-hwfor],[data-sub],[data-ssub],[data-lsgo],[data-newl],[data-bknow],[data-bklater],[data-exopen],[data-exdel],#exAdd,[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#remAdd,#reset");
+  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-reorder],[data-pdel],[data-optstyle],[data-optpos],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-st],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-ngo],[data-ndismiss],[data-ndismissall],[data-focusfield],[data-title],[data-titlesave],[data-titlecancel],[data-pgtoggle],[data-classopen],[data-notesopen],[data-addrem],[data-remedit],[data-remsave],[data-remcancel],[data-revplan],[data-qrem],[data-hwpost],[data-hwfor],[data-sub],[data-ssub],[data-lsgo],[data-newl],[data-bknow],[data-bklater],[data-exopen],[data-exdel],#exAdd,[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#remAdd,#reset");
   if(!b)return;
   const ds=b.dataset;
   if(ds.ndismiss!==undefined){
@@ -2231,6 +2242,8 @@ document.addEventListener("click",e=>{
   if(ds.optopen){change(()=>state.settings.openOn=ds.optopen);return}
   if(ds.optfocus){change(()=>state.settings.focusMin=+ds.optfocus);return}
   if(ds.opttheme){change(()=>state.settings.theme=ds.opttheme);return}
+  if(ds.st){const st=ds.st;document.querySelectorAll(".smtab").forEach(t=>t.classList.toggle("on",t.dataset.st===st));
+    document.querySelectorAll(".setgrp").forEach(g=>g.hidden=!g.id.toLowerCase().endsWith(st));return}
   if(ds.color){colorOpen=colorOpen===ds.color?null:ds.color;render();return}
   if(ds.setc){const[id,h]=ds.setc.split(":");setColor(id,h);return}
   if(ds.menu){openMenu=openMenu===ds.menu?null:ds.menu;render();return}
@@ -2684,9 +2697,8 @@ function hardReload(){
   try{location.replace(u)}catch(e){location.href=u}
   setTimeout(()=>location.reload(),1000);
 }
-async function checkUpdate(manual){
-  const b=document.getElementById("upd");
-  if(manual){b.textContent="Checking…";b.disabled=true}
+async function checkUpdate(manual){const b=document.getElementById("upd"),st=document.getElementById("offst");
+  if(manual){b.textContent="Checking…";b.disabled=true;st.textContent="Checking…"}
   try{
     if(swReg){try{await swReg.update()}catch(err){}}
     const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),8000);
@@ -2694,22 +2706,16 @@ async function checkUpdate(manual){
     const t=await r.text();const m=t.match(/const APP_VERSION="([^"]+)"/);
     if(m&&m[1]!==APP_VERSION){
       updateReady=true;renderBanner();
-      // Auto-update disabled - just show notification
-      // if(manual){
-      //   b.textContent="Updating…";alertMsg("Updating to "+m[1]+"…");
-      //   setTimeout(hardReload,400);return;
-      // } else {
-      //   alertMsg("New update (v"+m[1]+") found — updating…");
-      //   setTimeout(hardReload,1200);return;
-      // }
-      if(manual){
-        b.textContent="Update";alertMsg("New update (v"+m[1]+") is ready. Click Update to install.");
-        return;
-      }
+      if(manual){b.textContent="Update";st.textContent="New version available";alertMsg("New update (v"+m[1]+") is ready. Click Update to install.");return}
     }
-    else if(manual)alertMsg("You're on the latest version ("+APP_VERSION+")")}
-  catch(e){if(manual)alertMsg(navigator.onLine===false?"You're offline. Connect to check for updates.":"Couldn't check. Are you online?")}
-  if(manual){b.textContent="Check";b.disabled=false}}
+    else if(manual){b.textContent="Check";st.textContent="Up to date";alertMsg("You're on the latest version ("+APP_VERSION+")")}
+  }
+  catch(e){
+    if(manual){b.textContent="Check";st.textContent="Offline or error";alertMsg(navigator.onLine===false?"You're offline. Connect to check for updates.":"Couldn't check. Are you online?")}
+    else{st.textContent="Offline or error"}
+  }
+  if(manual){b.disabled=false}
+}
 document.addEventListener("click",e=>{
   const sc=e.target.closest("#showChanges");
   if(sc){const box=document.getElementById("changeBox");const open=box.hidden;
