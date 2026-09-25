@@ -3,7 +3,9 @@
 // Opened by "Update now" (?v=...): this page is already the new version, so a waiting worker can take over at once.
 const JUST_UPDATED=/[?&]v=/.test(location.search);
 const CHANGES=[
-  ["3.4","Cleaner Timetable: one slim bar for the week with arrows, a Month button and a ⋯ menu (Plan my week, Week review)",
+  ["3.4","Cleaner Timetable: swipe the day strip to move between weeks; ⋯ (Plan my week, Week review) sits before the week and the Month button on the right",
+        "The ＋ button now floats at the bottom right, so the top has just search, notifications and settings",
+        "A lesson's ⋯ menu starts with Add title and Lessons & pages; Focus and Tomorrow were removed from it",
         "Today's card is shorter: tap a class for +1 lesson or homework, finished classes and ticked items fold into a small “done” row",
         "Lessons show their amount as a small pill; tap it to change lessons and pages",
         "Homework and exams in the day card are one line each; reminders and revision are in their ⋯ menu",
@@ -683,6 +685,22 @@ setInterval(()=>{if(tab==="study"&&!document.hidden){if(week===0&&selDay===today
 const ICO_DEL=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>`;
 const ICO_CAL=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg>`;
 const ICO_WEEK=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>`;
+// ---- the day strip: weeks side by side, one week per screen; swiping to another week opens it ----
+let stripFrom=-8,stripTo=16,stripT=null,stripBusy=false;
+function renderStrip(){const el=document.getElementById("strip");if(!el)return;
+  if(week<stripFrom+3||week>stripTo-3){stripFrom=Math.min(-8,week-6);stripTo=Math.max(16,week+6)}
+  const MS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],selKey=iso(dateFor(week,selDay));let h="";
+  for(let w=stripFrom;w<=stripTo;w++)DAY_ORDER.forEach((d,i)=>{const dt=dateFor(w,d),key=iso(dt),tasks=tasksOn(d,key).filter(k=>!k.skipped),on=key===selKey;
+    h+=`<button data-selk="${key}" class="${on?"sel":""} ${i===0?"wks":""} ${key<todayIso?"past":""}" aria-pressed="${on}" aria-label="${DAY_NAMES[d]} ${dt.getDate()} ${MS[dt.getMonth()]}">
+      <b>${DAY_NAMES[d].slice(0,3)}</b><small>${key===todayIso?"Today":isComplete(d,key)?"✓":dt.getDate()===1?"1 "+MS[dt.getMonth()]:dt.getDate()}</small>
+      <div class="dots">${tasks.slice(0,5).map(k=>`<span class="${k.done?"d":""}" style="--c:${col(subj(k.s))}"></span>`).join("")}</div></button>`});
+  el.innerHTML=h;stripBusy=true;el.scrollLeft=(week-stripFrom)*(el.clientWidth+stripGap(el));requestAnimationFrame(()=>stripBusy=false)}
+function stripGap(el){return parseFloat(getComputedStyle(el).columnGap)||0}
+document.addEventListener("scroll",e=>{const el=e.target;if(!el||el.id!=="strip"||stripBusy)return;clearTimeout(stripT);
+  stripT=setTimeout(()=>{const w=stripFrom+Math.round(el.scrollLeft/(el.clientWidth+stripGap(el)));if(w===week||!el.clientWidth)return;
+    week=w;if(week===0)selDay=today;openForm=null;ttMenu=false;buzz(4);render()},140)},true);
+document.addEventListener("click",e=>{const b=e.target.closest("[data-selk]");if(!b)return;const k=b.dataset.selk;
+  week=weekOffsetOf(k);selDay=new Date(k+"T12:00:00").getDay();openForm=null;buzz(4);render()});
 function renderTTBar(){const el=document.getElementById("ttBar");if(!el)return;const m=ttView==="month",now=new Date();
   if(!monthAt)monthAt=[now.getFullYear(),now.getMonth()];
   const MN=["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -694,10 +712,9 @@ function renderTTBar(){const el=document.getElementById("ttBar");if(!el)return;c
     if(week<0&&DAY_ORDER.every(d=>isComplete(d,iso(dateFor(week,d)))))label+=" ✓";sub=dLabel(ws)+" – "+dLabel(we)}
   const items=m?[]:[week>=0?`<button data-plan>🪄 Plan my week</button>`:"",week<=0?`<button data-review>📊 ${week===0?"Review this week":"Review that week"}</button>`:""].filter(Boolean);
   const nav=m?"mnav":"wk",unit=m?"month":"week";
-  el.innerHTML=`<button class="ttlabel" data-tthome ${home?"disabled":""} aria-label="${home?label:"Back to today"}"><b>${label}</b><small>${sub}${home?"":` · <span class="ttback">Today ›</span>`}</small></button>
-    <div class="ttctl"><button class="wkbtn" data-${nav}="-1" aria-label="Previous ${unit}">‹</button><button class="wkbtn" data-${nav}="1" aria-label="Next ${unit}">›</button>
-      <button class="wkbtn" data-tview="${m?"week":"month"}" aria-label="${m?"Week view":"Month view"}" title="${m?"Week view":"Month view"}">${m?ICO_WEEK:ICO_CAL}</button>
-      ${items.length?`<button class="wkbtn ${ttMenu?"on":""}" data-ttmenu aria-label="More" aria-expanded="${ttMenu}">⋯</button>`:""}</div>
+  el.innerHTML=`${items.length?`<button class="wkbtn ttmore ${ttMenu?"on":""}" data-ttmenu aria-label="More" aria-expanded="${ttMenu}">⋯</button>`:""}<button class="ttlabel" data-tthome ${home?"disabled":""} aria-label="${home?label:"Back to today"}"><b>${label}</b><small>${sub}${home?"":` · <span class="ttback">Today ›</span>`}</small></button>
+    <div class="ttctl ${m?"month":""}"><button class="wkbtn ttarrow" data-${nav}="-1" aria-label="Previous ${unit}">‹</button><button class="wkbtn ttarrow" data-${nav}="1" aria-label="Next ${unit}">›</button>
+      <button class="wkbtn" data-tview="${m?"week":"month"}" aria-label="${m?"Week view":"Month view"}" title="${m?"Week view":"Month view"}">${m?ICO_WEEK:ICO_CAL}</button></div>
     ${ttMenu&&items.length?`<div class="ttmenu" role="menu">${items.join("")}</div>`:""}`}
 document.addEventListener("click",e=>{
   if(e.target.closest("[data-ttmenu]")){ttMenu=!ttMenu;renderTTBar();return}
@@ -1205,7 +1222,7 @@ function afterRender(){
     det.classList.remove("slidein");void det.offsetWidth;det.classList.add("slidein")}
   if(tab!==lastTabDone||selDay!==lastSelDone||week!==lastWeekDone){if(lastTabDone!==undefined){recentDone.clear();amtEdit=null;clsMenu=null}lastTabDone=tab;lastSelDone=selDay;lastWeekDone=week}
   if(selDay!==lastSel){const d=document.querySelector(".day.sel");if(d&&lastSel!==null)d.classList.add("enter");
-    document.querySelector(".strip button.sel")?.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});lastSel=selDay}
+    lastSel=selDay}
   if(justTicked){const el=document.querySelector(`[data-tick^="${justTicked}:"]`);if(el)el.closest("li").classList.add("pop");justTicked=null}
   bindDaySortables();
   requestAnimationFrame(moveInd);
@@ -1319,11 +1336,7 @@ function render(){
     :`<button class="subj addsubj" data-subjadd>+ Add subject</button>`;
 
 
-  document.getElementById("strip").innerHTML=DAY_ORDER.map(d=>{
-    const dt=dateFor(week,d),key=iso(dt),tasks=tasksOn(d,key).filter(k=>!k.skipped);
-    return `<button data-sel="${d}" class="${d===selDay?"sel":""}" aria-pressed="${d===selDay}">
-      <b>${DAY_NAMES[d].slice(0,3)}</b><small>${key===todayIso?"Today":isComplete(d,key)?"✓":dt.getDate()}</small>
-      <div class="dots">${tasks.map(k=>`<span class="${k.done?"d":""}" style="--c:${col(subj(k.s))}"></span>`).join("")}</div></button>`}).join("");
+  renderStrip();
 
   document.getElementById("days").innerHTML=DAY_ORDER.map(d=>{
     const day=state.days[d],dt=dateFor(week,d),key=iso(dt),isToday=key===todayIso;
@@ -1340,12 +1353,10 @@ function render(){
       const acts=`<button class="dots-btn ${open?"on":""}" data-menu="${mk}" aria-label="More options" aria-expanded="${open}">⋯</button>`;
       const isFirst=idx===0,isLast=idx===arr.length-1;
       const menu=open?`<li class="tmenu">
+        <button data-title="${key}:${k.id}">✎ ${k.title?"Rename":"Add title"}</button>
+        <button data-amtedit="${mk}">✎ Lessons &amp; pages</button>
         ${!isFirst?`<button data-reorder="${key}:${k.id}:up">↑ Move up</button>`:""}
         ${!isLast?`<button data-reorder="${key}:${k.id}:down">↓ Move down</button>`:""}
-        ${key===todayIso&&!k.done?`<button data-focus="${key}:${k.id}:${k.s}:${k.amt??""}">⏱ Focus</button>`:""}
-        <button data-amtedit="${mk}">✎ Lessons &amp; pages</button>
-        <button data-title="${key}:${k.id}">✎ ${k.title?"Rename":"Add title"}</button>
-        ${key>=todayIso&&!k.done?`<button data-move="${key}:${k.id}:${k.kind}:${k.s}:${k.amt??""}">→ Tomorrow</button>`:""}
         ${k.kind==="fixed"
           ?`<button data-skip="${key}:${k.id}">Remove from this day</button><button class="danger" data-delfix="${d}:${k.id}">Remove every ${DAY_NAMES[d].slice(0,3)}</button>`
           :`<button class="danger" data-delextra="${key}:${k.id}">Remove</button>`}</li>`:"";
