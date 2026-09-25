@@ -23,7 +23,7 @@
 <meta property="og:description" content="Track your daily study schedule, subjects, tasks, and progress with an offline-capable, distraction-free study planner.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?b=10">
+<link rel="stylesheet" href="styles.css?b=11">
 </head>
 <body>
 <div id="splash"><img src="icon-192.png" alt=""><span>Study Planner</span></div>
@@ -125,9 +125,6 @@
         <div class="seg" id="optFocus"><button data-optfocus="15">15 min</button><button data-optfocus="25">25 min</button><button data-optfocus="45">45 min</button><button data-optfocus="60">60 min</button></div></div>
       <div class="setrow"><div><b>Plan revision for new exams</b><small>Adds up to 4 revision sessions in the two weeks before each exam you add.</small></div>
         <label class="sw"><input type="checkbox" id="optAutoRev"><span></span></label></div>
-      <div class="setrow"><div><b>Share timetable</b><small>Send a link so a classmate can copy your weekly lessons and classes.</small></div><button class="btn ghost" id="shareTT">Share link</button></div>
-      <div class="setrow"><div><b>Export schedule</b><small>Exams, homework and your weekly classes (with times) as a calendar file for Apple or Google Calendar.</small></div><button class="btn ghost" id="expIcs">Export .ics</button></div>
-      <div class="setrow"><div><b>Clear ticks</b><small>Unticks every task in the week you're viewing.</small></div><button class="btn ghost" id="reset">Clear</button></div>
     </section>
     <section class="setgrp setpage" data-page="alerts" hidden>
       <div class="setrow"><div><b>Reminder pop-ups</b><small id="notifTxt">Reminders pop up in the app when they're due. Allow notifications to also see them while the app is in the background.</small></div><button class="btn ghost" id="notifBtn">Allow</button></div>
@@ -151,9 +148,11 @@
       <div class="setrow wide"><div><b>Accent colour</b><small>Buttons, tabs and highlights.</small></div><div class="accents" id="accents"></div></div>
       <div class="setrow wide"><div><b>Font</b></div>
         <div class="seg"><button data-optfont="default">Default</button><button data-optfont="rounded">Rounded</button><button data-optfont="modern">Modern</button><button data-optfont="serif">Serif</button></div></div>
-      <div class="setrow"><div><b>Subject colors</b><small>Change them from the color dot on each subject.</small></div><button class="btn ghost" data-lsgo="all">Open</button></div>
+      <div class="setrow wide"><div><b>Subject colours</b><small>Tap a colour to change it.</small></div><div class="scols" id="subjColors"></div></div>
     </section>
     <section class="setgrp setpage" data-page="data" hidden>
+      <div class="setrow"><div><b>Share timetable</b><small>Send a link so a classmate can copy your weekly lessons and classes.</small></div><button class="btn ghost" id="shareTT">Share link</button></div>
+      <div class="setrow"><div><b>Export schedule</b><small>Exams, homework and your weekly classes (with times) as a calendar file for Apple or Google Calendar.</small></div><button class="btn ghost" id="expIcs">Export .ics</button></div>
       <div class="setrow"><div><b>Recently deleted</b><small>Restore anything you deleted in the last 30 days.</small></div><button class="btn ghost" data-sp="trash">Open</button></div>
       <div class="setrow"><div><b>Backup</b><small>One file with everything, photos included. <button class="inlink" id="mv">or share a link</button></small></div><button class="btn" id="fbSave">Save file</button></div>
       <div id="fbLink" class="fblink" hidden></div>
@@ -232,8 +231,8 @@
 <script>
 // Version and build live here in the page: the update check (and older installed versions) read them from index.html.
 // APP_BUILD goes up with every published change; bump the ?b= on styles.css and app.js to match.
-const APP_VERSION="3.4";const APP_BUILD=10;
+const APP_VERSION="3.4";const APP_BUILD=11;
 </script>
-<script src="app.js?b=10"></script>
+<script src="app.js?b=11"></script>
 </body>
 </html>

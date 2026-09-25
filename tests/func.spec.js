@@ -14,7 +14,7 @@ test("core flows", async ({ browser, baseURL }) => {
   await p.click('.day.sel [data-hwtick="h1"]');await p.waitForTimeout(200);
   ok("tick homework in day card",await p.evaluate(()=>state.homework.find(h=>h.id==="h1").done));
   // add a task via form
-  await p.click('.day.sel .dayadds [data-open]');await p.selectOption('.day.sel [data-form] select[name=s]','eng');await p.fill('.day.sel [data-form] input[name=amt]','2');await p.click('.day.sel [data-save]');await p.waitForTimeout(200);
+  await p.click('#fabTab');await p.selectOption('.qaform select[name=s]','eng');await p.fill('.qaform input[name=amt]','2');await p.click('.qaform [data-qsave]');await p.waitForTimeout(400);
   ok("add lesson task",await p.evaluate(()=>tasksOn(today,todayIso).some(k=>k.s==="eng"&&k.amt===2)));
   // focus timer
   await p.click('#focusStart');await p.waitForTimeout(300);ok("focus timer opens",await p.evaluate(()=>!document.getElementById("focus").hidden));
@@ -28,7 +28,6 @@ test("core flows", async ({ browser, baseURL }) => {
   await p.click('[data-notenew]');await p.waitForTimeout(200);ok("new note",await p.evaluate(()=>!!noteOpen));
   await p.click('[data-noteclose]');await p.click('[data-subjback]');await p.waitForTimeout(200);ok("back to subject list",await p.evaluate(()=>subjView===null&&!document.getElementById("subjList").hidden));
   // settings subject colors -> lessons
-  await p.evaluate(()=>{tab="set";setPage="look";render()});await p.click('#pSet [data-lsgo="all"]');await p.waitForTimeout(200);ok("settings Subject colors opens Lessons",await p.evaluate(()=>tab==="todo"&&todoSub==="les"));
   // search subject result
   await p.evaluate(()=>{tab="search";render()});await p.fill("#q","arab");await p.waitForTimeout(200);await p.click('#sres [data-go="subj:arab"]');await p.waitForTimeout(200);
   ok("search subject result opens Lessons",await p.evaluate(()=>tab==="todo"&&todoSub==="les"&&subjView==="arab"));
@@ -39,9 +38,9 @@ test("core flows", async ({ browser, baseURL }) => {
   
   // add homework and exam from the day card
   await p.evaluate(()=>{document.getElementById("focus").hidden=true;tab="study";week=0;selDay=today;openForm=null;render()});
-  await p.click('.day.sel .dayadds [data-open]');await p.click('.day.sel [data-fkind="hw"]');await p.fill('.day.sel [data-form] [name=text]','Worksheet 5');await p.click('.day.sel [data-save]');await p.waitForTimeout(200);
+  await p.click('#fabTab');await p.click('#sheet [data-qak="hw"]');await p.fill('.qaform [name=text]','Worksheet 5');await p.fill('.qaform [name=date]',await p.evaluate(()=>todayIso));await p.click('.qaform [data-qsave]');await p.waitForTimeout(400);
   ok("add homework from day card",await p.evaluate(()=>state.homework.some(h=>h.text==="Worksheet 5"&&h.due===todayIso)));
-  await p.click('.day.sel .dayadds [data-open]');await p.click('.day.sel [data-fkind="ex"]');await p.fill('.day.sel [data-form] [name=text]','Maths test');await p.click('.day.sel [data-save]');await p.waitForTimeout(200);
+  await p.click('#fabTab');await p.click('#sheet [data-qak="ex"]');await p.fill('.qaform [name=text]','Maths test');await p.fill('.qaform [name=date]',await p.evaluate(()=>todayIso));await p.click('.qaform [data-qsave]');await p.waitForTimeout(400);
   ok("add exam from day card",await p.evaluate(()=>state.exams.some(x=>x.title==="Maths test"&&x.date===todayIso)));
   ok("both show in today's card",await p.evaluate(()=>{const t=document.querySelector(".day.sel").textContent;return t.includes("Worksheet 5")&&t.includes("Maths test")}));
   ok("ticked lesson folds into a 'done' row",!(await p.isVisible('.day.sel li.tk.les[data-oid=t2]'))&&(await p.textContent('.day.sel [data-showdone$=":les"]')).includes("done"));

@@ -105,5 +105,19 @@ test("clean layout and smart search", async ({ browser, baseURL }) => {
   await p.setViewportSize({width:390,height:600});await q(()=>{tab="todo";todoSub="les";subjView="prog";render();scrollTo(0,0)});await p.waitForTimeout(100);
   await p.mouse.wheel(0,250);await p.waitForTimeout(300);ok("+ hides while scrolling down",await q(()=>document.body.classList.contains("fabhide")));
   await p.mouse.wheel(0,-120);await p.waitForTimeout(300);ok("and comes back scrolling up",await q(()=>!document.body.classList.contains("fabhide")));
+  // + adds to the day you're viewing, remembers the subject; the card has no "+ Add"
+  await p.setViewportSize({width:390,height:1400});await q(()=>{tab="study";ttView="week";week=0;selDay=DAY_ORDER[(DAY_ORDER.indexOf(today)+2)%7];if(iso(dateFor(0,selDay))<todayIso)week=1;render()});
+  const vk=await q(()=>iso(dateFor(week,selDay)));ok("no + Add in the day card",(await p.locator(".day.sel .dayadds [data-open]").count())===0&&await p.isVisible(".day.sel [data-classopen]"));
+  await p.click("#fabTab");ok("lesson date = the viewed day",(await p.inputValue(".qaform [name=date]"))===vk&&(await p.textContent("#sheet .shh b")).includes("·"));
+  await p.click('#sheet [data-qak="hw"]');ok("homework due = the viewed day",(await p.inputValue(".qaform [name=date]"))===vk);
+  await p.fill(".qaform [name=text]","Poem");await p.selectOption(".qaform [name=s]","hist");await p.click(".qaform [data-qsave]");await p.waitForTimeout(400);
+  ok("homework added for that day",await q(k=>state.homework.some(h=>h.text==="Poem"&&h.due===k),vk));
+  await p.click("#fabTab");await p.click('#sheet [data-qak="hw"]');ok("remembers the last subject",(await p.inputValue(".qaform [name=s]"))==="hist");await q(()=>closeSheet());await p.waitForTimeout(300);
+  // settings: share & export under Share & backup, no Clear ticks, colours in Appearance
+  await q(()=>{tab="set";setPage="planner";render()});ok("planner page has no share/export/clear",!(await p.isVisible("#shareTT"))&&!(await p.isVisible("#expIcs"))&&(await p.locator("#reset").count())===0);
+  await q(()=>{setPage="data";render()});ok("share & export under Share & backup",await p.isVisible("#shareTT")&&await p.isVisible("#expIcs")&&(await p.textContent("#setTitle"))==="Share & backup");
+  await q(()=>{setPage="look";render()});ok("subject colours listed in Appearance",(await p.locator("#subjColors .scol").count())===4);
+  await p.click('#subjColors [data-color=prog]');await p.click('#subjColors .cpal button >> nth=3');await p.waitForTimeout(150);
+  ok("change a colour in place",await q(()=>tab==="set"&&setPage==="look"&&state.subjects.find(x=>x.id==="prog").c===SWATCHES[3]));
   expect(errs,"page errors").toEqual([]);
 });

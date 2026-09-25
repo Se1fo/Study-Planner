@@ -1278,3 +1278,15 @@ body.fabhide .fab{transform:translateY(140%);opacity:0;pointer-events:none}
 .sdsum>.sdpg{background:var(--panel);border:1px solid var(--line);border-radius:12px}
 .ncell button.bt{border:0;background:none;padding:0;margin:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
 .ncell button.bt:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:6px}
+/* Appearance: subject colours in place */
+.scols{display:grid;gap:4px;width:100%}
+.scol{display:flex;align-items:center;gap:10px;padding:6px 2px;font-weight:600;font-size:.92rem}
+.scol .cdot{width:22px;height:22px;margin:0}
+.scols .cpal{margin:2px 0 8px 32px}
+.shday{font-weight:600;color:var(--muted);font-size:.9em}
+.scols,.scol{min-width:0}
+.scol span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scol .cdot{flex:none}
+.setrow:has(#subjColors){flex-direction:column;align-items:stretch;gap:8px}
+.qaform label.prichk{display:flex;align-items:center;justify-content:flex-start;gap:10px;grid-column:1/-1;text-align:left;font-size:.9rem}
+.qaform label.prichk input{width:20px;height:20px;flex:none;margin:0}
