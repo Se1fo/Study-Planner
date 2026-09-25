@@ -3,6 +3,15 @@
 // Opened by "Update now" (?v=...): this page is already the new version, so a waiting worker can take over at once.
 const JUST_UPDATED=/[?&]v=/.test(location.search);
 const CHANGES=[
+  ["3.4","Cleaner Timetable: one slim bar for the week with arrows, a Month button and a ⋯ menu (Plan my week, Week review)",
+        "Today's card is shorter: tap a class for +1 lesson or homework, finished classes and ticked items fold into a small “done” row",
+        "Lessons show their amount as a small pill; tap it to change lessons and pages",
+        "Homework and exams in the day card are one line each; reminders and revision are in their ⋯ menu",
+        "Slimmer header with a search button, so everything moves up",
+        "Lessons tab: one compact row per subject; set pages left on the subject's page",
+        "Attendance settings (absence limit, school days, holidays) moved to Settings → Attendance",
+        "Search: quick views like Overdue and This week, and add straight from the search box, e.g. “add essay English friday”",
+        "Fixed: “All stats” covered the weekly total, and the Lessons tab label was hard to read in Luxe dark"],
   ["3.3","Reminders pop up on screen when they're due, with Snooze 10 min and Done (and a phone notification if you allow it)",
         "Plan my week: spreads the lessons you have left across the days before each exam, at most 4 a day",
         "Stats page: focus time, lessons and homework over 8 weeks, 6 months or 12 months, plus a by-subject table",
@@ -103,7 +112,7 @@ function col(sj){return sj.c.startsWith("--")?`var(${sj.c})`:sj.c}
 const uid=()=>Math.random().toString(36).slice(2,9);
 // Declared early because render() reads them during startup.
 let setPage=null;
-const SET_PAGES=[["account","☁️","Account"],["planner","📅","Planner"],["alerts","🔔","Reminders & sounds"],["look","🎨","Appearance"],["data","🛟","Backup & data"],["about","ℹ️","About"],["trash","🗑️","Recently deleted"]];
+const SET_PAGES=[["account","☁️","Account"],["planner","📅","Planner"],["school","🏫","Attendance"],["alerts","🔔","Reminders & sounds"],["look","🎨","Appearance"],["data","🛟","Backup & data"],["about","ℹ️","About"],["trash","🗑️","Recently deleted"]];
 let installPrompt=null;
 // Cloud sync state; declared early because save() and render() read it during startup.
 const sync={ready:null,fn:null,auth:null,db:null,user:null,status:"",at:0,unsub:null,timer:null,applying:false,conflict:null,emailOpen:false,busy:false,attempt:0};
@@ -159,6 +168,9 @@ let tab=(()=>{const o=state.settings.openOn;if(o&&o!=="last")return o;try{const 
 let formKind="les",ttView="week",monthAt=null;
 let week=0, selDay=today, openForm=null, openMenu=null, setupStep=1;
 const expanded=new Set();
+// Timetable: amount editor, class menu, finished classes/tickets folded away, week bar menu.
+let amtEdit=null,clsMenu=null,ttMenu=false,setDirect=false;
+const showDone=new Set(),showPastCls=new Set(),recentDone=new Set();
 function isComplete(wd,key){return key<todayIso&&tasksOn(wd,key).filter(k=>!k.skipped).every(k=>k.done)}
 
 function load(){try{const r=localStorage.getItem("study-planner");return r?JSON.parse(r):null}catch(e){return null}}
@@ -291,6 +303,9 @@ let editItem=null;
 function tMenuKey(kind,id,ctx){return kind+":"+id+":"+(ctx||"list")}
 function tMenuBtn(kind,id,ctx){const mk=tMenuKey(kind,id,ctx);return `<button class="dots-btn ${openMenu===mk?"on":""}" data-menu="${mk}" aria-label="More options" aria-expanded="${openMenu===mk}">⋯</button>`}
 function tMenu(kind,id,ctx,i,n,extra){if(openMenu!==tMenuKey(kind,id,ctx))return "";
+  if(ctx&&kind!=="rem"){const r=remFor(id),it=kind==="hw"?state.homework.find(h=>h.id===id):state.exams.find(x=>x.id===id);
+    if(it&&!(kind==="hw"&&it.done))extra=(extra||"")+(r?`<button data-remedit="${r.id}">🔔 Reminder: ${relDay(r.date)} ${t12(r.time)}</button>`:`<button data-addrem="${kind}:${id}">🔔 Add reminder</button>`);
+    if(kind==="ex"&&it&&daysUntil(it.date)>=1)extra=(extra||"")+`<button data-revplan="${id}">📚 ${revCount(it)?revCount(it)+" revision days":"Plan revision"}</button>`}
   return `<li class="tmenu">${ctx&&i>0?`<button data-tmove="up">↑ Move up</button>`:""}${ctx&&i<n-1?`<button data-tmove="down">↓ Move down</button>`:""}<button data-edit="${kind}:${id}">✎ Edit</button>${extra||""}<button class="danger" data-${{hw:"hwdel",ex:"exdel",rem:"remdel"}[kind]}="${id}">Delete</button></li>`}
 function editTicket(kind,it){const rem=kind==="rem",text=kind==="ex"?it.title:it.text,date=kind==="hw"?it.due:it.date;
   return `<li class="task tk editing" style="--c:${rem?"var(--prog)":col(subj(it.s))}" data-oid="${it.id}"><div class="tedit">
@@ -304,12 +319,12 @@ function estOpts(v){return `<option value="">⏱ Time needed</option>`+EST_OPTS.
 function hwTicket(h,ctx="",i=0,n=1){if(editItem==="hw:"+h.id)return editTicket("hw",h);
   const sj=subj(h.s),over=h.due<todayIso&&!h.done;return `<li class="task tk hw ${h.done?"done":""}" style="--c:${col(sj)}" data-oid="${h.id}">
     <input type="checkbox" class="chk" data-hwtick="${h.id}" ${h.done?"checked":""} aria-label="Done: ${esc(h.text)}">
-    <div class="tt"><b data-edit="hw:${h.id}">${h.pri&&!h.done?`<span class="pflag" title="High priority">⚑</span>`:""}${esc(h.text)}</b><small class="tsub">${esc(sj.name)} · ${over?`<span class="red">overdue</span>`:"due "+relDay(h.due).toLowerCase()}${h.est?" · "+fmtMin(h.est):""}</small>${h.done?"":`<div class="itrow">${remChip(h,"hw")}${h.due<=todayIso?`<button class="lnk postpone" data-hwpost="${h.id}">+1 day</button>`:""}</div>`}</div>
+    <div class="tt"><b data-edit="hw:${h.id}">${h.pri&&!h.done?`<span class="pflag" title="High priority">⚑</span>`:""}${esc(h.text)}</b><small class="tsub">${esc(sj.name)} · ${over?`<span class="red">overdue</span>`:"due "+relDay(h.due).toLowerCase()}${h.est?" · "+fmtMin(h.est):""}${ctx&&!h.done&&remFor(h.id)?" · 🔔":""}</small>${h.done?"":`<div class="itrow">${remChip(h,"hw")}${h.due<=todayIso?`<button class="lnk postpone" data-hwpost="${h.id}">+1 day</button>`:""}</div>`}</div>
     ${tMenuBtn("hw",h.id,ctx)}</li>${tMenu("hw",h.id,ctx,i,n,h.done?"":`<button data-hwpost="${h.id}">→ Next day</button>`)}`}
 function examTicket(x,ctx="",i=0,n=1){if(editItem==="ex:"+x.id)return editTicket("ex",x);
   const sj=subj(x.s),n2=daysUntil(x.date);return `<li class="task tk exam" style="--c:${col(sj)}" data-oid="${x.id}">
     <span class="tico ${n2<=3?"soon":""}" title="${n2===0?"Today":n2+" days"}">${n2===0?"!":n2}</span>
-    <div class="tt"><b data-edit="ex:${x.id}">${esc(x.title)}</b><small class="tsub">${esc(sj.name)} · ${n2===0?"today":n2===1?"tomorrow":"in "+n2+" days"}</small><div class="itrow">${remChip(x,"ex")}${n2>=1?`<button class="lnk postpone" data-revplan="${x.id}">${revCount(x)?"📚 "+revCount(x)+" revision days":"📚 Plan revision"}</button>`:""}</div></div>
+    <div class="tt"><b data-edit="ex:${x.id}">${esc(x.title)}</b><small class="tsub">${esc(sj.name)} · ${n2===0?"today":n2===1?"tomorrow":"in "+n2+" days"}${ctx&&remFor(x.id)?" · 🔔":""}</small><div class="itrow">${remChip(x,"ex")}${n2>=1?`<button class="lnk postpone" data-revplan="${x.id}">${revCount(x)?"📚 "+revCount(x)+" revision days":"📚 Plan revision"}</button>`:""}</div></div>
     ${tMenuBtn("ex",x.id,ctx)}</li>${tMenu("ex",x.id,ctx,i,n)}`}
 function remTicket(r,ctx="",i=0,n=1){if(editItem==="rem:"+r.id)return editTicket("rem",r);
   const past=(r.date+"T"+r.time)<=nowStamp();return `<li class="task tk rem ${past?"done":""}" style="--c:var(--prog)" data-oid="${r.id}">
@@ -344,7 +359,7 @@ function restoreTrash(id){const t=(state.trash||[]).find(x=>x.id===id);if(!t)ret
   state.trash=state.trash.filter(x=>x.id!==id);return true}
 function renderTrash(){const el=document.getElementById("trashBox");if(!el)return;const tr=state.trash||[];
   el.innerHTML=tr.length?`<ul class="trlist">${tr.map(t=>`<li><div class="tt"><b>${esc(t.label||TRASH_KIND[t.kind])}</b><small>${TRASH_KIND[t.kind]||"Item"} · deleted ${relTime(t.at)} · ${Math.max(1,30-Math.floor((Date.now()-t.at)/864e5))} days left</small></div>
-    <button class="btn ghost" data-trrestore="${t.id}">Restore</button><button class="del" data-trkill="${t.id}" aria-label="Delete forever">×</button></li>`).join("")}</ul>
+    <button class="btn ghost" data-trrestore="${t.id}">Restore</button><button class="del" data-trkill="${t.id}" aria-label="Delete forever">${ICO_DEL}</button></li>`).join("")}</ul>
     <button class="lnk danger trempty" data-trempty>Empty the bin</button>`:`<div class="emptybig sm">Nothing here. Things you delete stay here for 30 days.</div>`}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-trrestore],[data-trkill],[data-trempty]");if(!b)return;const ds=b.dataset;
   if(ds.trrestore){let ok=false;change(()=>{ok=restoreTrash(ds.trrestore)});if(ok)alertMsg("Restored ✓");return}
@@ -436,7 +451,7 @@ function renderGrades(){
 function gradesHtml(sid){const gs=(state.grades||[]).filter(g=>g.s===sid).sort((a,b)=>a.date<b.date?1:-1),avg=gradeAvg(sid),last=gs[0];
   return `<section class="topics grades" style="--c:${col(subj(sid))}"><div class="tphead"><h3 class="grp">Grades</h3>${avg!=null?`<span style="color:${gcol(avg)}">Average ${fmt(avg)}%</span>`:""}</div>
     ${gs.length?`<ul class="glist">${gs.map(g=>{const pc=g.max?g.score/g.max*100:0;return `<li style="--c:${col(subj(sid))}"><i class="gdot"></i><div class="gt"><b>${esc(g.name)}</b><small>${relDay(g.date)}</small></div>
-      <div class="gs"><b style="color:${gcol(pc)}">${fmt(g.score)}<span>/${fmt(g.max)}</span></b><small>${fmt(Math.round(pc*10)/10)}%</small></div><button class="del" data-gdel="${g.id}" aria-label="Delete grade">×</button></li>`}).join("")}</ul>`:`<p class="tpempty">Add test and quiz scores to see your average.</p>`}
+      <div class="gs"><b style="color:${gcol(pc)}">${fmt(g.score)}<span>/${fmt(g.max)}</span></b><small>${fmt(Math.round(pc*10)/10)}%</small></div><button class="del" data-gdel="${g.id}" aria-label="Delete grade">${ICO_DEL}</button></li>`}).join("")}</ul>`:`<p class="tpempty">Add test and quiz scores to see your average.</p>`}
     <div class="gform2"><input id="gName" placeholder="Test or quiz" maxlength="40"><input id="gScore" type="number" step="any" min="0" inputmode="decimal" placeholder="Score"><span>/</span><input id="gMax" type="number" step="any" min="0" inputmode="decimal" placeholder="Out of" value="${last?fmt(last.max):""}"><button class="btn ghost" data-gadd>Add</button></div></section>`}
 function renderExams(){
   const up=state.exams.filter(x=>x.date>=todayIso).sort((a,b)=>a.date<b.date?-1:1);
@@ -452,14 +467,69 @@ function hl(text,q){const t=String(text),i=t.toLowerCase().indexOf(q);if(i<0)ret
 let sFilter="all",sLast=[];
 function recentSearches(){try{return JSON.parse(localStorage.getItem("sp-recent")||"[]")}catch(e){return []}}
 function pushRecent(q){if(q.length<2)return;const r=[q,...recentSearches().filter(x=>x!==q)].slice(0,6);try{localStorage.setItem("sp-recent",JSON.stringify(r))}catch(e){}}
+// ---- search commands: "add essay english friday", "exam history 12 oct", "remind me call mum 5pm" ----
+const WD_WORDS={sun:0,sunday:0,mon:1,monday:1,tue:2,tues:2,tuesday:2,wed:3,wednesday:3,thu:4,thur:4,thurs:4,thursday:4,fri:5,friday:5,sat:6,saturday:6};
+const MON_WORDS=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+function parseAdd(raw){let q=" "+raw.trim().replace(/\s+/g," ")+" ";const low=()=>q.toLowerCase();
+  const m0=low().match(/^ (add|new|\+) /)||low().match(/^ (remind me( to)?) /);if(!m0)return null;
+  let kind="hw";if(m0[1].startsWith("remind"))kind="rem";q=" "+q.slice(m0[0].length);
+  const km=low().match(/^ (homework|hw|exam|test|quiz|reminder|remind me( to)?|remind) /);
+  if(km){kind=/^(exam|test|quiz)/.test(km[1])?"ex":/^remind/.test(km[1])?"rem":"hw";if(/^(test|quiz)$/.test(km[1]))q=" "+km[1]+q.slice(km[0].length-1);else q=" "+q.slice(km[0].length)}
+  const cut=re=>{const m=low().match(re);if(!m)return null;q=q.slice(0,m.index)+" "+q.slice(m.index+m[0].length);return m};
+  let date=null,time=null,m;
+  if((m=cut(/ (?:at )?(\d{1,2})(?::(\d{2}))? ?(am|pm) /)))time=String((+m[1]%12)+(m[3]==="pm"?12:0)).padStart(2,"0")+":"+(m[2]||"00");
+  else if((m=cut(/ (?:at )?([01]?\d|2[0-3]):([0-5]\d) /)))time=m[1].padStart(2,"0")+":"+m[2];
+  if((m=cut(/ (?:due |on |by )?(today|tonight) /)))date=todayIso;
+  else if((m=cut(/ (?:due |on |by )?(tomorrow|tmrw|tmr) /)))date=addDays(1);
+  else if((m=cut(/ (?:due |on |by )?in (\d{1,3}) days? /)))date=addDays(+m[1]);
+  else if((m=cut(/ (?:due |on |by )?next week /)))date=addDays(7);
+  else if((m=cut(/ (?:due |on |by )?(?:next )?(sun|sunday|mon|monday|tue|tues|tuesday|wed|wednesday|thu|thur|thurs|thursday|fri|friday|sat|saturday) /))){const wd=WD_WORDS[m[1]];let n=(wd-today+7)%7;if(n===0)n=7;date=addDays(n)}
+  else if((m=cut(/ (?:due |on |by )?(\d{1,2}) (jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]* /))||(m=cut(/ (?:due |on |by )?(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]* (\d{1,2}) /))){
+    const day=+(/\d/.test(m[1])?m[1]:m[2]),mo=MON_WORDS.indexOf((/\d/.test(m[1])?m[2]:m[1]).slice(0,3)),n=new Date();let y=n.getFullYear();
+    let k=y+"-"+String(mo+1).padStart(2,"0")+"-"+String(day).padStart(2,"0");if(k<todayIso)k=(y+1)+k.slice(4);if(day>=1&&day<=31)date=k}
+  let sid=null;const subs=SUBJECTS.filter(x=>x.id!=="other").sort((a,b)=>b.name.length-a.name.length);
+  for(const x of subs){const nm=x.name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,"\\$&");if(cut(new RegExp(" (?:for )?"+nm+" "))){sid=x.id;break}}
+  if(!sid){for(const w of low().trim().split(" ")){if(w.length<3)continue;const x=subs.find(x=>x.name.toLowerCase().startsWith(w)||(w.length>=4&&w.startsWith(x.name.toLowerCase().slice(0,4))));if(x){cut(new RegExp(" (?:for )?"+w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+" "));sid=x.id;break}}}
+  let text=q.trim().replace(/^(to|for) /i,"").replace(/ (due|on|by|for|at)$/i,"").trim();
+  if(!text){if(kind==="rem"||!sid)return {kind,need:true};text=subj(sid).name+(kind==="hw"?" homework":" exam")}
+  text=text.charAt(0).toUpperCase()+text.slice(1);
+  if(kind==="hw")date=date||addDays(1);
+  if(kind==="ex")date=date||addDays(7);
+  if(kind==="rem"){time=time||"18:00";if(!date)date=(todayIso+"T"+time)>nowStamp()?todayIso:addDays(1)}
+  return {kind,text,s:sid||"other",date,time}}
+function cmdLabel(c){if(c.need)return `Type what to add, e.g. “add essay English friday”`;
+  const what={hw:"homework",ex:"exam",rem:"reminder"}[c.kind],sj=c.kind!=="rem"&&c.s!=="other"?" · "+esc(subj(c.s).name):"";
+  const r=relDay(c.date),rl=/^(Today|Tomorrow|Yesterday)$/.test(r)?r.toLowerCase():r;
+  const when=c.kind==="hw"?"due "+rl:c.kind==="ex"?rl:rl+" at "+t12(c.time);
+  return `<span>＋ Add ${what} <b>“${esc(c.text)}”</b>${sj} · ${when}</span>`}
+function runCmd(c){if(!c||c.need)return;let msg="";
+  change(()=>{if(c.kind==="hw"){state.homework.push({id:uid(),text:c.text,s:c.s,due:c.date,done:false});msg="Homework added, due "+relDay(c.date).toLowerCase()}
+    if(c.kind==="ex"){const ex={id:uid(),title:c.text,s:c.s,date:c.date};state.exams.push(ex);if(state.settings.autoRev!==false)planRevision(ex);msg="Exam added for "+relDay(c.date).toLowerCase()}
+    if(c.kind==="rem"){state.reminders.push({id:uid(),text:c.text,date:c.date,time:c.time});msg="Reminder set for "+relDay(c.date).toLowerCase()+" at "+t12(c.time)}});
+  document.getElementById("q").value="";renderSearch();alertMsg(msg+" ✓")}
+// ---- quick views: words like "overdue" or "this week" list what's due, as well as matching text ----
+const SVIEWS=[["overdue","⚠️ Overdue"],["today","Due today"],["this week","This week"],["exams","Exams ahead"],["pinned","📌 Pinned notes"]];
+function viewGroups(q){const out=[],hwRow=h=>({go:"hw",c:subj(h.s),t:esc(h.text),m:esc(subj(h.s).name)+" · "+(h.done?"done":h.due<todayIso?"overdue, was due "+relDay(h.due).toLowerCase():"due "+relDay(h.due).toLowerCase())}),
+  exRow=x=>({go:"ex",c:subj(x.s),t:esc(x.title),m:esc(subj(x.s).name)+" · "+relDay(x.date)}),remRow=r=>({go:"rem",t:esc(r.text),m:relDay(r.date)+", "+t12(r.time)});
+  const hw=hwPending(),wk=addDays(7);
+  if(q==="overdue"||q==="late"){const l=hw.filter(h=>h.due<todayIso).sort((a,b)=>a.due<b.due?-1:1);out.push(["Overdue",l.map(hwRow)])}
+  if(q==="today"||q==="tomorrow"){const k=q==="today"?todayIso:addDays(1);out.push([q==="today"?"Due today":"Due tomorrow",[...state.exams.filter(x=>x.date===k).map(exRow),...hw.filter(h=>h.due===k).map(hwRow),...state.reminders.filter(r=>r.date===k&&!r.link).map(remRow)]])}
+  if(q==="this week"||q==="week"){out.push(["Next 7 days",[...state.exams.filter(x=>x.date>=todayIso&&x.date<=wk).sort((a,b)=>a.date<b.date?-1:1).map(exRow),...hw.filter(h=>h.due>=todayIso&&h.due<=wk).sort((a,b)=>a.due<b.due?-1:1).map(hwRow)]])}
+  if(q==="exams"||q==="upcoming"){out.push(["Exams ahead",state.exams.filter(x=>x.date>=todayIso).sort((a,b)=>a.date<b.date?-1:1).map(exRow)])}
+  if(q==="pinned"){out.push(["Pinned notes",(state.notes||[]).filter(n=>n.pinned).map(n=>({go:"note:"+n.id,c:subj(n.s),t:esc(noteTitle(n)),m:esc(subj(n.s).name)}))])}
+  if(q==="done"){out.push(["Done homework",state.homework.filter(h=>h.done).map(hwRow)])}
+  return out.filter(([,i])=>i.length)}
+let sCmd=null;
 function renderSearch(){
   const q=document.getElementById("q").value.trim().toLowerCase(),out=document.getElementById("sres"),fl=document.getElementById("sFilters");
   if(!q){fl.innerHTML="";
     const rec=recentSearches();
-    out.innerHTML=`${rec.length?`<h3 class="grp">Recent</h3><div class="chips wrapchips">${rec.map(r=>`<button data-recent="${esc(r)}">${esc(r)}</button>`).join("")}<button class="clr" data-recentclear>Clear</button></div>`:""}
-      <div class="emptybig sm">Search homework, exams, reminders, notes, classes, topics, flashcards, holidays and subjects.</div>`;return}
+    sCmd=null;out.innerHTML=`<h3 class="grp">Quick views</h3><div class="chips wrapchips">${SVIEWS.map(([k,l])=>`<button data-recent="${k}">${l}</button>`).join("")}</div>
+      ${rec.length?`<h3 class="grp">Recent</h3><div class="chips wrapchips">${rec.map(r=>`<button data-recent="${esc(r)}">${esc(r)}</button>`).join("")}<button class="clr" data-recentclear>Clear</button></div>`:""}
+      <div class="emptybig sm">Search everything, or add straight from here: <b>add essay English friday</b>, <b>exam history 12 oct</b>, <b>remind me to call mum 5pm</b>.</div>`;return}
+  const qq=document.getElementById("q").value.trim();sCmd=parseAdd(qq)||(/^(exam|test) /i.test(qq)?parseAdd("add "+qq):null);
   const has=t=>String(t||"").toLowerCase().includes(q);
-  let groups=[];
+  let groups=viewGroups(q);
   const hw=state.homework.filter(h=>has(h.text)||has(subj(h.s).name));
   if(hw.length)groups.push(["Homework",hw.map(h=>({go:"hw",c:subj(h.s),t:hl(h.text,q),m:esc(subj(h.s).name)+" · "+(h.done?"done":"due "+relDay(h.due))}))]);
   const ex=state.exams.filter(x=>has(x.title)||has(subj(x.s).name));
@@ -485,14 +555,16 @@ function renderSearch(){
   const total=groups.reduce((a,[,i])=>a+i.length,0);
   fl.innerHTML=groups.length>1?`<div class="chips wrapchips">${[["all","All "+total],...groups.map(([g,i])=>[g,g+" "+i.length])].map(([k,l])=>`<button data-sfilter="${esc(k)}" class="${sFilter===k?"on":""}">${esc(l)}</button>`).join("")}</div>`:"";
   if(sFilter!=="all"&&groups.some(([g])=>g===sFilter))groups=groups.filter(([g])=>g===sFilter);
-  out.innerHTML=groups.length?groups.map(([g,items])=>`<h3 class="grp">${g}</h3><ul class="card">${items.slice(0,20).map(r=>`<li class="task sr" data-go="${r.go}" style="--c:${r.c?col(r.c):"var(--muted)"}"><i class="sdot"></i><div class="tt"><b>${r.t}</b><small>${r.m}</small></div><span class="chev">›</span></li>`).join("")}</ul>`).join("")
-    :`<div class="emptybig">Nothing found for “${esc(q)}”.</div>`;
+  const cmdRow=sCmd?`<button class="scmd" data-scmd ${sCmd.need?"disabled":""}>${cmdLabel(sCmd)}${sCmd.need?"":`<small>Press Enter or tap to add</small>`}</button>`:"";
+  out.innerHTML=cmdRow+(groups.length?groups.map(([g,items])=>`<h3 class="grp">${g}</h3><ul class="card">${items.slice(0,20).map(r=>`<li class="task sr" data-go="${r.go}" style="--c:${r.c?col(r.c):"var(--muted)"}"><i class="sdot"></i><div class="tt"><b>${r.t}</b><small>${r.m}</small></div><span class="chev">›</span></li>`).join("")}</ul>`).join("")
+    :sCmd?"":`<div class="emptybig">Nothing found for “${esc(q)}”.</div>`);
 }
 document.addEventListener("input",e=>{if(e.target.id==="q"){sFilter="all";renderSearch()}});
 document.addEventListener("keydown",e=>{if(e.target.id!=="q")return;
-  if(e.key==="Enter"){pushRecent(e.target.value.trim());document.querySelector("#sres [data-go]")?.click()}
+  if(e.key==="Enter"){if(sCmd&&!sCmd.need){runCmd(sCmd);return}pushRecent(e.target.value.trim());document.querySelector("#sres [data-go]")?.click()}
   if(e.key==="Escape"){e.target.value="";renderSearch()}});
 document.addEventListener("click",e=>{
+  if(e.target.closest("[data-scmd]")){runCmd(sCmd);return}
   const f=e.target.closest("[data-sfilter]");if(f){sFilter=f.dataset.sfilter;renderSearch();return}
   const r=e.target.closest("[data-recent]");if(r){const q=document.getElementById("q");q.value=r.dataset.recent;renderSearch();q.focus();return}
   if(e.target.closest("[data-recentclear]")){try{localStorage.removeItem("sp-recent")}catch(err){}renderSearch();return}});
@@ -563,19 +635,27 @@ function clsForm(d,c){return `<li class="cls editing"><input data-cf="name" valu
   <div class="cftimes"><label><span>From</span><input type="time" data-cf="start" value="${c?c.start:""}"></label><label><span>To</span><input type="time" data-cf="end" value="${c?c.end:""}"></label></div>
   <div class="acts">${c?`<button class="lnk danger" data-cldel="${d}:${c.id}">Delete</button>`:""}<button class="btn ghost" data-clcancel>Cancel</button><button class="btn" data-clsave="${d}:${c?c.id:"new"}">Save</button></div></li>`}
 function classesHtml(d,isToday){const cs=classesOf(d);if(!cs.length&&classEdit!==d+":new")return "";const hm=hmNow(),cur=isToday?classNow(d,hm):null;
-  const rows=cs.map(c=>classEdit===d+":"+c.id?clsForm(d,c):`<li class="cls ${cur===c?"now":""}" data-cledit="${d}:${c.id}" title="Tap to edit"><span class="ctime">${c.start?fmtRange(c.start,c.end):"Any time"}</span><b>${esc(c.name)}</b>${cur===c?`<i class="cnow">Now</i>`:""}</li>`);
+  const over=c=>isToday&&c.end&&c.end<=hm&&classEdit!==d+":"+c.id,past=cs.filter(over),fold=past.length>0&&!showPastCls.has(d);
+  const rows=cs.filter(c=>!(fold&&over(c))).map(c=>{if(classEdit===d+":"+c.id)return clsForm(d,c);const mk=d+":"+c.id,open=clsMenu===mk;
+    const sids=[...new Set(classSubjects(c.name).map(x=>x.id))];
+    const menu=open?`<li class="tmenu">${sids.map(id=>`<button data-newl="${id}">＋1 ${esc(subj(id).name)} lesson left</button><button data-hwfor="${id}">＋ ${esc(subj(id).name)} homework</button>`).join("")}<button data-cledit="${mk}">✎ Edit class</button></li>`:"";
+    return `<li class="cls ${cur===c?"now":""} ${over(c)?"over":""}" data-clmenu="${mk}" aria-expanded="${open}"><span class="ctime">${c.start?fmtRange(c.start,c.end):"Any time"}</span><b>${esc(c.name)}</b>${cur===c?`<i class="cnow">Now</i>`:""}</li>${menu}`});
   if(classEdit===d+":new")rows.push(clsForm(d,null));
-  return `<section class="clsec"><h3>Classes <span>every ${DAY_NAMES[d]}</span></h3><ul class="clist">${rows.join("")}</ul></section>`}
+  const nx=isToday&&!cur?cs.find(c=>c.start&&c.start>hm):null,soon=nx&&toMin(nx.start)-toMin(hm)<=120?`<span>next in ${fmtMin(toMin(nx.start)-toMin(hm))}</span>`:"";
+  const foldRow=past.length?`<li class="foldrow"><button class="lnk" data-pastcls="${d}">${fold?`✓ ${past.length} earlier class${past.length>1?"es":""} · Show`:"Hide earlier classes"}</button></li>`:"";
+  return `<section class="clsec"><h3>Classes ${soon}</h3><ul class="clist">${fold?foldRow:""}${rows.join("")}${fold?"":foldRow}</ul></section>`}
 function saveClass(li,key){const[d,id]=key.split(":"),v=f=>li.querySelector(`[data-cf=${f}]`).value.trim(),name=v("name");
   if(!name){li.querySelector("[data-cf=name]").focus();return}let st=v("start"),en=v("end");if(st&&en&&en<st)[st,en]=[en,st];
   change(()=>{const day=state.days[d];day.classes=day.classes||[];if(id==="new")day.classes.push({id:uid(),name,start:st,end:en});
     else{const c=day.classes.find(x=>x.id===id);if(c){c.name=name;c.start=st;c.end=en}}classEdit=null})}
-document.addEventListener("click",e=>{const b=e.target.closest("[data-cledit],[data-clsave],[data-cldel],[data-clcancel],[data-classopen]");if(!b)return;const ds=b.dataset;
+document.addEventListener("click",e=>{const b=e.target.closest("[data-cledit],[data-clsave],[data-cldel],[data-clcancel],[data-classopen],[data-clmenu],[data-pastcls]");if(!b)return;const ds=b.dataset;
+  if(ds.pastcls!==undefined){const d=+ds.pastcls;showPastCls.has(d)?showPastCls.delete(d):showPastCls.add(d);render();return}
+  if(ds.clmenu&&!e.target.closest("input,button")){clsMenu=clsMenu===ds.clmenu?null:ds.clmenu;openMenu=null;buzz(4);render();return}
   if(ds.classopen!==undefined){classEdit=ds.classopen+":new";render();setTimeout(()=>document.querySelector("li.cls.editing [data-cf=name]")?.focus(),40);return}
   if(ds.clcancel!==undefined){classEdit=null;render();return}
   if(ds.clsave){saveClass(b.closest("li.cls"),ds.clsave);return}
   if(ds.cldel){const[d,id]=ds.cldel.split(":");snap();change(()=>{const c=state.days[d].classes.find(x=>x.id===id);if(c)trashPut("cls",c.name+" · "+DAY_NAMES[d],{d,item:c});state.days[d].classes=state.days[d].classes.filter(c=>c.id!==id);classEdit=null});undoToast("Class removed");return}
-  if(ds.cledit&&!e.target.closest("input,button")){classEdit=ds.cledit;render();setTimeout(()=>document.querySelector("li.cls.editing [data-cf=name]")?.focus(),40)}},true);
+  if(ds.cledit){classEdit=ds.cledit;clsMenu=null;render();setTimeout(()=>document.querySelector("li.cls.editing [data-cf=name]")?.focus(),40)}},true);
 document.addEventListener("keydown",e=>{const li=e.target.closest&&e.target.closest("li.cls.editing");if(!li)return;
   if(e.key==="Enter"){e.preventDefault();saveClass(li,li.querySelector("[data-clsave]").dataset.clsave)}if(e.key==="Escape"){classEdit=null;render()}});
 // A single line above the week: what's on now or next, and what's still due today.
@@ -591,27 +671,38 @@ function renderMonth(){const el=document.getElementById("monthView");if(!el)retu
     cells+=`<button class="md ${k===todayIso?"tod":""} ${k<todayIso?"past":""} ${hol?"hol":""}" data-mday="${k}" aria-label="${i} ${MN[m]}${ex.length?", exam":""}${hw.length?", "+hw.length+" homework due":""}">
       <span class="mn">${i}</span>${ex.length?`<b class="mex" title="${esc(ex.map(x=>x.title).join(", "))}">📅${ex.length>1?ex.length:""}</b>`:""}${hw.length?`<small class="mhw">${hw.length} hw</small>`:""}<span class="mdots">${dots}</span></button>`}
   const up=state.exams.filter(x=>x.date.startsWith(y+"-"+String(m+1).padStart(2,"0"))).sort((a,b)=>a.date<b.date?-1:1);
-  el.innerHTML=`<div class="calnav"><button class="wkbtn" data-mnav="-1" aria-label="Previous month">‹</button><b>${MN[m]} ${y}</b><button class="wkbtn" data-mnav="1" aria-label="Next month">›</button></div>
-    <div class="mgrid">${cells}</div>
-    ${up.length?`<h3 class="grp">Exams this month</h3>${tickets(up.map(x=>examTicket(x)))}`:""}`}
+  el.innerHTML=`<div class="mgrid">${cells}</div>
+    ${up.length?`<h3 class="grp">Exams this month</h3>${tickets(up.map(x=>examTicket(x,"month")))}`:""}`}
 function weekOffsetOf(k){const d=new Date(k+"T12:00:00");d.setDate(d.getDate()-((d.getDay()-DAY_ORDER[0]+7)%7));return Math.round((d-weekStart(0))/(7*864e5))}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-tview],[data-mnav],[data-mday]");if(!b)return;const ds=b.dataset;
-  if(ds.tview){ttView=ds.tview;buzz(4);render();return}
-  if(ds.mnav){let[y,m]=monthAt;m+=+ds.mnav;if(m<0){m=11;y--}if(m>11){m=0;y++}monthAt=[y,m];renderMonth();return}
+  if(ds.tview){ttView=ds.tview;ttMenu=false;buzz(4);render();return}
+  if(ds.mnav){let[y,m]=monthAt;m+=+ds.mnav;if(m<0){m=11;y--}if(m>11){m=0;y++}monthAt=[y,m];render();return}
   if(ds.mday){const k=ds.mday;week=weekOffsetOf(k);selDay=new Date(k+"T12:00:00").getDay();ttView="week";openForm=null;render();
     setTimeout(()=>document.querySelector(".day.sel")?.scrollIntoView({behavior:"smooth",block:"start"}),60)}});
-function renderNextUp(){const el=document.getElementById("lStrip");if(!el)return;const hm=hmNow(),parts=[];
-  const cur=classNow(today,hm),nx=classesOf(today).find(c=>c.start&&c.start>hm);
-  if(cur)parts.push(`<b>Now:</b> ${esc(cur.name)}, until ${t12(cur.end)}`);
-  else if(nx){const m=toMin(nx.start)-toMin(hm);parts.push(`<b>Next:</b> ${esc(nx.name)} ${m<=120?"in "+fmtMin(m):"at "+t12(nx.start)}`)}
-  const ll=tasksOn(today,todayIso).filter(k=>!k.skipped&&!k.done).length;if(ll)parts.push(`${ll} lesson${ll>1?"s":""} left today`);
-  const over=hwPending().filter(h=>h.due<todayIso).length,dueT=hwPending().filter(h=>h.due===todayIso).length;
-  if(dueT)parts.push(`${dueT} homework due today`);if(over)parts.push(`<span class="red">${over} overdue</span>`);
-  if(!parts.length)parts.push(holidayOn(todayIso)?"🌴 Holiday. Enjoy it!":"Nothing else due today 🎉");
-  el.innerHTML=`<button class="nextup" data-nextup aria-label="Go to today">${parts.join('<span class="nsep">·</span>')}</button>`}
-document.addEventListener("click",e=>{if(!e.target.closest("[data-nextup]"))return;week=0;selDay=today;openForm=null;render();
-  setTimeout(()=>document.querySelector(".day.sel")?.scrollIntoView({behavior:"smooth",block:"start"}),60)});
-setInterval(()=>{if(tab==="study"&&!document.hidden){renderNextUp();if(week===0&&selDay===today&&!classEdit&&!openForm&&!editItem&&!document.querySelector("#days input:focus"))render()}},60e3);
+setInterval(()=>{if(tab==="study"&&!document.hidden){if(week===0&&selDay===today&&!classEdit&&!openForm&&!editItem&&!document.querySelector("#days input:focus"))render()}},60e3);
+const ICO_DEL=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>`;
+const ICO_CAL=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg>`;
+const ICO_WEEK=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>`;
+function renderTTBar(){const el=document.getElementById("ttBar");if(!el)return;const m=ttView==="month",now=new Date();
+  if(!monthAt)monthAt=[now.getFullYear(),now.getMonth()];
+  const MN=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  let label,sub,home;
+  if(m){const[y,mo]=monthAt;home=y===now.getFullYear()&&mo===now.getMonth();label=MN[mo]+(y!==now.getFullYear()?" "+y:"");
+    const n=state.exams.filter(x=>x.date.startsWith(y+"-"+String(mo+1).padStart(2,"0"))).length;sub=n?n+" exam"+(n>1?"s":""):"No exams"}
+  else{const ws=weekStart(week),we=dateFor(week,DAY_ORDER[6]);home=week===0;
+    label=week===0?"This week":week===1?"Next week":week===-1?"Last week":"Week of "+dLabel(ws);
+    if(week<0&&DAY_ORDER.every(d=>isComplete(d,iso(dateFor(week,d)))))label+=" ✓";sub=dLabel(ws)+" – "+dLabel(we)}
+  const items=m?[]:[week>=0?`<button data-plan>🪄 Plan my week</button>`:"",week<=0?`<button data-review>📊 ${week===0?"Review this week":"Review that week"}</button>`:""].filter(Boolean);
+  const nav=m?"mnav":"wk",unit=m?"month":"week";
+  el.innerHTML=`<button class="ttlabel" data-tthome ${home?"disabled":""} aria-label="${home?label:"Back to today"}"><b>${label}</b><small>${sub}${home?"":` · <span class="ttback">Today ›</span>`}</small></button>
+    <div class="ttctl"><button class="wkbtn" data-${nav}="-1" aria-label="Previous ${unit}">‹</button><button class="wkbtn" data-${nav}="1" aria-label="Next ${unit}">›</button>
+      <button class="wkbtn" data-tview="${m?"week":"month"}" aria-label="${m?"Week view":"Month view"}" title="${m?"Week view":"Month view"}">${m?ICO_WEEK:ICO_CAL}</button>
+      ${items.length?`<button class="wkbtn ${ttMenu?"on":""}" data-ttmenu aria-label="More" aria-expanded="${ttMenu}">⋯</button>`:""}</div>
+    ${ttMenu&&items.length?`<div class="ttmenu" role="menu">${items.join("")}</div>`:""}`}
+document.addEventListener("click",e=>{
+  if(e.target.closest("[data-ttmenu]")){ttMenu=!ttMenu;renderTTBar();return}
+  if(e.target.closest("[data-tthome]")){ttMenu=false;if(ttView==="month")monthAt=null;else{week=0;selDay=today;openForm=null}render();return}
+  if(ttMenu&&(!e.target.closest(".ttbar")||e.target.closest(".ttmenu button"))){ttMenu=false;setTimeout(renderTTBar,0)}});
 function gradeAvg(sid){const g=(state.grades||[]).filter(x=>x.s===sid&&x.max>0);if(!g.length)return null;
   return Math.round(g.reduce((a,x)=>a+x.score/x.max*100,0)/g.length*10)/10}
 // Homework, exams and reminders for one date, as ticket sections. Today also picks up overdue homework.
@@ -624,26 +715,34 @@ function byDayOrder(key,list){const ord=peek(key).order||[];if(!ord.length)retur
 function daySections(key){
   const isToday=key===todayIso,out={};
   const hw=byDayOrder(key,state.homework.filter(h=>h.due===key||(isToday&&!h.done&&h.due<todayIso)).sort((a,b)=>(a.done-b.done)||(a.due<b.due?-1:1)));
-  if(hw.length)out.hw=dsec("hw","Homework",hw.filter(h=>!h.done).length,hw.length,tickets(hw.map((h,i,a)=>hwTicket(h,key,i,a.length))));
+  const hwMin=hw.filter(h=>!h.done).reduce((a,h)=>a+(h.est||0),0);
+  if(hw.length)out.hw=dsec("hw","Homework",hw.filter(h=>!h.done).length,hw.length,foldDone(key,"hw",hw,h=>h.done,(h,i,a)=>hwTicket(h,key,i,a.length)),hwMin?" · ≈ "+fmtMin(hwMin):"");
   const ex=byDayOrder(key,state.exams.filter(x=>x.date===key));
   if(ex.length)out.ex=dsec("ex","Exams",null,ex.length,tickets(ex.map((x,i,a)=>examTicket(x,key,i,a.length))));
   const rm=byDayOrder(key,state.reminders.filter(r=>r.date===key&&!r.link).sort((a,b)=>a.time<b.time?-1:1));
-  if(rm.length)out.rem=dsec("rem","Reminders",null,rm.length,tickets(rm.map((r,i,a)=>remTicket(r,key,i,a.length))));
+  if(rm.length)out.rem=dsec("rem","Reminders",null,rm.length,foldDone(key,"rem",rm,r=>(r.date+"T"+r.time)<=nowStamp(),(r,i,a)=>remTicket(r,key,i,a.length)));
   return out}
-function dsec(id,name,left,total,body){return `<section class="dsec" data-oid="${id}"><h3 title="Hold to move this section">${name}${left!=null&&total?`<span>${left?left+" left":"all done"}</span>`:""}</h3>${body}</section>`}
+function dsec(id,name,left,total,body,extra=""){return `<section class="dsec" data-oid="${id}"><h3 title="Hold to move this section">${name}${left!=null&&total?`<span>${left?left+" left":"all done"}${extra}</span>`:""}</h3>${body}</section>`}
+// Finished tickets fold into one "✓ 2 done" row (ones ticked just now stay put until you move on).
+function foldDone(key,sec,list,isDone,html){const k=key+":"+sec,hide=!showDone.has(k),vis=[],done=[];
+  list.forEach(it=>(isDone(it)&&hide&&!recentDone.has(it.id)?done:vis).push(it));
+  const row=done.length||(showDone.has(k)&&list.some(isDone))?`<li class="foldrow"><button class="lnk" data-showdone="${k}">${hide?`✓ ${done.length} done · Show`:"Hide done"}</button></li>`:"";
+  return `<ul class="tickets">${vis.map(html).join("")}${row}</ul>`}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-amtedit],[data-amtdone]");if(!b)return;
+  amtEdit=b.dataset.amtedit&&amtEdit!==b.dataset.amtedit?b.dataset.amtedit:null;openMenu=null;render();
+  if(amtEdit)setTimeout(()=>document.querySelector(".day.sel .amtrow .amtin")?.focus(),40)});
+document.addEventListener("click",e=>{if(clsMenu&&e.target.closest(".clist .tmenu button"))clsMenu=null},true);
+document.addEventListener("click",e=>{const b=e.target.closest("[data-showdone]");if(!b)return;const k=b.dataset.showdone;showDone.has(k)?showDone.delete(k):showDone.add(k);render()});
+document.addEventListener("change",e=>{const t=e.target;if(!t.checked||!t.dataset)return;const id=t.dataset.hwtick||(t.dataset.tick&&t.dataset.tick.split(":")[1]);if(id)recentDone.add(id)},true);
 // The summary, class shortcuts and tomorrow line that used to live in the card above the week.
 function todayExtras(){
   const tasks=tasksOn(today,todayIso).filter(k=>!k.skipped),left=tasks.filter(k=>!k.done).length;
   const parts=[],sk=streakDays();
   if(sk>=2)parts.push(`<span class="streak">🔥 ${sk}-day streak</span>`);
   if(tasks.length&&!left)parts.push("All study done ✓");
-  const fm=(state.focusLog||{})[todayIso]||0;if(fm)parts.push(fmtMin(fm)+" focused");
-  const hwMin=hwPending().filter(h=>h.due<=todayIso).reduce((a,h)=>a+(h.est||0),0);if(hwMin)parts.push("≈ "+fmtMin(hwMin)+" of homework");
   const nx=state.exams.filter(x=>x.date>todayIso&&daysUntil(x.date)<=14).sort((a,b)=>a.date<b.date?-1:1)[0];
   if(nx){const n=daysUntil(nx.date);parts.push(`<span class="${n<=3?"red":""}">${esc(nx.title)} ${n===1?"tomorrow":"in "+n+" days"}</span>`)}
   const sum=parts.length?`<p class="dsum">${parts.join(" · ")}</p>`:"";
-  const cn=classesOf(today).map(c=>c.name).join(" "),ids=cn?[...new Set(classSubjects(cn).map(x=>x.id))]:[];
-  const cls=ids.length?`<div class="newl">${ids.map(id=>{const x=subj(id);return `<button data-newl="${id}" style="--c:${col(x)}">+1 ${esc(x.name)} lesson</button><button data-hwfor="${id}" style="--c:${col(x)}">＋ Homework</button>`}).join("")}</div>`:"";
   const tk=addDays(1),twd=new Date(tk+"T12:00:00").getDay();
   const tt0=tasksOn(twd,tk).filter(k=>!k.skipped).map(k=>esc(subj(k.s).name)+(k.amt?" ×"+fmt(k.amt):"")),tt=tt0.length>3?[...tt0.slice(0,2),"+"+(tt0.length-2)+" more"]:tt0;
   const nh=state.homework.filter(h=>!h.done&&h.due===tk).length;
@@ -652,7 +751,7 @@ function todayExtras(){
   const tc=tcs.length>2?tcs.length+" classes"+(first?" from "+t12(first.start):""):tcs.length?"Classes: "+tcs.map(c=>esc(c.name)+(c.start?" "+t12(c.start):"")).join(", "):"";
   const all=[...tx,tc,tt.join(", "),nh?nh+" homework due":""].filter(Boolean);
   const tmr=new Date().getHours()<18?"":`<div class="tmr"><em>Tomorrow</em><span>${all.length?all.join(" · "):"Nothing planned"}</span></div>`;
-  return {sum,cls,tmr}}
+  return {sum,tmr}}
 // ---- plan my week: spread each subject's fair share of lessons over the lightest days ----
 const PLAN_CAP=4;
 function weekPlan(off){const keys=DAY_ORDER.map(d=>iso(dateFor(off,d))).filter(k=>k>=todayIso&&!holidayOn(k));if(!keys.length)return {adds:[],left:0};
@@ -713,7 +812,7 @@ function reviewDue(){const i=DAY_ORDER.indexOf(today);if(i===6&&new Date().getHo
 function topicsFor(sid){return (state.topics||{})[sid]||[]}
 function topicsHtml(sid){const ts=topicsFor(sid),d=ts.filter(t=>t.done).length;
   return `<section class="topics"><div class="tphead"><h3 class="grp">Topics</h3>${ts.length?`<span>${d} of ${ts.length} done</span>`:""}</div>
-    ${ts.length?`<div class="tpbar"><i style="width:${d/ts.length*100}%"></i></div><ul class="tplist">${ts.map(t=>`<li class="${t.done?"done":""}"><label><input type="checkbox" class="chk" data-tptick="${sid}:${t.id}" ${t.done?"checked":""}><span>${esc(t.t)}</span></label><button class="del" data-tpdel="${sid}:${t.id}" aria-label="Remove topic">×</button></li>`).join("")}</ul>`:`<p class="tpempty">List the chapters or units for this subject and tick them off as you finish them.</p>`}
+    ${ts.length?`<div class="tpbar"><i style="width:${d/ts.length*100}%"></i></div><ul class="tplist">${ts.map(t=>`<li class="${t.done?"done":""}"><label><input type="checkbox" class="chk" data-tptick="${sid}:${t.id}" ${t.done?"checked":""}><span>${esc(t.t)}</span></label><button class="del" data-tpdel="${sid}:${t.id}" aria-label="Remove topic">${ICO_DEL}</button></li>`).join("")}</ul>`:`<p class="tpempty">List the chapters or units for this subject and tick them off as you finish them.</p>`}
     <div class="tpadd"><input id="tpNew" placeholder="e.g. Unit 4: Poetry" maxlength="60" enterkeyhint="done"><button class="btn ghost" data-tpadd="${sid}">Add</button></div></section>`}
 function addTopic(sid){const i=document.getElementById("tpNew"),t=i.value.trim();if(!t){i.focus();return}
   change(()=>{state.topics[sid]=[...topicsFor(sid),{id:uid(),t,done:false}]});setTimeout(()=>document.getElementById("tpNew")?.focus(),30)}
@@ -838,7 +937,7 @@ function renderSubjectPage(){
         ${x.imgs&&x.imgs.length?`<img class="thumb" data-img="${x.imgs[0]}" alt="">`:""}</div>`).join(""):`<div class="estate"><span>🗒️</span><b>No notes yet</b><small>Write what you learned in ${esc(sj.name)}, add photos of the board or your book.</small></div>`}</div>`;
   }
   det.innerHTML=`<div class="sdhead" style="--c:${col(sj)}"><button class="lnk" data-subjback>‹ ${n?esc(sj.name):"Subjects"}</button>${n?"":`<h2><i></i><span class="snm">${esc(sj.name)}</span></h2>`}</div>
-    ${n?"":`<div class="sdsum"><span><b>${fmt(left)}</b>lesson${left===1?"":"s"} left</span>${(p=>p!=null?`<span><b>${fmt(p)}</b>page${p===1?"":"s"} left</span>`:"")(pagesLeft(sj.id,t))}<span><b>${hw}</b>homework</span>${ex?`<span><b>${daysUntil(ex.date)}</b>days to ${esc(ex.title)}</span>`:""}</div>`}
+    ${n?"":`<div class="sdsum"><span><b>${fmt(left)}</b>lesson${left===1?"":"s"} left</span><label class="sdpg"><input class="pgin" data-pages="${sj.id}" type="number" min="0" step="any" inputmode="decimal" placeholder="–" value="${(p=>p==null?"":fmt(p))(pagesLeft(sj.id,t))}" aria-label="${esc(sj.name)} pages left"><span>pages left</span></label><span><b>${hw}</b>homework</span>${ex?`<span><b>${daysUntil(ex.date)}</b>days to ${esc(ex.title)}</span>`:""}</div>`}
     ${body}`;
   loadImgs(det);
   const ta=det.querySelector(".ntext");if(ta){const fit=()=>{ta.style.height="auto";ta.style.height=Math.max(180,ta.scrollHeight)+"px"};fit();ta.addEventListener("input",fit)}
@@ -1077,7 +1176,9 @@ function applySettings(){
 
 function renderHeader(){
   const h=new Date().getHours();
-  document.getElementById("greet").textContent=h<5?"Good night":h<12?"Good morning":h<17?"Good afternoon":"Good evening";
+  const g=h<5?"Good night":h<12?"Good morning":h<17?"Good afternoon":"Good evening";
+  const page={todo:"Tasks",school:"Attendance"}[tab];
+  document.getElementById("greet").textContent=page||(innerWidth<370?g.replace("Good ","").replace(/^./,c=>c.toUpperCase()):g);
   const d=new Date();const MN=["January","February","March","April","May","June","July","August","September","October","November","December"];
   const narrow=innerWidth<420;
   document.getElementById("sub").textContent=(narrow?DAY_NAMES[d.getDay()].slice(0,3):DAY_NAMES[d.getDay()])+", "+d.getDate()+" "+(narrow?MN[d.getMonth()].slice(0,3):MN[d.getMonth()]);
@@ -1085,7 +1186,7 @@ function renderHeader(){
 let classOpen=null,notesOpen=null,titleEdit=null;
 let prevTab="study",studySub="tt",todoSub="les",subjView=null,noteOpen=null;
 const scrollMem={};
-let lastTab=null,lastSel=null,justTicked=null;
+let lastTab=null,lastSel=null,justTicked=null,lastTabDone,lastSelDone,lastWeekDone;
 function moveInd(){
   const on=document.querySelector(".tabs button.on"),ind=document.getElementById("tabInd");
   if(!on||!ind||!on.offsetWidth)return;const first=!ind.dataset.ok;if(first)ind.style.transition="none";ind.style.width=on.offsetWidth+"px";ind.style.transform=`translateX(${on.offsetLeft-4}px)`;if(first){ind.dataset.ok=1;requestAnimationFrame(()=>requestAnimationFrame(()=>ind.style.transition=""))}
@@ -1102,6 +1203,7 @@ function afterRender(){
   const det=document.getElementById("subjDetail");
   if(det&&!det.hidden&&det.dataset.k!==(subjView||"")+"/"+(noteOpen||"")){det.dataset.k=(subjView||"")+"/"+(noteOpen||"");
     det.classList.remove("slidein");void det.offsetWidth;det.classList.add("slidein")}
+  if(tab!==lastTabDone||selDay!==lastSelDone||week!==lastWeekDone){if(lastTabDone!==undefined){recentDone.clear();amtEdit=null;clsMenu=null}lastTabDone=tab;lastSelDone=selDay;lastWeekDone=week}
   if(selDay!==lastSel){const d=document.querySelector(".day.sel");if(d&&lastSel!==null)d.classList.add("enter");
     document.querySelector(".strip button.sel")?.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});lastSel=selDay}
   if(justTicked){const el=document.querySelector(`[data-tick^="${justTicked}:"]`);if(el)el.closest("li").classList.add("pop");justTicked=null}
@@ -1193,9 +1295,8 @@ function render(){
   document.querySelectorAll("[data-sub]").forEach(b=>b.classList.toggle("on",b.dataset.sub===todoSub));
   document.getElementById("sHw").hidden=todoSub!=="hw";document.getElementById("sEx").hidden=todoSub!=="ex";document.getElementById("sLes").hidden=todoSub!=="les";
 
-  renderBanner();renderHomework();renderExams();renderGrades();renderReminders();renderStats();renderSubjectPage();renderSchool();renderNextUp();if(tab==="stats")renderStatsPage();
+  renderBanner();renderHomework();renderExams();renderGrades();renderReminders();renderStats();renderSubjectPage();renderSchool();renderTTBar();if(tab==="stats")renderStatsPage();
   document.getElementById("weekView").hidden=ttView!=="week";document.getElementById("monthView").hidden=ttView!=="month";
-  document.querySelectorAll("[data-tview]").forEach(b=>{b.classList.toggle("on",b.dataset.tview===ttView);b.setAttribute("aria-selected",b.dataset.tview===ttView)});
   if(ttView==="month")renderMonth();
 
   document.getElementById("subjects").innerHTML=SUBJECTS.filter(s=>s.id!=="other").map(s=>{
@@ -1204,26 +1305,19 @@ function render(){
     const unplanned=left-t[s.id].planned;
     const note=left===0&&base>0?"All done":unplanned>0?`<span class="warn">${fmt(unplanned)} not planned this week</span>`:"Planned this week";
     const nn=(state.notes||[]).filter(n=>n.s===s.id).length;
+    const ts=topicsFor(s.id),td=ts.filter(x=>x.done).length,pl=pagesLeft(s.id,t);
+    const meta=[ts.length?`<span class="tpmini"><span class="tpbar"><i style="width:${td/ts.length*100}%"></i></span>${td}/${ts.length} topics</span>`:"",pl!=null?fmt(pl)+" pages left":"",nn?nn+" note"+(nn>1?"s":""):""].filter(Boolean);
     return `<div class="subj" data-subj="${s.id}" style="--c:${col(s)}">
-      <div class="name"><button class="cdot" data-color="${s.id}" aria-label="Change ${esc(s.name)} color"></button><span class="snm">${esc(s.name)}</span>${BASE_SUBJECTS.some(b=>b.id===s.id)?"":`<button class="del sm" data-subjdel="${s.id}" aria-label="Remove ${esc(s.name)}">×</button>`}<span class="opn">${nn?nn+" note"+(nn>1?"s":""):"Notes"} ›</span></div>
+      <div class="name"><button class="cdot" data-color="${s.id}" aria-label="Change ${esc(s.name)} color"></button><span class="snm">${esc(s.name)}</span>${BASE_SUBJECTS.some(b=>b.id===s.id)?"":`<button class="del sm" data-subjdel="${s.id}" aria-label="Remove ${esc(s.name)}">${ICO_DEL}</button>`}
+        <span class="sleft"><input class="numin" data-left="${s.id}" type="number" min="0" step="any" inputmode="decimal" value="${fmt(left)}" aria-label="${s.name} lessons left"><span class="of">left</span></span>
+        <span class="step"><button aria-label="Fewer ${s.name} lessons" data-step="${s.id}" data-by="-1">−</button><button aria-label="More ${s.name} lessons" data-step="${s.id}" data-by="1">+</button></span><span class="chev" aria-hidden="true">›</span></div>
+      ${meta.length?`<div class="smeta">${meta.join('<span class="nsep">·</span>')}</div>`:""}
       ${colorOpen===s.id?`<div class="cpal">${SWATCHES.map(h=>`<button style="background:${h}" data-setc="${s.id}:${h}" aria-label="Color ${h}" class="${s.c===h?"on":""}"></button>`).join("")}<label class="cpick" aria-label="Custom color"><input type="color" data-cpick="${s.id}" value="${s.c.startsWith("#")?s.c:"#3b82f6"}">+</label></div>`:""}
-      <div class="row"><input class="numin" data-left="${s.id}" type="number" min="0" step="any" inputmode="decimal" value="${fmt(left)}" aria-label="${s.name} lessons left"><span class="of">lesson${left===1?"":"s"} left</span>
-        <span class="step">
-        <button aria-label="Fewer ${s.name} lessons" data-step="${s.id}" data-by="-1">−</button>
-        <button aria-label="More ${s.name} lessons" data-step="${s.id}" data-by="1">+</button></span></div>
-      <label class="pgrow"><input class="pgin" data-pages="${s.id}" type="number" min="0" step="any" inputmode="decimal" placeholder="–" value="${(p=>p==null?"":fmt(p))(pagesLeft(s.id,t))}" aria-label="${s.name} pages left"><span>pages left <em>(optional)</em></span></label>
-      ${(ts=>ts.length?`<div class="tpmini"><div class="tpbar"><i style="width:${ts.filter(x=>x.done).length/ts.length*100}%"></i></div><small>${ts.filter(x=>x.done).length}/${ts.length} topics</small></div>`:"")(topicsFor(s.id))}
     </div>`}).join("");
   document.getElementById("subjects").innerHTML+=addingSubj
     ?`<div class="subj addsubj"><input id="newSubj" placeholder="Subject name" maxlength="24"><div class="acts"><button class="btn ghost" data-subjcancel>Cancel</button><button class="btn" data-subjsave>Add</button></div></div>`
     :`<button class="subj addsubj" data-subjadd>+ Add subject</button>`;
 
-  // week nav
-  const ws=weekStart(week),we=dateFor(week,DAY_ORDER[6]);
-  document.getElementById("wkLabel").textContent=(week===0?"This week":week===1?"Next week":week===-1?"Last week":"Week of "+dLabel(ws));
-  document.getElementById("wkDates").textContent=dLabel(ws)+" – "+dLabel(we);
-  document.getElementById("wkToday").hidden=week===0;document.querySelector("[data-review]").hidden=week>0;document.querySelector("[data-plan]").hidden=week<0;
-  if(week<0&&DAY_ORDER.every(d=>isComplete(d,iso(dateFor(week,d)))))document.getElementById("wkLabel").textContent+=" ✓";
 
   document.getElementById("strip").innerHTML=DAY_ORDER.map(d=>{
     const dt=dateFor(week,d),key=iso(dt),tasks=tasksOn(d,key).filter(k=>!k.skipped);
@@ -1238,18 +1332,19 @@ function render(){
       <div class="dayhead"><h2>${DAY_NAMES[d]} <span class="dnum">${dLabel(dt)}</span></h2><span class="okmark" aria-label="Done">✓</span></div>
       <div class="donerow"><span>Day done</span><button class="lnk" data-expand="${key}">Show</button></div></article>`;
     const hasLessons=tasks.filter(k=>!k.skipped).length>0,secMap=daySections(key),tx=isToday?todayExtras():null;let copyRow="";
-    let list=hasLessons?`<section class="dsec" data-oid="les"><h3 title="Hold to move this section">Lessons<span>${(n=>n?n+" left":"all done")(tasks.filter(k=>!k.skipped&&!k.done).length)}</span></h3><ul class="task-list tickets" data-dkey="${key}" data-wd="${d}">${tasks.map((k,idx,arr)=>{const s=subj(k.s);
-      if(k.skipped)return "";
+    const lesVis=tasks.filter(k=>!k.skipped),lk=key+":les",lesHide=!showDone.has(lk),lesFold=lesVis.filter(k=>k.done&&lesHide&&!recentDone.has(k.id)),lesShow=lesVis.filter(k=>!lesFold.includes(k));
+    const lesRow=lesFold.length||(!lesHide&&lesVis.some(k=>k.done))?`<li class="foldrow"><button class="lnk" data-showdone="${lk}">${lesHide?`✓ ${lesFold.length} done · Show`:"Hide done"}</button></li>`:"";
+    let list=hasLessons?`<section class="dsec" data-oid="les"><h3 title="Hold to move this section">Lessons<span>${(n=>n?n+" left":"all done")(lesVis.filter(k=>!k.done).length)}</span></h3><ul class="task-list tickets" data-dkey="${key}" data-wd="${d}">${lesShow.map((k,idx,arr)=>{const s=subj(k.s);
       const tag=k.kind==="fixed"?"":k.label?esc(k.label):"This day only";
-      const mk=key+":"+k.id,open=openMenu===mk;
+      const mk=key+":"+k.id,open=openMenu===mk,editing=amtEdit===mk;
       const acts=`<button class="dots-btn ${open?"on":""}" data-menu="${mk}" aria-label="More options" aria-expanded="${open}">⋯</button>`;
       const isFirst=idx===0,isLast=idx===arr.length-1;
       const menu=open?`<li class="tmenu">
         ${!isFirst?`<button data-reorder="${key}:${k.id}:up">↑ Move up</button>`:""}
         ${!isLast?`<button data-reorder="${key}:${k.id}:down">↓ Move down</button>`:""}
         ${key===todayIso&&!k.done?`<button data-focus="${key}:${k.id}:${k.s}:${k.amt??""}">⏱ Focus</button>`:""}
+        <button data-amtedit="${mk}">✎ Lessons &amp; pages</button>
         <button data-title="${key}:${k.id}">✎ ${k.title?"Rename":"Add title"}</button>
-        <button data-pgtoggle="${key}">${peek(key).noPages?"Show pages":"Hide pages"} this day</button>
         ${key>=todayIso&&!k.done?`<button data-move="${key}:${k.id}:${k.kind}:${k.s}:${k.amt??""}">→ Tomorrow</button>`:""}
         ${k.kind==="fixed"
           ?`<button data-skip="${key}:${k.id}">Remove from this day</button><button class="danger" data-delfix="${d}:${k.id}">Remove every ${DAY_NAMES[d].slice(0,3)}</button>`
@@ -1258,9 +1353,11 @@ function render(){
         <span class="chk off"></span>
         <div class="tt"><input class="ttl" id="ttlIn" value="${esc(k.title||"")}" placeholder="Title for ${esc(s.name)}" maxlength="40"></div>
         <button class="btn sm" data-titlesave="${key}:${k.id}:${k.kind}:${d}">Save</button><button class="lnk" data-titlecancel>Cancel</button></li>`;
+      const amtTxt=(k.amt!=null&&k.amt!==""?fmt(k.amt)+" lesson"+(+k.amt===1?"":"s"):"– lessons")+(k.pg?" · "+fmt(k.pg)+" p":"");
+      const editor=editing?`<div class="itrow amtrow"><input class="amtin" data-amt="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.amt??""}" placeholder="–" aria-label="${s.name} lessons on ${dLabel(dt)}"> <span class="amtl">lessons</span><input class="amtin" data-pg="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.pg??""}" placeholder="–" aria-label="${s.name} pages on ${dLabel(dt)}"> <span class="amtl">pages</span><button class="lnk" data-amtdone>Done</button></div>`:"";
       return `<li class="task tk les ${k.done?"done":""}" style="--c:${col(s)}" data-tid="${k.id}" data-oid="${k.id}">
         <input type="checkbox" class="chk" data-tick="${key}:${k.id}:${k.s}:${k.amt||0}:${k.pg||0}" ${k.done?"checked":""} aria-label="Done: ${s.name}">
-        <div class="tt"><b>${s.name}${k.title?` <span class="ttlx">${esc(k.title)}</span>`:""}</b>${tag?`<small class="tsub">${tag}</small>`:""}<div class="itrow amtrow"><input class="amtin" data-amt="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.amt??""}" placeholder="–" aria-label="${s.name} lessons on ${dLabel(dt)}"> <span class="amtl">lessons</span>${peek(key).noPages?"":`<input class="amtin" data-pg="${key}:${k.id}:${k.kind}" type="number" min="0" step="any" inputmode="decimal" value="${k.pg??""}" placeholder="–" aria-label="${s.name} pages on ${dLabel(dt)}"> <span class="amtl">pages</span>`}</div></div>${acts}</li>${menu}`}).join("")}</ul></section>`
+        <div class="tt"><b>${s.name}${k.title?` <span class="ttlx">${esc(k.title)}</span>`:""}</b>${tag?`<small class="tsub">${tag}</small>`:""}${editor}</div>${editing?"":`<button class="amtpill" data-amtedit="${mk}" aria-label="${s.name}: ${amtTxt}. Change">${amtTxt}</button>`}${acts}</li>${menu}`}).join("")}${lesRow}</ul></section>`
       :"";
     const fk=formKind,kinds=[["les","Lesson"],["hw","Homework"],["ex","Exam"]];
     const form=openForm===d?`<div class="form" data-form="${d}">
@@ -1284,11 +1381,10 @@ function render(){
       const p=[];if(ls.length)p.push(l?l+" lesson"+(l>1?"s":"")+" left":"Lessons done ✓");if(hwn)p.push(hwn+" homework");if(exn)p.push(`<span class="red">${exn>1?exn+" exams":"Exam"}</span>`);if(cln)p.push(cln+" class"+(cln>1?"es":""));
       return `<p class="dmini">${holidayOn(key)?"🌴 "+esc(holidayOn(key).name||"Holiday"):p.join(" · ")||"Free day"}</p>`})();
     return `<article class="day ${d===selDay?"sel":""} ${isToday?"today":""}" ${d===selDay?"":`data-sel="${d}"`}>
-      <div class="dayhead"><h2>${DAY_NAMES[d]} <span class="dnum">${dLabel(dt)}</span></h2>${isToday?'<button class="focusbtn" id="focusStart" aria-label="Start focus timer">⏱ Focus</button>':""}</div>${mini}
+      <div class="dayhead"><h2>${DAY_NAMES[d]} <span class="dnum">${dLabel(dt)}</span></h2>${isToday?(fm=>`<button class="focusbtn" id="focusStart" aria-label="Start focus timer${fm?", "+fmtMin(fm)+" focused today":""}">⏱ ${fm?fmtMin(fm):"Focus"}</button>`)((state.focusLog||{})[todayIso]||0):""}</div>${mini}
       ${(h=>h?`<div class="holtag">🌴 ${esc(h.name||"Holiday")}</div>`:"")(holidayOn(key))}
       ${isToday?tx.sum+tx.tmr:""}
       ${classesHtml(d,isToday)}
-      ${isToday?tx.cls:""}
       ${expanded.has(key)?`<button class="lnk hide" data-expand="${key}">Hide finished day</button>`:""}
       ${(()=>{secMap.les=list;const body=secOrder().map(k=>secMap[k]||"").join("");return body?`<div class="dsecs" data-dkey="${key}">${body}</div>`:`<div class="empty">Nothing planned. Free day.</div>`})()}${copyRow}
 
@@ -2033,6 +2129,7 @@ addEventListener("online",()=>{renderSyncPill();if(lsGet("sp-sync")==="1"&&!sync
 function setSummary(k){const st=state.settings;
   if(k==="account")return sync.user?(sync.user.email||"Signed in")+" · "+(sync.status||"Synced"):"Sync & backup is off";
   if(k==="planner")return "Week starts "+DAY_NAMES[st.weekStart].slice(0,3)+" · "+(st.focusMin||25)+" min focus";
+  if(k==="school"){const n=(state.settings.schoolDays||[]).length,h=(state.holidays||[]).filter(x=>x.to>=todayIso).length;return n+" school day"+(n===1?"":"s")+(st.absLimit!=null&&st.absLimit!==""?" · limit "+st.absLimit:"")+(h?" · "+h+" holiday"+(h>1?"s":"")+" ahead":"")}
   if(k==="alerts")return (st.sound===false?"Sounds off":"Sounds on")+" · "+((st.remPresets||[]).length?(st.remPresets.length+" saved time"+(st.remPresets.length>1?"s":"")):"No saved times");
   if(k==="look")return (st.style==="luxe"?"Luxe":"Classic")+" · "+({auto:"Auto",light:"Light",dark:"Dark"}[st.theme]||"Auto")+" theme";
   if(k==="data")return (state.lastBackup?"Last backup "+relTime(state.lastBackup):"No backup yet")+((state.trash||[]).length?" · "+state.trash.length+" in the bin":"");
@@ -2045,12 +2142,12 @@ function renderSetPages(){const menu=document.getElementById("setMenu");if(!menu
   const nb=document.getElementById("notifBtn");if(nb){const perm="Notification" in window?Notification.permission:"unsupported";nb.hidden=perm!=="default";
     if(perm==="granted")document.getElementById("notifTxt").textContent="Reminders pop up in the app, and as notifications while it's in the background ✓";}
   menu.hidden=!!setPage;document.querySelectorAll(".setpage").forEach(el=>el.hidden=el.dataset.page!==setPage);
-  document.getElementById("setBackMain").hidden=!!setPage;document.getElementById("setBackMenu").hidden=!setPage;
+  if(!setPage)setDirect=false;document.getElementById("setBackMain").hidden=!!setPage&&!setDirect;document.getElementById("setBackMenu").hidden=!setPage||setDirect;
   document.getElementById("setBackMenu").dataset.sp=setPage==="trash"?"data":"";document.getElementById("setBackMenu").textContent=setPage==="trash"?"‹ Backup & data":"‹ Settings";
   document.getElementById("setTitle").textContent=setPage?SET_PAGES.find(x=>x[0]===setPage)[2]:"Settings";
   if(setPage==="trash")renderTrash();
   if(!setPage)menu.innerHTML=SET_PAGES.filter(x=>x[0]!=="trash").map(([k,ic,t])=>`<button class="smrow" data-sp="${k}"><span class="smi">${ic}</span><span class="smt"><b>${t}</b><small>${esc(setSummary(k))}</small></span><span class="chev">›</span></button>`).join("")}
-function openSetPage(k){if(tab!=="set"){prevTab=tab;tab="set"}setPage=k||null;render();scrollTo(0,0)}
+function openSetPage(k){setDirect=tab!=="set"&&!!k;if(tab!=="set"){prevTab=tab;tab="set"}setPage=k||null;render();scrollTo(0,0)}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-sp]");if(!b)return;e.stopPropagation();buzz(4);openSetPage(b.dataset.sp)},true);
 
 // ---- Install as an app ----

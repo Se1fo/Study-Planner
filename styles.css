@@ -1083,7 +1083,7 @@ button.gav{border:0;font:inherit;color:inherit;cursor:pointer;text-align:center}
 .plday{flex-wrap:wrap}.plday b{min-width:84px}.plday span{display:flex;flex-wrap:wrap;gap:4px}
 .pchip{font-style:normal;font-size:.78rem;font-weight:700;border-radius:20px;padding:2px 9px;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--ink);border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
 #pStats{display:none}body[data-view="stats"] #pStats{display:block}
-.allstats{float:right;margin-top:-26px;font-size:.8rem}
+.allstats{display:block;margin:8px 0 0 auto;font-size:.82rem}
 .statrange{display:grid;grid-template-columns:repeat(3,1fr);margin:0 0 14px;width:100%}
 .sttiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px}
 .sttiles div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center;display:grid;gap:2px;box-shadow:var(--shadow)}
@@ -1134,3 +1134,92 @@ li.done .tt{opacity:1}
 :root[data-theme="dark"] .cald.sp,:root[data-theme="dark"] .cald.sa{color:#0b0b0e}
 .cls.now .ctime{color:var(--ink)}
 .tabbar{background:color-mix(in srgb,var(--bg) 94%,transparent)!important}
+
+/* ==== v3.4: cleaner layout ==== */
+/* Header: one slim row; search is an icon */
+header{margin-bottom:10px;padding-top:4px;min-height:48px}
+header h1{font-size:clamp(1.1rem,5.4vw,1.6rem)}
+header .sub{margin-top:1px;font-size:.8rem}
+.hbtns{gap:6px}
+.hbtns .gear{width:40px;height:40px}
+.hbtns .gear svg{width:19px;height:19px}
+@media(min-width:420px){.hbtns{gap:8px}.hbtns .gear{width:42px;height:42px}}
+body.compact header h1{font-size:1.1rem}
+
+/* Timetable bar: week (or month) label, arrows, view switch and a small menu */
+.ttbar{position:relative;display:flex;align-items:center;gap:8px;margin:0 0 10px}
+.ttlabel{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;border:0;background:none;padding:2px 2px;font:inherit;color:var(--ink);text-align:left;cursor:pointer}
+.ttlabel:disabled{cursor:default;opacity:1}
+.ttlabel b{font-family:"Bricolage Grotesque",Figtree,sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ttlabel small{color:var(--muted);font-size:.78rem;white-space:nowrap}
+.ttback{color:var(--link,var(--prog));font-weight:700}
+.ttctl{display:flex;gap:6px;flex:none}
+.ttctl .wkbtn{width:36px;height:36px;display:grid;place-items:center;padding:0}
+.ttctl .wkbtn.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ttmenu{position:absolute;right:0;top:calc(100% + 6px);z-index:8;display:grid;gap:2px;min-width:200px;padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.14)}
+.ttmenu button{border:0;background:none;color:var(--ink);font:inherit;font-size:.9rem;font-weight:600;text-align:left;padding:10px 12px;border-radius:10px;cursor:pointer}
+.ttmenu button:hover,.ttmenu button:focus-visible{background:var(--soft)}
+:root[data-style="luxe"] .ttlabel b{font-family:Fraunces,Georgia,serif;font-weight:500;font-size:1.2rem}
+.strip{margin-bottom:10px}
+
+/* Day card: one line per item, finished things folded away */
+.dsum{margin:-2px 0 10px}
+.clsec h3 span{color:var(--arab)}
+li.cls.over{opacity:.62}
+li.cls[aria-expanded="true"]{box-shadow:0 0 0 2px color-mix(in srgb,var(--ink) 18%,transparent)}
+.clist>li.tmenu{padding:0 0 4px 0}
+.foldrow{list-style:none;display:flex;justify-content:center;padding:2px 0 0}
+.foldrow .lnk{font-size:.8rem;font-weight:600;color:var(--muted);padding:6px 10px}
+.clist .foldrow{justify-content:flex-start}
+.amtpill{flex:none;align-self:center;border:1px solid var(--line);background:var(--soft);color:var(--ink);font:inherit;font-size:.76rem;font-weight:700;border-radius:20px;padding:4px 10px;cursor:pointer;white-space:nowrap;font-variant-numeric:tabular-nums}
+.amtpill:active{transform:scale(.95)}
+li.tk.done .amtpill{opacity:.7}
+.amtrow .lnk{margin-left:auto;font-weight:700;font-size:.8rem}
+.day ul.tickets>li.tk .itrow:not(.amtrow):not(:has(.remedit)),.monthv ul.tickets>li.tk .itrow:not(:has(.remedit)){display:none}
+.day ul.tickets>li.tk{padding-top:8px;padding-bottom:8px}
+.dayadds{margin-top:12px}
+
+/* Lessons tab: one row per subject */
+.subjects{gap:8px}
+.subj{padding:10px 12px 10px 14px;cursor:pointer}
+.subj .name{display:flex;align-items:center;gap:8px}
+.subj .name .snm{flex:1 1 auto;font-size:.95rem}
+.subj .sleft{display:flex;align-items:center;gap:5px;flex:none}
+.subj .sleft .of{font-size:.78rem;color:var(--muted)}
+.subj .numin{width:3.4em!important;padding:3px 4px}
+.subj .step{display:flex;gap:6px;flex:none}
+.subj .step button{width:30px;height:30px}
+.subj .chev{color:var(--muted);font-weight:700;flex:none;margin-left:2px}
+.subj .del.sm{float:none;display:grid;place-items:center;min-width:28px;min-height:28px;padding:0}
+.smeta{display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;margin:6px 0 0 25px;font-size:.76rem;color:var(--muted)}
+.smeta .tpmini{display:inline-flex;align-items:center;gap:6px;margin:0}
+.smeta .tpmini .tpbar{width:54px;flex:none;margin:0;height:5px}
+.nsep{opacity:.6}
+@media(max-width:360px){.subj .sleft .of{display:none}.subj .step button{width:28px;height:28px}}
+.sdpg{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 10px;font-size:.85rem;color:var(--muted);cursor:text}
+.sdpg .pgin{width:4em;border:1px solid var(--line);background:var(--soft);border-radius:8px;padding:3px 6px;font:inherit;font-weight:700;color:var(--ink);text-align:center}
+.allstats{color:var(--link,var(--prog));font-weight:700}
+
+/* Attendance: settings live in Settings now */
+.attset{display:block;margin:4px auto 8px;font-size:.84rem;font-weight:700}
+
+/* Search: add-command row */
+.scmd{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;margin:4px 0 12px;padding:12px 14px;border:1px dashed color-mix(in srgb,var(--ink) 30%,var(--line));background:var(--panel);color:var(--ink);border-radius:14px;font:inherit;font-size:.92rem;text-align:left;cursor:pointer}
+.scmd small{font-size:.74rem;color:var(--muted)}
+.scmd:disabled{cursor:default;color:var(--muted)}
+.scmd:not(:disabled):active{transform:scale(.99)}
+
+/* One look for every section heading and every single-action delete */
+h3.grp,.grp,.dsec h3,.clsec h3,.sthead .grp,.tphead .grp{font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.del{display:inline-grid;place-items:center;font-size:1rem;color:var(--muted)}
+.del svg{display:block}
+.del:hover{color:var(--eng)}
+.subj,.stats,.attcard,.calcard,.setgrp,.mgrid,.neditor{border-radius:18px}
+@media(max-width:430px){.subj .chev{display:none}.subj .numin{width:2.9em!important}.subj .name{gap:6px}.subj .sleft .of{font-size:.72rem}}
+.subj .numin{color:color-mix(in srgb,var(--c),var(--ink) calc(var(--tmix)*1.7))}
+:root[data-style="luxe"] .seg.todoseg button.on{background:none!important;color:var(--gold)}
+:root[data-style="luxe"] .seg.todoseg button.on em{color:var(--ink)}
+:root[data-accent] .seg.todoseg button.on{color:var(--accent)}
+.todoseg button{flex:1 1 auto!important}
+:root[data-style="luxe"] header h1{font-size:clamp(1.2rem,5.6vw,1.75rem)}
+.sthead span b{color:color-mix(in srgb,var(--arab),var(--ink) calc(var(--tmix)*1.7))}

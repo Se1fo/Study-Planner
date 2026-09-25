@@ -20,10 +20,10 @@ test("core flows", async ({ browser, baseURL }) => {
   await p.click('#focusStart');await p.waitForTimeout(300);ok("focus timer opens",await p.evaluate(()=>!document.getElementById("focus").hidden));
   await p.evaluate(()=>{document.getElementById("focus").hidden=true});
   // +1 lesson from class shortcut
-  const before=await p.evaluate(()=>state.remaining.eng);await p.click('.day.sel [data-newl="eng"]');await p.waitForTimeout(200);
+  const before=await p.evaluate(()=>state.remaining.eng);await p.click('.day.sel li.cls:has-text("English")');await p.click('.day.sel .clist [data-newl="eng"]');await p.waitForTimeout(200);
   ok("+1 lesson class shortcut",await p.evaluate(b=>state.remaining.eng===b+1,before));
   // lessons strip goes to Tasks > Lessons subject page
-  await p.evaluate(()=>{tab="todo";todoSub="les";subjView=null;render()});await p.click('.subj[data-subj="prog"] .name');await p.waitForTimeout(300);
+  await p.evaluate(()=>{tab="todo";todoSub="les";subjView=null;render()});await p.click('.subj[data-subj="prog"] .snm');await p.waitForTimeout(300);
   ok("lessons chip opens Lessons tab",await p.evaluate(()=>tab==="todo"&&todoSub==="les"&&subjView==="prog"&&!document.getElementById("subjDetail").hidden));
   await p.click('[data-notenew]');await p.waitForTimeout(200);ok("new note",await p.evaluate(()=>!!noteOpen));
   await p.click('[data-noteclose]');await p.click('[data-subjback]');await p.waitForTimeout(200);ok("back to subject list",await p.evaluate(()=>subjView===null&&!document.getElementById("subjList").hidden));
@@ -44,8 +44,13 @@ test("core flows", async ({ browser, baseURL }) => {
   await p.click('.day.sel .dayadds [data-open]');await p.click('.day.sel [data-fkind="ex"]');await p.fill('.day.sel [data-form] [name=text]','Maths test');await p.click('.day.sel [data-save]');await p.waitForTimeout(200);
   ok("add exam from day card",await p.evaluate(()=>state.exams.some(x=>x.title==="Maths test"&&x.date===todayIso)));
   ok("both show in today's card",await p.evaluate(()=>{const t=document.querySelector(".day.sel").textContent;return t.includes("Worksheet 5")&&t.includes("Maths test")}));
-  await p.click('.day.sel [data-menu]');await p.click('.day.sel [data-pgtoggle]');await p.waitForTimeout(200);
-  ok("hide pages from menu",await p.evaluate(()=>peek(todayIso).noPages===true&&!document.querySelector('.day.sel [data-pg]')));
+  ok("ticked lesson folds into a 'done' row",!(await p.isVisible('.day.sel li.tk.les[data-oid=t2]'))&&(await p.textContent('.day.sel [data-showdone$=":les"]')).includes("done"));
+  await p.click('.day.sel [data-showdone$=":les"]');await p.waitForTimeout(150);ok("Show brings it back",await p.isVisible('.day.sel li.tk.les[data-oid=t2]'));
+  ok("lesson amount shows as a pill, no inputs",await p.isVisible('.day.sel li.tk.les[data-oid=t2] .amtpill')&&!(await p.isVisible('.day.sel li.tk.les[data-oid=t2] [data-amt]')));
+  await p.click('.day.sel li.tk.les[data-oid=t2] .amtpill');await p.fill('.day.sel [data-amt^="'+await p.evaluate(()=>todayIso)+':t2"]','3');await p.press('.day.sel [data-amt^="'+await p.evaluate(()=>todayIso)+':t2"]','Tab');await p.waitForTimeout(200);
+  await p.fill('.day.sel [data-pg^="'+await p.evaluate(()=>todayIso)+':t2"]','12');await p.press('.day.sel [data-pg^="'+await p.evaluate(()=>todayIso)+':t2"]','Tab');await p.waitForTimeout(200);
+  await p.click('.day.sel [data-amtdone]');await p.waitForTimeout(150);
+  ok("edit lessons and pages from the pill -> "+await p.textContent('.day.sel li.tk.les[data-oid=t2] .amtpill'),(await p.textContent('.day.sel li.tk.les[data-oid=t2] .amtpill')).includes("3 lessons · 12 p"));
   ok("tab renamed",await p.evaluate(()=>document.querySelector('.tabbar [data-tab=study]').textContent.includes("Timetable")));
   expect(errs,"page errors").toEqual([]);
 });

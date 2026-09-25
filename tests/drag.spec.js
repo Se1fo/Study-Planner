@@ -14,11 +14,11 @@ test("drag to reorder", async ({ browser, baseURL }) => {
   const hw='.day.sel .dsec[data-oid=hw] li.tk';
   const before=await order(p,hw);await drag(hw+'[data-oid=h1] .tt b',hw+'[data-oid=h3]',false);
   ok("mouse: reorder homework ("+before+" -> "+await order(p,hw)+")",(await order(p,hw))==="h1,h3");
-  const les='.day.sel .dsec[data-oid=les] li.tk';await drag(les+'[data-oid=t2] .tt b',les+'[data-oid=t1]',false);
+  const les='.day.sel .dsec[data-oid=les] li.tk';await p.click('.day.sel [data-showdone$=":les"]');await p.waitForTimeout(150);await drag(les+'[data-oid=t2] .tt b',les+'[data-oid=t1]',false);
   ok("mouse: reorder lessons -> "+await order(p,les),(await order(p,les))==="t2,t1");
   const sec='.day.sel .dsecs>.dsec';const s0=await order(p,sec);await drag('.day.sel .dsec[data-oid=ex]>h3','.day.sel .dsec[data-oid=les]>h3',false);
   ok("mouse: move Exams section to top ("+s0+" -> "+await order(p,sec)+")",(await order(p,sec)).startsWith("ex,"));
-  await p.reload();await p.waitForTimeout(600);
+  await p.reload();await p.waitForTimeout(600);await p.click('.day.sel [data-showdone$=":les"]');await p.waitForTimeout(150);
   ok("order kept after reload",(await order(p,hw))==="h1,h3"&&(await order(p,les))==="t2,t1"&&(await order(p,sec)).startsWith("ex,"));
   ok("checkbox still ticks (not a drag)",await (async()=>{await p.click('.day.sel [data-hwtick=h3]');await p.waitForTimeout(150);return p.evaluate(()=>state.homework.find(h=>h.id==="h3").done)})());
   expect(errs,"page errors").toEqual([]);}
