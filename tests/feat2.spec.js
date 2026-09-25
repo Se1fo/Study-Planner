@@ -52,7 +52,7 @@ test("features: set 2", async ({ browser, baseURL }) => {
   await p.fill('#q','recursion');ok("search finds topics",(await p.textContent('#sres')).includes("Topics"));
   await p.fill('#q','loop');ok("search finds flashcards",(await p.textContent('#sres')).includes("Flashcards"));
   // ICS export is valid
-  await q(()=>{state.days[today].classes=[{id:"x",name:"English",start:"08:00",end:"08:45"}];save();tab="set";setPage="planner";render()});
+  await q(()=>{state.days[today].classes=[{id:"x",name:"English",start:"08:00",end:"08:45"}];save();tab="set";setPage="data";render()});
   const [dl]=await Promise.all([p.waitForEvent("download"),p.click('#expIcs')]);const ics=fs.readFileSync(await dl.path(),"utf8");
   const ok2=ics.split("BEGIN:VEVENT").length-1===ics.split("END:VEVENT").length-1&&!/END:VEVENT\r\nBEGIN:VALARM/.test(ics)&&/RRULE:FREQ=WEEKLY/.test(ics)&&/BEGIN:VALARM[\s\S]*?END:VALARM\r\nEND:VEVENT/.test(ics);
   ok("calendar file: alarms inside events, weekly classes",ok2);

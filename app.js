@@ -9,6 +9,8 @@ const CHANGES=[
         "Homework and Exams tabs use the same one-line items; add with the floating ＋, which also hides while you scroll down",
         "Notifications: tap an alert to open it; homework alerts are combined into one",
         "The focus timer asks what you're studying, so the time counts for that subject in Stats",
+        "＋ adds to the day you're looking at and remembers your last subject; the day card keeps just ＋ Class",
+        "Settings: Share timetable and Export moved to Share & backup, Clear ticks removed, subject colours change right in Appearance",
         "Fixed: the pages-left box and grade form on a subject's page, focus time wrapping in Stats, and the empty attendance chart",
         "Today's card is shorter: tap a class for +1 lesson or homework, finished classes and ticked items fold into a small “done” row",
         "Lessons show their amount as a small pill; tap it to change lessons and pages",
@@ -118,7 +120,7 @@ function col(sj){return sj.c.startsWith("--")?`var(${sj.c})`:sj.c}
 const uid=()=>Math.random().toString(36).slice(2,9);
 // Declared early because render() reads them during startup.
 let setPage=null;
-const SET_PAGES=[["account","☁️","Account"],["planner","📅","Planner"],["school","🏫","Attendance"],["alerts","🔔","Reminders & sounds"],["look","🎨","Appearance"],["data","🛟","Backup & data"],["about","ℹ️","About"],["trash","🗑️","Recently deleted"]];
+const SET_PAGES=[["account","☁️","Account"],["planner","📅","Planner"],["school","🏫","Attendance"],["alerts","🔔","Reminders & sounds"],["look","🎨","Appearance"],["data","🛟","Share & backup"],["about","ℹ️","About"],["trash","🗑️","Recently deleted"]];
 let installPrompt=null;
 // Cloud sync state; declared early because save() and render() read it during startup.
 const sync={ready:null,fn:null,auth:null,db:null,user:null,status:"",at:0,unsub:null,timer:null,applying:false,conflict:null,emailOpen:false,busy:false,attempt:0};
@@ -1405,7 +1407,7 @@ function render(){
       ${(()=>{secMap.les=list;const body=secOrder().map(k=>secMap[k]||"").join("");return body?`<div class="dsecs" data-dkey="${key}">${body}</div>`:`<div class="empty">Nothing planned. Free day.</div>`})()}${copyRow}
 
       ${openForm===d?`<div class="add">${form}</div>`:""}
-      ${openForm===d?"":`<div class="dayadds"><button data-open="${d}">＋ Add</button><button data-classopen="${d}">＋ Class</button></div>`}</article>`}).join("");
+      ${openForm===d?"":`<div class="dayadds"><button data-classopen="${d}">＋ Class</button></div>`}</article>`}).join("");
   bindSwipeRows(document.getElementById("days"));
   afterRender();labelControls();
 }
@@ -2161,9 +2163,10 @@ function renderSetPages(){const menu=document.getElementById("setMenu");if(!menu
     if(perm==="granted")document.getElementById("notifTxt").textContent="Reminders pop up in the app, and as notifications while it's in the background ✓";}
   menu.hidden=!!setPage;document.querySelectorAll(".setpage").forEach(el=>el.hidden=el.dataset.page!==setPage);
   if(!setPage)setDirect=false;document.getElementById("setBackMain").hidden=!!setPage&&!setDirect;document.getElementById("setBackMenu").hidden=!setPage||setDirect;
-  document.getElementById("setBackMenu").dataset.sp=setPage==="trash"?"data":"";document.getElementById("setBackMenu").textContent=setPage==="trash"?"‹ Backup & data":"‹ Settings";
+  document.getElementById("setBackMenu").dataset.sp=setPage==="trash"?"data":"";document.getElementById("setBackMenu").textContent=setPage==="trash"?"‹ Share & backup":"‹ Settings";
   document.getElementById("setTitle").textContent=setPage?SET_PAGES.find(x=>x[0]===setPage)[2]:"Settings";
   if(setPage==="trash")renderTrash();
+  if(setPage==="look")document.getElementById("subjColors").innerHTML=SUBJECTS.filter(x=>x.id!=="other").map(x=>`<div class="scol"><button class="cdot" data-color="${x.id}" style="--c:${col(x)}" aria-label="Change ${esc(x.name)} colour" aria-expanded="${colorOpen===x.id}"></button><span>${esc(x.name)}</span></div>${colorOpen===x.id?`<div class="cpal">${SWATCHES.map(h=>`<button style="background:${h}" data-setc="${x.id}:${h}" aria-label="Colour ${h}" class="${x.c===h?"on":""}"></button>`).join("")}<label class="cpick" aria-label="Custom colour"><input type="color" data-cpick="${x.id}" value="${x.c.startsWith("#")?x.c:"#3b82f6"}">+</label></div>`:""}`).join("");
   if(!setPage)menu.innerHTML=SET_PAGES.filter(x=>x[0]!=="trash").map(([k,ic,t])=>`<button class="smrow" data-sp="${k}"><span class="smi">${ic}</span><span class="smt"><b>${t}</b><small>${esc(setSummary(k))}</small></span><span class="chev">›</span></button>`).join("")}
 function openSetPage(k){setDirect=tab!=="set"&&!!k;if(tab!=="set"){prevTab=tab;tab="set"}setPage=k||null;render();scrollTo(0,0)}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-sp]");if(!b)return;e.stopPropagation();buzz(4);openSetPage(b.dataset.sp)},true);
@@ -2379,23 +2382,24 @@ function openSheet(step){
   sh.hidden=false;bg.hidden=false;labelControls(sh);requestAnimationFrame(()=>{sh.classList.add("up");bg.classList.add("up")})}
 let qaKind="hw";
 const QA_KINDS=[["les","Lesson","📚"],["hw","Homework","📝"],["ex","Exam","📅"],["rem","Reminder","🔔"],["note","Note","🗒️"]];
-function quickAddHtml(){const k=qaKind,sel=subjOptions(),d=new Date();d.setHours(d.getHours()+1,0,0,0);
+function qaDay(){const k=tab==="study"&&ttView==="week"?iso(dateFor(week,selDay)):todayIso;return k>todayIso?k:todayIso}
+function quickAddHtml(){const k=qaKind,sel=subjOptions(state.settings.lastSubj),d=new Date();d.setHours(d.getHours()+1,0,0,0);const vk=qaDay(),later=vk>todayIso;
   const f={
     les:`<select name="s">${sel}</select><input name="amt" type="number" min="0" step="any" inputmode="decimal" placeholder="Lessons">
-      <input name="title" class="ftitle" placeholder="Title (optional), e.g. Unit 3" maxlength="40"><label class="due ftitle"><span>Date</span><input name="date" type="date" value="${todayIso}"></label>
+      <input name="title" class="ftitle" placeholder="Title (optional), e.g. Unit 3" maxlength="40"><label class="due ftitle"><span>Date</span><input name="date" type="date" value="${vk}"></label>
       <label class="prichk ftitle"><input type="checkbox" name="every"> Repeat every week on this day</label>`,
-    hw:`<input name="text" class="ftitle" placeholder="Homework, e.g. Essay page 40" maxlength="80"><select name="s">${sel}</select><label class="due"><span>Due</span><input name="date" type="date" value="${addDays(1)}"></label>
+    hw:`<input name="text" class="ftitle" placeholder="Homework, e.g. Essay page 40" maxlength="80"><select name="s">${sel}</select><label class="due"><span>Due</span><input name="date" type="date" value="${later?vk:addDays(1)}"></label>
       <div class="hwopts ftitle"><button type="button" class="pritog" aria-pressed="false">⚑ High priority</button><select name="est" aria-label="Time needed">${estOpts("")}</select></div>`,
-    ex:`<input name="text" class="ftitle" placeholder="Exam name, e.g. Arabic midterm" maxlength="60"><select name="s">${sel}</select><label class="due"><span>Date</span><input name="date" type="date" value="${addDays(7)}"></label>`,
-    rem:`<input name="text" class="ftitle" placeholder="Remind me to…" maxlength="80"><label class="due"><span>Date</span><input name="date" type="date" value="${iso(d)}"></label><label class="due"><span>Time</span><input name="time" type="time" value="${String(d.getHours()).padStart(2,"0")}:00"></label>`,
+    ex:`<input name="text" class="ftitle" placeholder="Exam name, e.g. Arabic midterm" maxlength="60"><select name="s">${sel}</select><label class="due"><span>Date</span><input name="date" type="date" value="${later?vk:addDays(7)}"></label>`,
+    rem:`<input name="text" class="ftitle" placeholder="Remind me to…" maxlength="80"><label class="due"><span>Date</span><input name="date" type="date" value="${later?vk:iso(d)}"></label><label class="due"><span>Time</span><input name="time" type="time" value="${later?"18":String(d.getHours()).padStart(2,"0")}:00"></label>`,
     note:""}[k];
-  return `<div class="shh"><b>Add</b><button class="lnk" data-qa="close">Cancel</button></div>
+  return `<div class="shh"><b>Add${later?` <span class="shday">· ${DAY_NAMES[new Date(vk+"T12:00:00").getDay()].slice(0,3)} ${dLabel(new Date(vk+"T12:00:00"))}</span>`:""}</b><button class="lnk" data-qa="close">Cancel</button></div>
     <div class="seg qakinds">${QA_KINDS.map(([x,l,ic])=>`<button data-qak="${x}" class="${x===k?"on":""}"><span>${ic}</span>${l}</button>`).join("")}</div>
     ${k==="note"?`<div class="qgrid">${SUBJECTS.filter(x=>x.id!=="other").map(x=>`<button data-qanote="${x.id}" style="--c:${col(x)}"><i></i>${esc(x.name)}</button>`).join("")}</div>`
       :`<div class="form qaform">${f}<div class="acts"><button class="btn full" data-qsave>Add ${QA_KINDS.find(x=>x[0]===k)[1].toLowerCase()}</button></div></div>`}`}
 function quickSave(){const f=document.querySelector(".qaform");if(!f)return;const v=n=>f.querySelector(`[name=${n}]`)?.value?.trim()||"",k=qaKind;
   if(k!=="les"&&!v("text")){f.querySelector("[name=text]").focus();return}
-  const date=v("date")||todayIso,sj=v("s");let msg="";
+  const date=v("date")||todayIso,sj=v("s");let msg="";if(sj&&k!=="rem")state.settings.lastSubj=sj;
   if(k==="rem"){const tm=v("time")||"18:00";if(date+"T"+tm<=nowStamp()){alertMsg("Pick a time in the future");return}}
   change(()=>{
     if(k==="les"){const wd=new Date(date+"T12:00:00").getDay(),id=uid(),raw=parseFloat(v("amt")),amt=isNaN(raw)?null:Math.max(0,raw),title=v("title")||undefined;
