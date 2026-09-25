@@ -78,5 +78,32 @@ test("clean layout and smart search", async ({ browser, baseURL }) => {
   await p.press("#q","Enter");await p.waitForTimeout(200);ok("Enter adds it",await q(f=>state.homework.some(h=>h.text==="Essay"&&h.s==="eng"&&h.due===f),fri));
   await p.fill("#q","exam history 12 oct");await p.waitForTimeout(100);await p.click("#sres .scmd");await p.waitForTimeout(200);
   ok("'exam …' without add also works",await q(()=>state.exams.some(x=>x.s==="hist"&&x.date.endsWith("-10-12"))));
+  // Homework/Exams tabs: one-line tickets, no add box, extras in ⋯
+  await q(()=>{tab="todo";todoSub="hw";render()});
+  ok("no add box on the Homework tab",!(await p.isVisible("#hwText"))&&!(await p.isVisible("#sHw .addbar")));
+  ok("homework tickets are one line",!(await p.isVisible("#hwList li.tk .itrow")));
+  await p.click('#hwList li.tk[data-oid=h2] [data-menu]');ok("reminder and next day in the menu",await p.isVisible('#hwList .tmenu [data-addrem="hw:h2"]')&&await p.isVisible('#hwList .tmenu [data-hwpost=h2]'));
+  await q(()=>{openMenu=null;todoSub="ex";render()});ok("no add box on the Exams tab",!(await p.isVisible("#exText")));
+  await p.click("#fabTab");ok("+ on the Exams tab opens the exam form",await q(()=>qaKind==="ex")&&await p.isVisible(".qaform"));
+  ok("no focus link in the add sheet",(await p.locator("#sheet [data-qa=focus]").count())===0);await q(()=>closeSheet());await p.waitForTimeout(300);
+  // notifications: tap the whole alert; homework alerts combined
+  await q(()=>{tab="notif";render()});
+  ok("one homework alert",(await p.locator('#notifList .ncell[data-nid^="hw:"]').count())===1);
+  ok("no Open/View buttons on plain alerts",(await p.locator("#notifList .ncell.ntap .nacts2 .lnk").count())===0);
+  await p.click('#notifList .ncell[data-nid^="hw:"] .bt');ok("tapping it opens Homework",await q(()=>tab==="todo"&&todoSub==="hw"));
+  // stats: empty attendance says so
+  await q(()=>{state.att={};save();tab="stats";render()});ok("empty attendance chart explains itself",(await p.textContent("#statsBody")).includes("Mark days on the Attendance tab"));
+  // focus: pick what you're studying
+  await q(()=>{tab="study";render();startFocus(null,25)});await p.waitForTimeout(200);
+  ok("focus asks what you're studying",await p.isVisible("#focus .fpick"));
+  const pick=await p.getAttribute("#focus .fpick button","data-fx");await p.click("#focus .fpick button");await p.waitForTimeout(100);
+  ok("picking sets the subject",await q(id=>!!focus.task&&focus.task.id===id,pick.slice(5))&&!(await p.isVisible("#focus .fpick")));
+  await q(()=>{focus.end=Date.now()-1000;saveFocus()});await p.waitForTimeout(800);
+  ok("time counts for that subject",await q(()=>Object.values((state.focusSub||{})[todayIso]||{}).some(v=>v>=25)));
+  await q(()=>{focus=null;saveFocus();showFocus()});
+  // floating + slides away while scrolling down
+  await p.setViewportSize({width:390,height:600});await q(()=>{tab="todo";todoSub="les";subjView="prog";render();scrollTo(0,0)});await p.waitForTimeout(100);
+  await p.mouse.wheel(0,250);await p.waitForTimeout(300);ok("+ hides while scrolling down",await q(()=>document.body.classList.contains("fabhide")));
+  await p.mouse.wheel(0,-120);await p.waitForTimeout(300);ok("and comes back scrolling up",await q(()=>!document.body.classList.contains("fabhide")));
   expect(errs,"page errors").toEqual([]);
 });
