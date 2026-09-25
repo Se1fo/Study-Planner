@@ -11,6 +11,10 @@ const CHANGES=[
         "The focus timer asks what you're studying, so the time counts for that subject in Stats",
         "＋ adds to the day you're looking at and remembers your last subject; the day card keeps just ＋ Class",
         "Settings: Share timetable and Export moved to Share & backup, Clear ticks removed, subject colours change right in Appearance",
+        "Easier to tap: tick circles, colour dots and ⋯ buttons have bigger touch areas",
+        "The week strip stays pinned under the header while you scroll a busy day",
+        "Add & next in the ＋ sheet for entering several things in a row",
+        "Faster to open: the app page is less than half the size",
         "Fixed: the pages-left box and grade form on a subject's page, focus time wrapping in Stats, and the empty attendance chart",
         "Today's card is shorter: tap a class for +1 lesson or homework, finished classes and ticked items fold into a small “done” row",
         "Lessons show their amount as a small pill; tap it to change lessons and pages",
@@ -173,7 +177,7 @@ function peek(key){const x=state.dates[key]||{skip:[],extra:[],done:{}};return {
 
 let state=migrate(load()||structuredClone(DEFAULT));
 let tab=(()=>{const o=state.settings.openOn;if(o&&o!=="last")return o;try{const t=localStorage.getItem("sp-tab");return t&&t!=="set"&&t!=="search"&&t!=="notif"?t:"week"}catch(e){return "week"}})();
-let formKind="les",ttView="week",monthAt=null;
+let ttView="week",monthAt=null;
 let week=0, selDay=today, openForm=null, openMenu=null, setupStep=1;
 const expanded=new Set();
 // Timetable: amount editor, class menu, finished classes/tickets folded away, week bar menu.
@@ -435,10 +439,6 @@ function renderHomework(){
   if(done.length)html+=`<button class="lnk more" data-hwshow>${hwShowDone?"Hide":"Show"} finished (${done.length})</button>`+(hwShowDone?`${tickets(done.map(item))}<button class="lnk" data-hwclear>Delete finished homework</button>`:"");
   document.getElementById("hwList").innerHTML=html;
   bindSwipeRows(document.getElementById("hwList"));bindSwipeRows(document.getElementById("remLegacy"));
-  const sel=document.getElementById("hwSubj");if(!sel.dataset.ready){sel.innerHTML=subjOptions();sel.dataset.ready=1}
-  const es=document.getElementById("hwEst");if(es&&es.options.length<2)es.innerHTML=estOpts("");
-  const dd=document.getElementById("hwDue");if(!dd.value)dd.value=addDays(1);
-  syncRemSelect("hwRem");
 }
 
 function daysUntil(key){return Math.round((new Date(key+"T12:00:00")-new Date(todayIso+"T12:00:00"))/864e5)}
@@ -461,10 +461,7 @@ function gradesHtml(sid){const gs=(state.grades||[]).filter(g=>g.s===sid).sort((
 function renderExams(){
   const up=state.exams.filter(x=>x.date>=todayIso).sort((a,b)=>a.date<b.date?-1:1);
   document.getElementById("exList").innerHTML=up.length?tickets(up.map(x=>examTicket(x))):`<div class="estate"><span>📅</span><b>No exams coming up</b><small>Add one so you get a countdown and revision days.</small><button class="btn" data-qa-open>Add exam</button></div>`;
-  const sel=document.getElementById("exSubj");if(!sel.dataset.ready){sel.innerHTML=subjOptions();sel.dataset.ready=1}
   bindSwipeRows(document.getElementById("exList"));
-  const exd=document.getElementById("exDate");if(!exd.value)exd.value=addDays(7);
-  syncRemSelect("exRem");
 }
 function classSubjects(txt){const t=" "+txt.toLowerCase()+" ";
   return SUBJECTS.filter(x=>x.id!=="other"&&(t.includes(x.name.toLowerCase())||(x.id==="prog"&&/[^a-z](it|coding|code|computer)[^a-z]/.test(t))||(x.name.length>4&&t.includes(x.name.toLowerCase().slice(0,4)))))}
@@ -697,10 +694,11 @@ function renderStrip(){const el=document.getElementById("strip");if(!el)return;
     h+=`<button data-selk="${key}" class="${on?"sel":""} ${i===0?"wks":""} ${key<todayIso?"past":""}" aria-pressed="${on}" aria-label="${DAY_NAMES[d]} ${dt.getDate()} ${MS[dt.getMonth()]}">
       <b>${DAY_NAMES[d].slice(0,3)}</b><small>${key===todayIso?"Today":isComplete(d,key)?"✓":dt.getDate()===1?"1 "+MS[dt.getMonth()]:dt.getDate()}</small>
       <div class="dots">${tasks.slice(0,5).map(k=>`<span class="${k.done?"d":""}" style="--c:${col(subj(k.s))}"></span>`).join("")}</div></button>`});
-  el.innerHTML=h;stripBusy=true;el.scrollLeft=(week-stripFrom)*(el.clientWidth+stripGap(el));requestAnimationFrame(()=>stripBusy=false)}
-function stripGap(el){return parseFloat(getComputedStyle(el).columnGap)||0}
+  el.innerHTML=h;stripBusy=true;el.scrollLeft=(week-stripFrom)*stripPage(el);requestAnimationFrame(()=>stripBusy=false)}
+// One week's width: the strip's inner width plus the gap before the next week.
+function stripPage(el){const cs=getComputedStyle(el);return el.clientWidth-(parseFloat(cs.paddingLeft)||0)-(parseFloat(cs.paddingRight)||0)+(parseFloat(cs.columnGap)||0)}
 document.addEventListener("scroll",e=>{const el=e.target;if(!el||el.id!=="strip"||stripBusy)return;clearTimeout(stripT);
-  stripT=setTimeout(()=>{const w=stripFrom+Math.round(el.scrollLeft/(el.clientWidth+stripGap(el)));if(w===week||!el.clientWidth)return;
+  stripT=setTimeout(()=>{const w=stripFrom+Math.round(el.scrollLeft/stripPage(el));if(w===week||!el.clientWidth)return;
     week=w;if(week===0)selDay=today;openForm=null;ttMenu=false;buzz(4);render()},140)},true);
 document.addEventListener("click",e=>{const b=e.target.closest("[data-selk]");if(!b)return;const k=b.dataset.selk;
   week=weekOffsetOf(k);selDay=new Date(k+"T12:00:00").getDay();openForm=null;buzz(4);render()});
@@ -1202,7 +1200,7 @@ function renderHeader(){
   document.getElementById("greet").textContent=page||(innerWidth<370?g.replace("Good ","").replace(/^./,c=>c.toUpperCase()):g);
   const d=new Date();const MN=["January","February","March","April","May","June","July","August","September","October","November","December"];
   const narrow=innerWidth<420;
-  document.getElementById("sub").textContent=(narrow?DAY_NAMES[d.getDay()].slice(0,3):DAY_NAMES[d.getDay()])+", "+d.getDate()+" "+(narrow?MN[d.getMonth()].slice(0,3):MN[d.getMonth()]);
+  document.getElementById("sub").textContent=tab==="study"?"":(narrow?DAY_NAMES[d.getDay()].slice(0,3):DAY_NAMES[d.getDay()])+", "+d.getDate()+" "+(narrow?MN[d.getMonth()].slice(0,3):MN[d.getMonth()]);
 }
 let classOpen=null,notesOpen=null,titleEdit=null;
 let prevTab="study",studySub="tt",todoSub="les",subjView=null,noteOpen=null;
@@ -1288,6 +1286,9 @@ addEventListener("scroll",()=>{
   if(pendingCompact!==c){pendingCompact=c;clearTimeout(compactT);
     compactT=setTimeout(()=>{if(pendingCompact===c){lastCompact=c;document.body.classList.toggle("compact",c)}pendingCompact=null},120)}
 },{passive:true});
+// The week strip pins under the header; keep its offset in step with the header's height.
+const hdrRO=typeof ResizeObserver!=="undefined"?new ResizeObserver(()=>{const h=document.querySelector("header");if(h)document.documentElement.style.setProperty("--hdrH",h.offsetHeight+"px")}):null;
+if(hdrRO)hdrRO.observe(document.querySelector("header"));
 let fabY=0;
 addEventListener("scroll",()=>{const y=Math.max(0,scrollY),d=y-fabY;if(Math.abs(d)<8)return;
   document.body.classList.toggle("fabhide",d>0&&y>80&&y+innerHeight<document.documentElement.scrollHeight-40);fabY=y},{passive:true});
@@ -1377,21 +1378,6 @@ function render(){
         <input type="checkbox" class="chk" data-tick="${key}:${k.id}:${k.s}:${k.amt||0}:${k.pg||0}" ${k.done?"checked":""} aria-label="Done: ${s.name}">
         <div class="tt"><b>${s.name}${k.title?` <span class="ttlx">${esc(k.title)}</span>`:""}</b>${tag?`<small class="tsub">${tag}</small>`:""}${editor}</div>${editing?"":`<button class="amtpill" data-amtedit="${mk}" aria-label="${s.name}: ${amtTxt}. Change">${amtTxt}</button>`}${acts}</li>${menu}`}).join("")}${lesRow}</ul></section>`
       :"";
-    const fk=formKind,kinds=[["les","Lesson"],["hw","Homework"],["ex","Exam"]];
-    const form=openForm===d?`<div class="form" data-form="${d}">
-        <div class="seg fkind" role="tablist">${kinds.map(([k,l])=>`<button data-fkind="${k}" class="${fk===k?"on":""}" role="tab" aria-selected="${fk===k}">${l}</button>`).join("")}</div>
-        ${fk==="les"?`<select name="s">${subjOptions()}</select>
-        <input name="amt" type="number" min="0" step="any" placeholder="Lessons" inputmode="decimal" aria-label="Lessons on ${dLabel(dt)}">
-        <input name="title" class="ftitle" placeholder="Title (optional), e.g. Unit 3" maxlength="40">
-        <input name="pg" class="fpg" type="number" min="0" step="any" placeholder="Pages (optional)" inputmode="decimal" aria-label="Pages">
-        <div class="rep" role="radiogroup">
-          <label><input type="radio" name="rep${d}" value="every" checked> Every ${DAY_NAMES[d]}</label>
-          <label><input type="radio" name="rep${d}" value="once"> Only ${dLabel(dt)}</label>
-        </div>`:`<input name="text" class="ftitle" placeholder="${fk==="hw"?"Homework, e.g. Essay page 40":"Exam name, e.g. Arabic midterm"}" maxlength="${fk==="hw"?80:60}">
-        <select name="s" class="ftitle">${subjOptions()}</select>
-        <p class="fnote">${fk==="hw"?"Due":"On"} ${DAY_NAMES[d]}, ${dLabel(dt)}</p>`}
-        <div class="acts"><button class="btn ghost" data-cancel>Cancel</button><button class="btn" data-save="${d}">Add ${fk==="les"?"lesson":fk==="hw"?"homework":"exam"}</button></div>
-      </div>`:"";
       const lastKey=iso(dateFor(week-1,d));
       const hasLastWeek=!!state.days[d]&&state.days[d].tasks&&state.days[d].tasks.length;
       if(!tasksOn(d,key).length&&hasLastWeek&&week>0&&openForm!==d)copyRow=`<div class="actrow"><button class="lnk" data-copyweek="${d}">Same as last week</button></div>`;
@@ -1406,8 +1392,7 @@ function render(){
       ${expanded.has(key)?`<button class="lnk hide" data-expand="${key}">Hide finished day</button>`:""}
       ${(()=>{secMap.les=list;const body=secOrder().map(k=>secMap[k]||"").join("");return body?`<div class="dsecs" data-dkey="${key}">${body}</div>`:`<div class="empty">Nothing planned. Free day.</div>`})()}${copyRow}
 
-      ${openForm===d?`<div class="add">${form}</div>`:""}
-      ${openForm===d?"":`<div class="dayadds"><button data-classopen="${d}">＋ Class</button></div>`}</article>`}).join("");
+      <div class="dayadds"><button data-classopen="${d}">＋ Class</button></div></article>`}).join("");
   bindSwipeRows(document.getElementById("days"));
   afterRender();labelControls();
 }
@@ -1418,7 +1403,7 @@ function persistStorage(){if(state.persisted)return;navigator.storage.persist().
 function prune(key){const x=state.dates[key];if(x&&!x.noPages&&!x.skip.length&&!x.extra.length&&!Object.keys(x.done).length&&!Object.keys(x.amt||{}).length&&!Object.keys(x.pg||{}).length&&!(x.order&&x.order.length))delete state.dates[key]}
 
 document.addEventListener("click",e=>{
-  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-open],[data-cancel],[data-save],[data-wk],[data-expand],[data-menu],[data-reorder],[data-pdel],[data-optstyle],[data-optpos],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-color],[data-setc],[data-move],[data-focus],[data-due],[data-fx],#focusStart,[data-hwrem],[data-ngo],[data-ndismiss],[data-ndismissall],[data-focusfield],[data-title],[data-titlesave],[data-titlecancel],[data-pgtoggle],[data-classopen],[data-notesopen],[data-addrem],[data-remedit],[data-remsave],[data-remcancel],[data-revplan],[data-hwpost],[data-hwfor],[data-sub],[data-ssub],[data-lsgo],[data-newl],[data-bknow],[data-bklater],[data-exopen],[data-exdel],#exAdd,[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel],#hwAdd,#reset");
+  const b=e.target.closest("button[data-tab],[data-sel],[data-step],[data-delfix],[data-delextra],[data-skip],[data-unskip],[data-wk],[data-expand],[data-menu],[data-reorder],[data-pdel],[data-optstyle],[data-optpos],[data-optsize],[data-optws],[data-optopen],[data-optfocus],[data-opttheme],[data-color],[data-setc],[data-fx],#focusStart,[data-hwrem],[data-ngo],[data-ndismiss],[data-ndismissall],[data-title],[data-titlesave],[data-titlecancel],[data-classopen],[data-notesopen],[data-addrem],[data-remedit],[data-remsave],[data-remcancel],[data-revplan],[data-hwpost],[data-hwfor],[data-sub],[data-ssub],[data-newl],[data-bknow],[data-bklater],[data-exdel],[data-hwdel],[data-hwshow],[data-hwclear],[data-remdel],[data-remshow],[data-remclear],[data-remseen],[data-subjadd],[data-subjcancel],[data-subjsave],[data-subjdel]");
   if(!b)return;
   const ds=b.dataset;
   if(ds.ndismiss!==undefined){
@@ -1447,14 +1432,6 @@ document.addEventListener("click",e=>{
     if(ds.tab==="back"&&scrollMem[prevTab]!=null)restoreScroll=scrollMem[prevTab];if(ds.tab==="back"){tab=prevTab||"week"}else{if(tab!=="set"&&tab!=="search"&&tab!=="notif")prevTab=tab;tab=ds.tab}
     if(!STACKED.includes(tab))try{localStorage.setItem("sp-tab",tab)}catch(err){}
     render();if(restoreScroll==null)scrollTo(0,0);if(tab==="search"){const q=document.getElementById("q");q.value="";renderSearch();setTimeout(()=>q.focus(),60)}return}
-  if(b.id==="hwAdd"){const t=document.getElementById("hwText"),text=t.value.trim();if(!text){t.focus();return}
-    const due=document.getElementById("hwDue").value||addDays(1);
-    const pri=document.getElementById("hwPri"),est=+document.getElementById("hwEst").value||0;
-    const hwItem={id:uid(),text,s:document.getElementById("hwSubj").value,due,done:false,pri:pri.getAttribute("aria-pressed")==="true"||undefined,est:est||undefined},rk=readRem("hwRem");
-    pri.setAttribute("aria-pressed","false");document.getElementById("hwEst").value="";
-    let okR=true;change(()=>{state.homework.push(hwItem);okR=addLinkedRem(rk,"hw",hwItem)});
-    if(rk&&!okR)alertMsg("Added. That reminder time has already passed.");else if(rk&&rk.date)offerPreset(rk,hwItem.due);
-    t.value="";return}
   if(ds.newl){const id=ds.newl;snap();change(()=>state.remaining[id]=(state.remaining[id]||0)+1);
     const t=totals(),left=Math.max(0,(state.remaining[id]||0)-t[id].done);undoToast(subj(id).name+": "+fmt(left)+" left now");return}
   if(ds.ngo){const g=ds.ngo;
@@ -1471,13 +1448,6 @@ document.addEventListener("click",e=>{
   if(ds.bknow!==undefined){openSetPage("data");return}
   if(ds.bklater!==undefined){state.bkSnooze=Date.now()+3*864e5;save();renderBanner();return}
   if(ds.sub){if(ds.sub===todoSub&&ds.sub==="les"){subjView=null;noteOpen=null}todoSub=ds.sub;render();return}
-  if(ds.lsgo){tab="todo";todoSub="les";subjView=ds.lsgo==="all"?null:ds.lsgo;noteOpen=null;render();scrollTo(0,0);return}
-  if(ds.exopen!==undefined){const f=document.getElementById("exForm");f.hidden=!f.hidden;if(!f.hidden){const d=document.getElementById("exDate");if(!d.value)d.value=addDays(7);document.getElementById("exText").focus()}return}
-  if(b.id==="exAdd"){const t=document.getElementById("exText"),title=t.value.trim();if(!title){t.focus();return}
-    const date=document.getElementById("exDate").value||addDays(7);
-    const exItem={id:uid(),title,s:document.getElementById("exSubj").value,date},rk=readRem("exRem");
-    let okR=true,nr=0;change(()=>{state.exams.push(exItem);okR=addLinkedRem(rk,"ex",exItem);if(state.settings.autoRev!==false)nr=planRevision(exItem)});t.value="";
-    if(rk&&!okR)alertMsg("Exam added. That reminder time has already passed.");else if(rk&&rk.date)offerPreset(rk,exItem.date);else alertMsg(nr?"Exam added with "+nr+" revision session"+(nr>1?"s":""):"Exam added");return}
   if(ds.exdel){openMenu=null;snap();change(()=>delExam(ds.exdel));undoToast("Exam deleted");return}
   if(ds.hwdel){openMenu=null;snap();change(()=>delHomework(ds.hwdel));undoToast("Homework deleted");return}
   if(ds.hwshow!==undefined){hwShowDone=!hwShowDone;render();return}
@@ -1492,9 +1462,6 @@ document.addEventListener("click",e=>{
   if(ds.titlesave){const[key,id,kind,d]=ds.titlesave.split(":");const v=document.getElementById("ttlIn").value.trim();
     titleEdit=null;change(()=>{if(kind==="fixed"){const k=state.days[d].tasks.find(k=>k.id===id);if(k){if(v)k.title=v;else delete k.title}}
       else{const k=dayData(state,key).extra.find(k=>k.id===id);if(k){if(v)k.title=v;else delete k.title}}});return}
-  if(ds.focusfield){const f=document.getElementById(ds.focusfield);if(f){f.closest(".collapsible")?.classList.add("open");f.focus();f.scrollIntoView({block:"center",behavior:"smooth"})}return}
-  if(ds.pgtoggle){const key=ds.pgtoggle;let hid=false;change(()=>{const x=dayData(state,key);if(x.noPages){delete x.noPages;prune(key)}else{x.noPages=true;hid=true}});
-    alertMsg(hid?"Pages hidden for this day":"Pages shown for this day");return}
   if(ds.remedit){editRem=ds.remedit;render();return}
   if(ds.remcancel!==undefined){editRem=null;render();return}
   if(ds.remsave){const d=document.getElementById("reD").value,t=document.getElementById("reT").value;if(!d||!t)return;
@@ -1503,7 +1470,7 @@ document.addEventListener("click",e=>{
     let ok=false;change(()=>{for(const k of [...(state.settings.remPresets||[]).map(p=>({back:p.back,time:p.time})),"eve","morn"]){if(addLinkedRem(k,type,it)){ok=true;break}}
       if(!ok){const d=new Date();d.setHours(d.getHours()+1,0,0,0);state.reminders.push({id:uid(),text:(type==="hw"?"Homework: "+it.text:"Exam: "+it.title),date:iso(d),time:String(d.getHours()).padStart(2,"0")+":00",link:{type,id}});ok=true}});
     alertMsg("Reminder set 🔔");return}
-  if(ds.hwfor){tab="todo";todoSub="hw";render();scrollTo(0,0);document.getElementById("hwSubj").value=ds.hwfor;setTimeout(()=>document.getElementById("hwText").focus(),80);return}
+  if(ds.hwfor){clsMenu=null;state.settings.lastSubj=ds.hwfor;qaKind="hw";openSheet();return}
   if(ds.hwpost){openMenu=null;change(()=>{const h=state.homework.find(h=>h.id===ds.hwpost);if(h){const base=h.due<todayIso?todayIso:h.due;const d=new Date(base+"T12:00:00");d.setDate(d.getDate()+1);h.due=iso(d);
       const r=remFor(h.id);if(r){state.reminders=state.reminders.filter(x=>x!==r);addLinkedRem("eve","hw",h)}}});alertMsg("Moved to "+relDay(state.homework.find(h=>h.id===ds.hwpost).due).toLowerCase());return}
   if(ds.remdel){openMenu=null;snap();change(()=>delReminder(ds.remdel));undoToast("Reminder deleted");return}
@@ -1551,17 +1518,8 @@ document.addEventListener("click",e=>{
     }
     return;
   }
-  if(ds.move){const[key,id,kind,sj,amt]=ds.move.split(":");const tk=nextDay(key);
-    openMenu=null;change(()=>{const x=dayData(state,key);
-      if(kind==="fixed")x.skip.push(id);else x.extra=x.extra.filter(k=>k.id!==id);
-      delete x.done[id];prune(key);
-      dayData(state,tk).extra.push({id:uid(),s:sj,amt:amt===""?null:+amt})});
-    alertMsg("Moved to tomorrow");return}
-  if(ds.focus){const[key,id,sj,amt]=ds.focus.split(":");openMenu=null;startFocus({key,id,s:sj,amt:amt===""?0:+amt});render();return}
   if(b.id==="focusStart"){startFocus(null);return}
   if(ds.fx){focusAction(ds.fx);return}
-  if(ds.due!==undefined){document.getElementById("hwDue").value=addDays(+ds.due);
-    document.querySelectorAll("[data-due]").forEach(c=>c.classList.toggle("on",c===b));return}
   if(ds.expand){expanded.has(ds.expand)?expanded.delete(ds.expand):expanded.add(ds.expand);render();return}
   if(ds.wk!==undefined){week=ds.wk==="0"?0:week+ +ds.wk;openForm=null;if(week===0)selDay=today;render();return}
   if(ds.sel!==undefined){selDay=+ds.sel;openForm=null;render();return}
@@ -1571,29 +1529,6 @@ document.addEventListener("click",e=>{
   if(ds.delextra){const[key,id]=ds.delextra.split(":");openMenu=null;snap();undoToast("Task removed");change(()=>{const x=dayData(state,key),k=x.extra.find(y=>y.id===id);if(k)trashPut("extra",subj(k.s).name+(k.title?" · "+k.title:""),{key,item:k});x.extra=x.extra.filter(k=>k.id!==id);delete x.done[id];prune(key)});return}
   if(ds.skip){const[key,id]=ds.skip.split(":");openMenu=null;snap();change(()=>{const x=dayData(state,key);x.skip.push(id);delete x.done[id]});undoToast("Task removed from this day");return}
   if(ds.unskip){const[key,id]=ds.unskip.split(":");change(()=>{const x=dayData(state,key);x.skip=x.skip.filter(i=>i!==id);prune(key)});return}
-  if(ds.open!==undefined){openForm=+ds.open;formKind="les";render();document.querySelector(`[data-form="${openForm}"] select`)?.focus();return}
-  if(ds.cancel!==undefined){openForm=null;render();return}
-  if(ds.save!==undefined){
-    const d=+ds.save,f=document.querySelector(`[data-form="${d}"]`);
-    if(formKind!=="les"){const t=f.querySelector("[name=text]"),text=t.value.trim();if(!text){t.focus();return}
-      const sj=f.querySelector("[name=s]").value,key=iso(dateFor(week,d));
-      change(()=>{if(formKind==="hw")state.homework.push({id:uid(),text,s:sj,due:key,done:false});else{const ex={id:uid(),title:text,s:sj,date:key};state.exams.push(ex);if(state.settings.autoRev!==false)planRevision(ex)}openForm=null});
-      alertMsg(formKind==="hw"?"Homework added":"Exam added");return}
-    const raw=parseFloat(f.querySelector("[name=amt]").value);
-    const amt=isNaN(raw)?null:Math.max(0,raw);
-    const rawPg=parseFloat(f.querySelector("[name=pg]").value);
-    const pg=isNaN(rawPg)?null:Math.max(0,rawPg);
-    const title=f.querySelector("[name=title]").value.trim();
-    const id=uid(),sj=f.querySelector("[name=s]").value,key=iso(dateFor(week,d));
-    const once=f.querySelector(`input[name=rep${d}]:checked`).value==="once";
-    change(()=>{if(once)dayData(state,key).extra.push({id,s:sj,amt,pg,title:title||undefined});
-      else{state.days[d].tasks.push({id,s:sj,title:title||undefined});const x=dayData(state,key);if(amt!==null)x.amt[id]=amt;if(pg!==null){x.pg=x.pg||{};x.pg[id]=pg}}
-      openForm=null});
-    return}
-  if(b.id==="reset"){
-    if(b.dataset.confirm){delete b.dataset.confirm;b.textContent="Clear";snap();undoToast("Ticks cleared");change(()=>DAY_ORDER.forEach(d=>{const key=iso(dateFor(week,d));if(state.dates[key]){state.dates[key].done={};prune(key)}}))}
-    else{b.dataset.confirm="1";b.textContent="Tap again";setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent="Clear"}},3000)}
-  }
   if(b.dataset.copyweek!==undefined){
     const d=+b.dataset.copyweek;
     const lastKey=iso(dateFor(week-1,d));
@@ -1780,7 +1715,6 @@ document.addEventListener("click",e=>{if(!e.target.closest("#undoBtn")||!undoSna
   state=migrate(JSON.parse(undoSnap));undoSnap=null;state.editedAt=Date.now();save();
   resetSubjSelects();render();alertMsg("Restored")});
 document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;
-  if(e.target.id==="hwText")document.getElementById("hwAdd").click();
   if(e.target.id==="newSubj")document.querySelector("[data-subjsave]")?.click()});
 (()=>{
   const ORDER=["study","todo","school"];
@@ -2310,7 +2244,7 @@ function setupAddSubject(){const inp=document.getElementById("setupNewSubj"),nam
   if(SUBJECTS.some(x=>x.name.toLowerCase()===name.toLowerCase())){alertMsg("You already have "+name);return}
   const used=state.subjects.map(x=>x.c),c=PALETTE.find(p=>!used.includes(p))||PALETTE[state.subjects.length%PALETTE.length],id="s"+uid();
   state.subjects.push({id,name,c});state.remaining[id]=0;SUBJECTS=[...state.subjects,OTHER];resetSubjSelects();save();inp.value="";renderSetup();inp.focus()}
-function resetSubjSelects(){["hwSubj","exSubj","gSubj"].forEach(i=>{const el=document.getElementById(i);if(el)el.dataset.ready=""})}
+function resetSubjSelects(){["gSubj"].forEach(i=>{const el=document.getElementById(i);if(el)el.dataset.ready=""})}
 document.addEventListener("click",e=>{
   const b=e.target.closest("#setup [data-snext],#setup [data-sprev],#setup [data-sclose],#setup [data-sdone],#setup [data-sd],#setup [data-sdel],#setup [data-sadd]");if(!b)return;const ds=b.dataset;
   if(ds.snext!==undefined){setupStep=Math.min(3,setupStep+1);renderSetup();return}
@@ -2320,8 +2254,6 @@ document.addEventListener("click",e=>{
   if(ds.sd!==undefined){const d=+ds.sd,a=state.settings.schoolDays||[];state.settings.schoolDays=a.includes(d)?a.filter(x=>x!==d):[...a,d];save();renderSetup();return}
   if(ds.sdel){const id=ds.sdel;state.subjects=state.subjects.filter(x=>x.id!==id);delete state.remaining[id];SUBJECTS=[...state.subjects,OTHER];resetSubjSelects();save();renderSetup();return}
 });
-document.addEventListener("click",e=>{const b=e.target.closest("[data-fkind]");if(!b)return;formKind=b.dataset.fkind;render();
-  const f=document.querySelector(`[data-form="${openForm}"]`);f?.querySelector(formKind==="les"?"select":"[name=text]")?.focus()});
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-tmove],[data-edit],[data-editsave],[data-editcancel]");if(!b)return;const ds=b.dataset;
   if(ds.tmove){const menu=b.closest("li.tmenu"),li=menu&&menu.previousElementSibling,ul=li&&li.parentElement,box=ul&&ul.closest(".dsecs");if(!box)return;
@@ -2383,7 +2315,7 @@ function openSheet(step){
 let qaKind="hw";
 const QA_KINDS=[["les","Lesson","📚"],["hw","Homework","📝"],["ex","Exam","📅"],["rem","Reminder","🔔"],["note","Note","🗒️"]];
 function qaDay(){const k=tab==="study"&&ttView==="week"?iso(dateFor(week,selDay)):todayIso;return k>todayIso?k:todayIso}
-function quickAddHtml(){const k=qaKind,sel=subjOptions(state.settings.lastSubj),d=new Date();d.setHours(d.getHours()+1,0,0,0);const vk=qaDay(),later=vk>todayIso;
+function quickAddHtml(){const k=qaKind,sel=subjOptions(state.settings.lastSubj),d=new Date();d.setHours(d.getHours()+1,0,0,0);const vk=qaNext&&qaNext.date>=todayIso?qaNext.date:qaDay(),later=vk>todayIso;qaNext=null;
   const f={
     les:`<select name="s">${sel}</select><input name="amt" type="number" min="0" step="any" inputmode="decimal" placeholder="Lessons">
       <input name="title" class="ftitle" placeholder="Title (optional), e.g. Unit 3" maxlength="40"><label class="due ftitle"><span>Date</span><input name="date" type="date" value="${vk}"></label>
@@ -2396,8 +2328,9 @@ function quickAddHtml(){const k=qaKind,sel=subjOptions(state.settings.lastSubj),
   return `<div class="shh"><b>Add${later?` <span class="shday">· ${DAY_NAMES[new Date(vk+"T12:00:00").getDay()].slice(0,3)} ${dLabel(new Date(vk+"T12:00:00"))}</span>`:""}</b><button class="lnk" data-qa="close">Cancel</button></div>
     <div class="seg qakinds">${QA_KINDS.map(([x,l,ic])=>`<button data-qak="${x}" class="${x===k?"on":""}"><span>${ic}</span>${l}</button>`).join("")}</div>
     ${k==="note"?`<div class="qgrid">${SUBJECTS.filter(x=>x.id!=="other").map(x=>`<button data-qanote="${x.id}" style="--c:${col(x)}"><i></i>${esc(x.name)}</button>`).join("")}</div>`
-      :`<div class="form qaform">${f}<div class="acts"><button class="btn full" data-qsave>Add ${QA_KINDS.find(x=>x[0]===k)[1].toLowerCase()}</button></div></div>`}`}
-function quickSave(){const f=document.querySelector(".qaform");if(!f)return;const v=n=>f.querySelector(`[name=${n}]`)?.value?.trim()||"",k=qaKind;
+      :`<div class="form qaform">${f}<div class="acts qaacts"><button class="btn ghost" data-qnext>Add &amp; next</button><button class="btn full" data-qsave>Add ${QA_KINDS.find(x=>x[0]===k)[1].toLowerCase()}</button></div></div>`}`}
+let qaNext=null;
+function quickSave(next){const f=document.querySelector(".qaform");if(!f)return;const v=n=>f.querySelector(`[name=${n}]`)?.value?.trim()||"",k=qaKind;
   if(k!=="les"&&!v("text")){f.querySelector("[name=text]").focus();return}
   const date=v("date")||todayIso,sj=v("s");let msg="";if(sj&&k!=="rem")state.settings.lastSubj=sj;
   if(k==="rem"){const tm=v("time")||"18:00";if(date+"T"+tm<=nowStamp()){alertMsg("Pick a time in the future");return}}
@@ -2408,10 +2341,12 @@ function quickSave(){const f=document.querySelector(".qaform");if(!f)return;cons
     if(k==="hw"){state.homework.push({id:uid(),text:v("text"),s:sj,due:date,done:false,pri:f.querySelector(".pritog").getAttribute("aria-pressed")==="true"||undefined,est:+v("est")||undefined});msg="Homework added"}
     if(k==="ex"){const ex={id:uid(),title:v("text"),s:sj,date};state.exams.push(ex);const n=state.settings.autoRev!==false?planRevision(ex):0;msg=n?"Exam added with "+n+" revision session"+(n>1?"s":""):"Exam added"}
     if(k==="rem"){state.reminders.push({id:uid(),text:v("text"),date,time:v("time")||"18:00"});msg="Reminder set for "+relDay(date).toLowerCase()}});
+  if(next){qaNext={date};document.getElementById("sheet").innerHTML=`<span class="grabber"></span>`+quickAddHtml();labelControls(document.getElementById("sheet"));
+    document.querySelector(".qaform [name=text],.qaform [name=amt]")?.focus();alertMsg(msg+" ✓ Add the next one");return}
   closeSheet();alertMsg(msg)}
-document.addEventListener("click",e=>{const b=e.target.closest("[data-qak],[data-qsave]");if(!b)return;
+document.addEventListener("click",e=>{const b=e.target.closest("[data-qak],[data-qsave],[data-qnext]");if(!b)return;
   if(b.dataset.qak){qaKind=b.dataset.qak;document.getElementById("sheet").innerHTML=`<span class="grabber"></span>`+quickAddHtml();labelControls(document.getElementById("sheet"));document.querySelector(".qaform [name=text],.qaform select")?.focus();return}
-  quickSave()});
+  quickSave(b.hasAttribute("data-qnext"))});
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.closest&&e.target.closest(".qaform")&&e.target.tagName==="INPUT"&&e.target.type!=="checkbox"){e.preventDefault();quickSave()}});
 function dragSheet(el,onClose){
   let y0=0,dy=0,drag=false;
@@ -2432,12 +2367,6 @@ document.addEventListener("click",e=>{
   if(a==="note"){openSheet("note");return}
   if(a==="remind"){openSheet("remind");return}
   closeSheet();
-  if(a==="grade"){tab="todo";todoSub="les";subjView=null;render();scrollTo(0,0);alertMsg("Open a subject to add its grade");return}
-  if(a==="rem"){openSheet("remind");return}
-  if(a==="hw"||a==="ex"){tab="todo";todoSub=a;render();scrollTo(0,0);setTimeout(()=>document.getElementById({hw:"hwText",ex:"exText"}[a])?.focus(),80);return}
-  if(a==="focus"){startFocus(null);return}
-  if(a==="task"){tab="study";studySub="tt";week=0;selDay=today;openForm=today;formKind="les";render();
-    setTimeout(()=>document.querySelector(`[data-form="${today}"]`)?.scrollIntoView({behavior:"smooth",block:"center"}),80)}
 });
 
 function b64enc(str){const bytes=new TextEncoder().encode(str);let bin="";for(let i=0;i<bytes.length;i+=8192)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+8192));return btoa(bin)}
