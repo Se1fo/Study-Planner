@@ -20,7 +20,7 @@ test("clean layout and smart search", async ({ browser, baseURL }) => {
   await p.click("#fabTab");ok("floating + opens quick add",await p.isVisible("#sheet"));await q(()=>closeSheet());await p.waitForTimeout(300);
   ok("⋯ sits before the week, no arrows on phones",await q(()=>document.querySelector(".ttbar").firstElementChild.matches("[data-ttmenu]"))&&!(await p.isVisible('.ttbar [data-wk="1"]')));
   ok("strip shows exactly this week",await q(()=>{const s=document.getElementById("strip");return [...s.querySelectorAll("button")].filter(b=>{const r=b.getBoundingClientRect(),o=s.getBoundingClientRect();return r.left>=o.left-1&&r.right<=o.right+1}).map(b=>b.dataset.selk).join()===DAY_ORDER.map(d=>iso(dateFor(0,d))).join()}));
-  await q(()=>{const s=document.getElementById("strip");s.scrollTo({left:s.scrollLeft+s.clientWidth+6})});await p.waitForTimeout(600);
+  await q(()=>{const s=document.getElementById("strip");s.scrollTo({left:s.scrollLeft+stripPage(s)})});await p.waitForTimeout(600);
   ok("swiping the strip -> Next week",(await p.textContent(".ttlabel b"))==="Next week"&&await q(()=>week===1));
   const k2=await q(()=>iso(dateFor(1,DAY_ORDER[2])));await p.click('#strip [data-selk="'+k2+'"]');ok("tap a day in that week",await q(k=>iso(dateFor(week,selDay))===k,k2));
   await p.click(".ttlabel");ok("tapping the label goes back to this week",await q(()=>week===0));
@@ -119,5 +119,18 @@ test("clean layout and smart search", async ({ browser, baseURL }) => {
   await q(()=>{setPage="look";render()});ok("subject colours listed in Appearance",(await p.locator("#subjColors .scol").count())===4);
   await p.click('#subjColors [data-color=prog]');await p.click('#subjColors .cpal button >> nth=3');await p.waitForTimeout(150);
   ok("change a colour in place",await q(()=>tab==="set"&&setPage==="look"&&state.subjects.find(x=>x.id==="prog").c===SWATCHES[3]));
+  // bigger tap areas, pinned strip, one date, Add & next, class menu homework
+  await q(()=>{tab="study";ttView="week";week=0;selDay=today;render();scrollTo(0,0)});await p.waitForTimeout(200);
+  ok("tick circles have a 40px+ tap area",await q(()=>{const c=document.querySelector(".day.sel li.tk .chk"),r=c.getBoundingClientRect(),b=getComputedStyle(c,"::before");return r.width+2*Math.abs(parseFloat(b.left))>=40}));
+  ok("no date under the greeting on Timetable",(await p.textContent("#sub")).trim()==="");
+  await p.setViewportSize({width:390,height:640});await q(()=>scrollTo(0,400));await p.waitForTimeout(500);
+  ok("week strip stays pinned while scrolling",await q(()=>{const s=document.getElementById("strip").getBoundingClientRect(),h=document.querySelector("header").getBoundingClientRect();return s.top>=h.bottom-2&&s.top<h.bottom+30}));
+  await p.setViewportSize({width:390,height:1400});await q(()=>scrollTo(0,0));await p.click("#fabTab");await p.click('#sheet [data-qak="hw"]');
+  await p.fill(".qaform [name=text]","Ex 1");await p.click('.qaform [data-qnext]');await p.waitForTimeout(300);
+  ok("Add & next keeps the sheet open",await p.isVisible(".qaform")&&(await p.inputValue(".qaform [name=text]"))===""&&await q(()=>qaKind==="hw"));
+  await p.fill(".qaform [name=text]","Ex 2");await p.click(".qaform [data-qsave]");await p.waitForTimeout(400);
+  ok("both added",await q(()=>state.homework.some(h=>h.text==="Ex 1")&&state.homework.some(h=>h.text==="Ex 2")));
+  await p.click('.day.sel li.cls:has-text("English")');await p.click('.day.sel .clist [data-hwfor=eng]');await p.waitForTimeout(300);
+  ok("class menu homework opens the add sheet for that subject",await q(()=>qaKind==="hw")&&(await p.inputValue(".qaform [name=s]"))==="eng");await q(()=>closeSheet());
   expect(errs,"page errors").toEqual([]);
 });
