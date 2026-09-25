@@ -29,10 +29,11 @@ test("tickets, menus and swipe", async ({ browser, baseURL }) => {
     const f=(t,x,y)=>el.dispatchEvent(new TouchEvent(t,{bubbles:true,cancelable:true,touches:t==="touchend"?[]:[mk(x,y)],changedTouches:[mk(x,y)]}));
     const x=bx.x+bx.width/2,y=bx.y+bx.height/2;f("touchstart",x,y);for(let i=1;i<=6;i++)f("touchmove",x+dx*i/6,y);f("touchend",x+dx,y)},[sel,bx,dx]);await p.waitForTimeout(200)};
   await swipe('.day.sel li.tk.les[data-oid=t2] .tt',110);ok("swipe right ticks a lesson",await q(()=>"t2" in state.dates[todayIso].done));
-  await swipe('.day.sel li.tk.les[data-oid=t2] .tt',-110);ok("swipe left removes lesson from this day",await q(()=>state.dates[todayIso].skip.includes("t2")));
+  await swipe('.day.sel li.tk.les[data-oid=t2] .tt',-110);ok("swipe left opens the lesson's options, removes nothing",await p.isVisible('.day.sel li.tmenu [data-skip]')&&await q(()=>!state.dates[todayIso].skip.includes("t2")));await q(()=>{openMenu=null;render()});
   await swipe('.day.sel li.tk.rem[data-oid=r1] .tt',110);ok("swipe right completes a reminder",await q(()=>!state.reminders.some(r=>r.id==="r1")));
   await p.evaluate(()=>{tab="todo";todoSub="ex";render()});
-  const nEx=await q(()=>state.exams.length);await swipe('#exList li.tk.exam[data-oid=e2] .tt',110);ok("swipe right on exam does nothing",await q(n=>state.exams.length===n,nEx));await swipe('#exList li.tk.exam[data-oid=e1] .tt',-110);ok("swipe left deletes exam in Exams tab",await q(()=>!state.exams.some(x=>x.id==="e1")));
+  const nEx=await q(()=>state.exams.length);await swipe('#exList li.tk.exam[data-oid=e2] .tt',110);ok("swipe right on exam does nothing",await q(n=>state.exams.length===n,nEx));await swipe('#exList li.tk.exam[data-oid=e1] .tt',-110);ok("swipe left opens the exam's options",await p.isVisible('#exList li.tmenu [data-exdel=e1]')&&await q(()=>state.exams.some(x=>x.id==="e1")));
+  await p.click('#exList li.tmenu [data-exdel=e1]');ok("delete from there",await q(()=>!state.exams.some(x=>x.id==="e1")));
   // 9: quick-add reminder
   await p.evaluate(()=>{tab="study";render()});await p.click('#fabTab');await p.click('#sheet [data-qak="rem"]');await p.waitForTimeout(400);ok("quick-add reminder opens its form",await p.isVisible('.qaform [name=time]'));
   expect(errs,"page errors").toEqual([]);

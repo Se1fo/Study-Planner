@@ -15,6 +15,11 @@ const CHANGES=[
         "The week strip stays pinned under the header while you scroll a busy day",
         "Add & next in the ＋ sheet for entering several things in a row",
         "Faster to open: the app page is less than half the size",
+        "Snappier on older phones: ticking, switching days and tabs redraw about twice as fast",
+        "Tap the tab you're on again to jump back to today (Timetable) or the top",
+        "Due-date buttons in the ＋ sheet: Today, Tomorrow, or the next class of that subject",
+        "The subject is picked from what you type, e.g. “history essay”",
+        "Swiping a task left shows its options instead of deleting it straight away",
         "Fixed: the pages-left box and grade form on a subject's page, focus time wrapping in Stats, and the empty attendance chart",
         "Today's card is shorter: tap a class for +1 lesson or homework, finished classes and ticked items fold into a small “done” row",
         "Lessons show their amount as a small pill; tap it to change lessons and pages",
@@ -376,6 +381,7 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-trrestore]
   if(ds.trempty!==undefined){if(!b.dataset.confirm){b.dataset.confirm=1;b.textContent="Tap again to empty the bin";setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent="Empty the bin"}},3000);return}
     change(()=>state.trash=[]);alertMsg("Bin emptied")}});
 function swipeAct(li,dir){const id=li.dataset.oid,has=c=>li.classList.contains(c);
+  if(dir<0){const m=li.querySelector("[data-menu]");if(m&&!m.classList.contains("on"))m.click();return}
   if(has("les")){const chk=li.querySelector(".chk[data-tick]");if(!chk)return;const key=chk.dataset.tick.split(":")[0];
     if(dir>0){chk.checked=!chk.checked;chk.dispatchEvent(new Event("change",{bubbles:true}));return}
     const ex0=peek(key).extra.find(k=>k.id===id),extra=!!ex0;snap();
@@ -686,17 +692,21 @@ const ICO_DEL=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" strok
 const ICO_CAL=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg>`;
 const ICO_WEEK=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>`;
 // ---- the day strip: weeks side by side, one week per screen; swiping to another week opens it ----
-let stripFrom=-8,stripTo=16,stripT=null,stripBusy=false;
+let stripFrom=-2,stripTo=2,stripT=null,stripBusy=false,stripPending=false,stripW=0;
+addEventListener("resize",()=>{stripW=0;stripPending=true;placeStrip()});
 function renderStrip(){const el=document.getElementById("strip");if(!el)return;
-  if(week<stripFrom+3||week>stripTo-3){stripFrom=Math.min(-8,week-6);stripTo=Math.max(16,week+6)}
+  stripFrom=week-2;stripTo=week+2;
   const MS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],selKey=iso(dateFor(week,selDay));let h="";
   for(let w=stripFrom;w<=stripTo;w++)DAY_ORDER.forEach((d,i)=>{const dt=dateFor(w,d),key=iso(dt),tasks=tasksOn(d,key).filter(k=>!k.skipped),on=key===selKey;
     h+=`<button data-selk="${key}" class="${on?"sel":""} ${i===0?"wks":""} ${key<todayIso?"past":""}" aria-pressed="${on}" aria-label="${DAY_NAMES[d]} ${dt.getDate()} ${MS[dt.getMonth()]}">
       <b>${DAY_NAMES[d].slice(0,3)}</b><small>${key===todayIso?"Today":isComplete(d,key)?"✓":dt.getDate()===1?"1 "+MS[dt.getMonth()]:dt.getDate()}</small>
       <div class="dots">${tasks.slice(0,5).map(k=>`<span class="${k.done?"d":""}" style="--c:${col(subj(k.s))}"></span>`).join("")}</div></button>`});
-  el.innerHTML=h;stripBusy=true;el.scrollLeft=(week-stripFrom)*stripPage(el);requestAnimationFrame(()=>stripBusy=false)}
+  el.innerHTML=h;stripBusy=true;stripPending=true}
+// Called at the end of render so the page is laid out once, not twice.
+function placeStrip(){if(!stripPending)return;stripPending=false;
+  requestAnimationFrame(()=>{const el=document.getElementById("strip");if(el)el.scrollLeft=(week-stripFrom)*stripPage(el);requestAnimationFrame(()=>stripBusy=false)})}
 // One week's width: the strip's inner width plus the gap before the next week.
-function stripPage(el){const cs=getComputedStyle(el);return el.clientWidth-(parseFloat(cs.paddingLeft)||0)-(parseFloat(cs.paddingRight)||0)+(parseFloat(cs.columnGap)||0)}
+function stripPage(el){if(stripW)return stripW;const cs=getComputedStyle(el),w=el.clientWidth-(parseFloat(cs.paddingLeft)||0)-(parseFloat(cs.paddingRight)||0)+(parseFloat(cs.columnGap)||0);if(el.clientWidth)stripW=w;return w}
 document.addEventListener("scroll",e=>{const el=e.target;if(!el||el.id!=="strip"||stripBusy)return;clearTimeout(stripT);
   stripT=setTimeout(()=>{const w=stripFrom+Math.round(el.scrollLeft/stripPage(el));if(w===week||!el.clientWidth)return;
     week=w;if(week===0)selDay=today;openForm=null;ttMenu=false;buzz(4);render()},140)},true);
@@ -1137,7 +1147,9 @@ function planRevision(x){const avail=[];for(let i=1;i<=14;i++){const d=new Date(
   for(let j=0;j<n;j++)pick.add(avail[n===1?avail.length-1:Math.round((avail.length-1)*j/(n-1))]);
   pick.forEach(k=>dayData(state,k).extra.push({id:uid(),s:x.s,amt:null,rev:x.id,label:"Revise: "+x.title}));return pick.size}
 function dropRevision(id){Object.keys(state.dates).forEach(k=>{const x=state.dates[k];if(x.extra.some(t=>t.rev===id)){x.extra=x.extra.filter(t=>t.rev!==id);prune(k)}})}
-function revCount(x){return Object.values(state.dates).reduce((a,d)=>a+d.extra.filter(k=>k.rev===x.id).length,0)}
+// Revision sessions per exam, counted once per render.
+let revMemo=null;
+function revCount(x){if(!revMemo){revMemo={};Object.values(state.dates).forEach(d=>d.extra.forEach(k=>{if(k.rev)revMemo[k.rev]=(revMemo[k.rev]||0)+1}))}return revMemo[x.id]||0}
 function examSoon(sid,key){const x=state.exams.filter(e=>e.s===sid&&e.date>=key).sort((a,b)=>a.date<b.date?-1:1)[0];if(!x)return "";
   const n=Math.round((new Date(x.date+"T12:00:00")-new Date(key+"T12:00:00"))/864e5);if(n>7)return "";return n===0?"exam today":n===1?"exam tomorrow":"exam in "+n+"d"}
 function renderReminders(){
@@ -1226,7 +1238,7 @@ function afterRender(){
   if(selDay!==lastSel){const d=document.querySelector(".day.sel");if(d&&lastSel!==null)d.classList.add("enter");
     lastSel=selDay}
   if(justTicked){const el=document.querySelector(`[data-tick^="${justTicked}:"]`);if(el)el.closest("li").classList.add("pop");justTicked=null}
-  bindDaySortables();
+  bindDaySortables();placeStrip();
   requestAnimationFrame(moveInd);
   if(restoreScroll!=null){const y=restoreScroll;restoreScroll=null;requestAnimationFrame(()=>scrollTo(0,y))}
 }
@@ -1301,7 +1313,7 @@ function normTab(){
 }
 function setNum(el,v){if(!el||el.textContent===v){if(el)el.textContent=v;return}el.textContent=v;el.classList.remove("bump");void el.offsetWidth;el.classList.add("bump")}
 function render(){
-  normTab();
+  revMemo=null;normTab();
   renderHeader();
   applySettings();
   const t=totals();
@@ -1427,6 +1439,11 @@ document.addEventListener("click",e=>{
     alertMsg("Alerts cleared");
     return;
   }
+  if(ds.tab&&ds.tab===tab&&b.closest(".tabbar,.tabs")){buzz(4);
+    if(tab==="study"){week=0;selDay=today;ttView="week";monthAt=null;openMenu=null;ttMenu=false}
+    if(tab==="school")calMonth=null;
+    if(tab==="todo"&&todoSub==="les"){subjView=null;noteOpen=null}
+    render();scrollTo({top:0,behavior:"smooth"});return}
   if(ds.tab){buzz(4);if(ds.tab==="set")setPage=null;if(ds.tab==="todo"&&tab==="todo"&&todoSub==="les"){subjView=null;noteOpen=null}
     if(ds.tab!=="back"&&scrollMem[ds.tab]!=null&&ds.tab!==tab)restoreScroll=scrollMem[ds.tab];
     if(ds.tab==="back"&&scrollMem[prevTab]!=null)restoreScroll=scrollMem[prevTab];if(ds.tab==="back"){tab=prevTab||"week"}else{if(tab!=="set"&&tab!=="search"&&tab!=="notif")prevTab=tab;tab=ds.tab}
@@ -2311,18 +2328,34 @@ function openSheet(step){
   sh.innerHTML=GRAB+(step==="note"
     ?`<div class="shh"><b>New note for…</b><button class="lnk" data-qa="close">Cancel</button></div><div class="qgrid">${SUBJECTS.filter(x=>x.id!=="other").map(x=>`<button data-qanote="${x.id}" style="--c:${col(x)}"><i></i>${esc(x.name)}</button>`).join("")}</div>`
     :quickAddHtml());
-  sh.hidden=false;bg.hidden=false;labelControls(sh);requestAnimationFrame(()=>{sh.classList.add("up");bg.classList.add("up")})}
+  sh.hidden=false;bg.hidden=false;labelControls(sh);dueChips();requestAnimationFrame(()=>{sh.classList.add("up");bg.classList.add("up")})}
 let qaKind="hw";
 const QA_KINDS=[["les","Lesson","📚"],["hw","Homework","📝"],["ex","Exam","📅"],["rem","Reminder","🔔"],["note","Note","🗒️"]];
+// The next school day (from tomorrow) with a class or lesson of this subject, within 3 weeks.
+function nextClassDay(sid){for(let i=1;i<=21;i++){const k=addDays(i),wd=new Date(k+"T12:00:00").getDay();if(holidayOn(k))continue;
+    if(classesOf(wd).some(c=>classSubjects(c.name).some(x=>x.id===sid))||tasksOn(wd,k).some(t=>!t.skipped&&t.s===sid))return k}return null}
+// A subject named in the text: whole name first, then the start of a word ("math" -> Maths).
+function subjectIn(text){const low=" "+text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu," ")+" ",subs=SUBJECTS.filter(x=>x.id!=="other").sort((a,b)=>b.name.length-a.name.length);
+  const full=subs.find(x=>low.includes(" "+x.name.toLowerCase()+" "));if(full)return full.id;
+  for(const w of low.trim().split(" ")){if(w.length<3)continue;const x=subs.find(x=>{const n=x.name.toLowerCase();return n.startsWith(w)||(w.length>=4&&w.startsWith(n.slice(0,4)))});if(x)return x.id}return null}
+function dueChips(){const f=document.querySelector(".qaform");if(!f||!["hw","ex"].includes(qaKind))return;const box=f.querySelector(".duechips");if(!box)return;
+  const sid=f.querySelector("[name=s]").value,cur=f.querySelector("[name=date]").value,nx=nextClassDay(sid),sj=subj(sid);
+  const tm=addDays(1),opts=[[todayIso,"Today"],[tm,nx===tm?"Tomorrow · "+sj.name+" class":"Tomorrow"],...(nx&&nx!==tm?[[nx,"Next "+sj.name+" class"]]:[]),...(qaKind==="ex"?[[addDays(7),"In a week"]]:[])];
+  box.innerHTML=opts.map(([k,l])=>`<button type="button" data-qdue="${k}" class="${k===cur?"on":""}">${esc(l)}${k===nx&&l.startsWith("Next")?` <small>${relDay(k)}</small>`:""}</button>`).join("")}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-qdue]");if(!b)return;const f=b.closest(".qaform");f.querySelector("[name=date]").value=b.dataset.qdue;buzz(4);dueChips()});
+document.addEventListener("input",e=>{const t=e.target;if(!t.closest||!t.closest(".qaform"))return;const f=t.closest(".qaform");
+  if(t.name==="text"&&qaKind!=="rem"&&!f.dataset.subjManual){const sid=subjectIn(t.value),sel=f.querySelector("[name=s]");if(sid&&sel.value!==sid){sel.value=sid;dueChips()}}
+  if(t.name==="date")dueChips()});
+document.addEventListener("change",e=>{const t=e.target;if(!t.closest||!t.closest(".qaform"))return;if(t.name==="s"){t.closest(".qaform").dataset.subjManual=1;dueChips()}if(t.name==="date")dueChips()});
 function qaDay(){const k=tab==="study"&&ttView==="week"?iso(dateFor(week,selDay)):todayIso;return k>todayIso?k:todayIso}
 function quickAddHtml(){const k=qaKind,sel=subjOptions(state.settings.lastSubj),d=new Date();d.setHours(d.getHours()+1,0,0,0);const vk=qaNext&&qaNext.date>=todayIso?qaNext.date:qaDay(),later=vk>todayIso;qaNext=null;
   const f={
     les:`<select name="s">${sel}</select><input name="amt" type="number" min="0" step="any" inputmode="decimal" placeholder="Lessons">
       <input name="title" class="ftitle" placeholder="Title (optional), e.g. Unit 3" maxlength="40"><label class="due ftitle"><span>Date</span><input name="date" type="date" value="${vk}"></label>
       <label class="prichk ftitle"><input type="checkbox" name="every"> Repeat every week on this day</label>`,
-    hw:`<input name="text" class="ftitle" placeholder="Homework, e.g. Essay page 40" maxlength="80"><select name="s">${sel}</select><label class="due"><span>Due</span><input name="date" type="date" value="${later?vk:addDays(1)}"></label>
+    hw:`<input name="text" class="ftitle" placeholder="Homework, e.g. Essay page 40" maxlength="80"><select name="s">${sel}</select><label class="due"><span>Due</span><input name="date" type="date" value="${later?vk:addDays(1)}"></label><div class="duechips ftitle"></div>
       <div class="hwopts ftitle"><button type="button" class="pritog" aria-pressed="false">⚑ High priority</button><select name="est" aria-label="Time needed">${estOpts("")}</select></div>`,
-    ex:`<input name="text" class="ftitle" placeholder="Exam name, e.g. Arabic midterm" maxlength="60"><select name="s">${sel}</select><label class="due"><span>Date</span><input name="date" type="date" value="${later?vk:addDays(7)}"></label>`,
+    ex:`<input name="text" class="ftitle" placeholder="Exam name, e.g. Arabic midterm" maxlength="60"><select name="s">${sel}</select><label class="due"><span>Date</span><input name="date" type="date" value="${later?vk:addDays(7)}"></label><div class="duechips ftitle"></div>`,
     rem:`<input name="text" class="ftitle" placeholder="Remind me to…" maxlength="80"><label class="due"><span>Date</span><input name="date" type="date" value="${later?vk:iso(d)}"></label><label class="due"><span>Time</span><input name="time" type="time" value="${later?"18":String(d.getHours()).padStart(2,"0")}:00"></label>`,
     note:""}[k];
   return `<div class="shh"><b>Add${later?` <span class="shday">· ${DAY_NAMES[new Date(vk+"T12:00:00").getDay()].slice(0,3)} ${dLabel(new Date(vk+"T12:00:00"))}</span>`:""}</b><button class="lnk" data-qa="close">Cancel</button></div>
@@ -2341,11 +2374,11 @@ function quickSave(next){const f=document.querySelector(".qaform");if(!f)return;
     if(k==="hw"){state.homework.push({id:uid(),text:v("text"),s:sj,due:date,done:false,pri:f.querySelector(".pritog").getAttribute("aria-pressed")==="true"||undefined,est:+v("est")||undefined});msg="Homework added"}
     if(k==="ex"){const ex={id:uid(),title:v("text"),s:sj,date};state.exams.push(ex);const n=state.settings.autoRev!==false?planRevision(ex):0;msg=n?"Exam added with "+n+" revision session"+(n>1?"s":""):"Exam added"}
     if(k==="rem"){state.reminders.push({id:uid(),text:v("text"),date,time:v("time")||"18:00"});msg="Reminder set for "+relDay(date).toLowerCase()}});
-  if(next){qaNext={date};document.getElementById("sheet").innerHTML=`<span class="grabber"></span>`+quickAddHtml();labelControls(document.getElementById("sheet"));
+  if(next){qaNext={date};document.getElementById("sheet").innerHTML=`<span class="grabber"></span>`+quickAddHtml();labelControls(document.getElementById("sheet"));dueChips();
     document.querySelector(".qaform [name=text],.qaform [name=amt]")?.focus();alertMsg(msg+" ✓ Add the next one");return}
   closeSheet();alertMsg(msg)}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-qak],[data-qsave],[data-qnext]");if(!b)return;
-  if(b.dataset.qak){qaKind=b.dataset.qak;document.getElementById("sheet").innerHTML=`<span class="grabber"></span>`+quickAddHtml();labelControls(document.getElementById("sheet"));document.querySelector(".qaform [name=text],.qaform select")?.focus();return}
+  if(b.dataset.qak){qaKind=b.dataset.qak;document.getElementById("sheet").innerHTML=`<span class="grabber"></span>`+quickAddHtml();labelControls(document.getElementById("sheet"));dueChips();document.querySelector(".qaform [name=text],.qaform select")?.focus();return}
   quickSave(b.hasAttribute("data-qnext"))});
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.closest&&e.target.closest(".qaform")&&e.target.tagName==="INPUT"&&e.target.type!=="checkbox"){e.preventDefault();quickSave()}});
 function dragSheet(el,onClose){
