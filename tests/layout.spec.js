@@ -132,5 +132,17 @@ test("clean layout and smart search", async ({ browser, baseURL }) => {
   ok("both added",await q(()=>state.homework.some(h=>h.text==="Ex 1")&&state.homework.some(h=>h.text==="Ex 2")));
   await p.click('.day.sel li.cls:has-text("English")');await p.click('.day.sel .clist [data-hwfor=eng]');await p.waitForTimeout(300);
   ok("class menu homework opens the add sheet for that subject",await q(()=>qaKind==="hw")&&(await p.inputValue(".qaform [name=s]"))==="eng");await q(()=>closeSheet());
+  // tap the current tab again -> back to today
+  await q(()=>{tab="study";ttView="week";week=2;selDay=DAY_ORDER[1];render()});await p.click(".tabbar [data-tab=study]");await p.waitForTimeout(200);
+  ok("re-tapping Timetable goes back to today",await q(()=>week===0&&selDay===today));
+  // due-date shortcuts and subject from the text
+  await p.click("#fabTab");await p.click('#sheet [data-qak="hw"]');await p.fill(".qaform [name=text]","history essay");await p.waitForTimeout(100);
+  ok("subject picked from the text",(await p.inputValue(".qaform [name=s]"))==="hist");
+  await p.selectOption(".qaform [name=s]","eng");await p.fill(".qaform [name=text]","history essay on poems");await p.waitForTimeout(100);
+  ok("a subject you chose yourself isn't overridden",(await p.inputValue(".qaform [name=s]"))==="eng");
+  const nx=await q(()=>nextClassDay("eng"));ok("next-class chip for the subject",nx&&(await p.textContent(".qaform .duechips")).includes("English class"));
+  await p.click('.qaform [data-qdue="'+nx+'"]');ok("chip sets the due date",(await p.inputValue(".qaform [name=date]"))===nx);
+  await p.click('.qaform [data-qdue="'+await q(()=>todayIso)+'"]');ok("Today chip",(await p.inputValue(".qaform [name=date]"))===await q(()=>todayIso));
+  await q(()=>closeSheet());await p.waitForTimeout(300);
   expect(errs,"page errors").toEqual([]);
 });
