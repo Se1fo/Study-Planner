@@ -7,7 +7,7 @@ test("layout has no overflow at any width", async ({ browser, baseURL }) => {
   let problems=0;
   const views=[["timetable","tab='study';ttView='week';render()"],["month","ttView='month';render()"],["lessons","ttView='week';tab='todo';todoSub='les';subjView=null;render()"],["subject","subjView='x0';render()"],
    ["homework","subjView=null;todoSub='hw';render()"],["exams","todoSub='ex';render()"],["school","tab='school';render()"],["settings","tab='set';setPage=null;render()"],["set-look","setPage='look';render()"],
-   ["set-planner","setPage='planner';render()"],["notif","tab='notif';render()"],["search","tab='search';render();document.getElementById('q').value='sub';renderSearch()"],
+   ["set-planner","setPage='planner';render()"],["set-school","setPage='school';render()"],["notif","tab='notif';render()"],["search","tab='search';render();document.getElementById('q').value='sub';renderSearch()"],
    ["quickadd","tab='study';render();qaKind='hw';openSheet()"],["review","closeSheet();reviewOff=-1;openSheet('review')"],["quiz","closeSheet();tab='todo';todoSub='les';subjView='x0';render();startQuiz('x0')"],["focus","quiz=null;renderQuiz();startFocus(null,25)"]];
   for(const w of [320,390,768,1400])for(const [scheme,style] of [["light",""],["dark",""],["dark","luxe"]]){
     if(w!==390&&style)continue;

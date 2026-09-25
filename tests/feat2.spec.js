@@ -8,7 +8,7 @@ test("features: set 2", async ({ browser, baseURL }) => {
   await p.goto(PAGE);await p.evaluate(SEED("seed.js"));await p.reload();await p.waitForTimeout(700);
   const q=(f,a)=>p.evaluate(f,a);
   // 4 settings pages
-  await q(()=>{tab="study";render()});await p.click('button[data-tab=set] >> nth=0');ok("gear opens the settings menu with 6 sections",(await p.locator('#setMenu .smrow').count())===6);
+  await q(()=>{tab="study";render()});await p.click('button[data-tab=set] >> nth=0');ok("gear opens the settings menu with 7 sections",(await p.locator('#setMenu .smrow').count())===7);
   await p.click('[data-sp=look]');ok("Appearance page opens",await p.isVisible('[data-optstyle=luxe]')&&!(await p.isVisible('#setMenu')));
   await p.click('#setBackMenu');ok("back returns to the menu",await p.isVisible('#setMenu'));
   await p.click('[data-sp=data]');ok("Backup page has Save file",await p.isVisible('#fbSave'));
@@ -20,10 +20,10 @@ test("features: set 2", async ({ browser, baseURL }) => {
   ok("old single class label migrated to a class",await q(()=>state.days[today].classes.length===1&&state.days[today].classes[0].name==="English class"&&!("session" in state.days[today])));
   await p.click('.day.sel [data-classopen]');await p.fill('li.cls.editing [data-cf=name]','Maths');await p.fill('li.cls.editing [data-cf=start]','23:58');await p.fill('li.cls.editing [data-cf=end]','23:59');await p.click('li.cls.editing [data-clsave]');await p.waitForTimeout(150);
   ok("add a class with times",await q(()=>state.days[today].classes.some(c=>c.name==="Maths"&&c.start==="23:58")));
-  ok("next-up says Next: Maths",(await p.textContent('#lStrip')).includes("Next: Maths"));
-  await p.click('.day.sel li.cls:has-text("Maths")');await p.fill('li.cls.editing [data-cf=name]','Maths 2');await p.keyboard.press("Enter");await p.waitForTimeout(150);
+  ok("new class shows in today's card",await p.isVisible('.day.sel li.cls:has-text("Maths")'));
+  await p.click('.day.sel li.cls:has-text("Maths")');await p.click('.day.sel .clist [data-cledit]');await p.fill('li.cls.editing [data-cf=name]','Maths 2');await p.keyboard.press("Enter");await p.waitForTimeout(150);
   ok("edit a class in place",await q(()=>state.days[today].classes.some(c=>c.name==="Maths 2")));
-  await p.click('.day.sel li.cls:has-text("Maths 2")');await p.click('li.cls.editing [data-cldel]');ok("delete a class",await q(()=>!state.days[today].classes.some(c=>c.name==="Maths 2")));
+  await p.click('.day.sel li.cls:has-text("Maths 2")');await p.click('.day.sel .clist [data-cledit]');await p.click('li.cls.editing [data-cldel]');ok("delete a class",await q(()=>!state.days[today].classes.some(c=>c.name==="Maths 2")));
   // 8 month view
   await p.click('[data-tview=month]');ok("month view shows",await p.isVisible('#monthView .mgrid')&&!(await p.isVisible('#weekView')));
   const k=await q(()=>todayIso.slice(0,8)+(todayIso.slice(8)==="15"?"16":"15"));await p.click('[data-mday="'+k+'"]');await p.waitForTimeout(200);

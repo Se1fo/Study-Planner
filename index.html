@@ -23,21 +23,19 @@
 <meta property="og:description" content="Track your daily study schedule, subjects, tasks, and progress with an offline-capable, distraction-free study planner.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?b=7">
+<link rel="stylesheet" href="styles.css?b=8">
 </head>
 <body>
 <div id="splash"><img src="icon-192.png" alt=""><span>Study Planner</span></div>
 <main class="wrap">
   <header>
     <div>
-      <div class="eyebrow">Study planner</div>
       <h1 id="greet">Hello</h1>
       <div class="sub"><span id="sub"></span><button class="syncpill" id="syncPill" data-sp="account" hidden></button></div>
     </div>
-    <div class="hbtns"><button class="gear addhead" id="fabTab" aria-label="Quick add"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M12 5.5v13M5.5 12h13"/></svg></button><button class="gear bellbtn2" data-tab="notif" aria-label="Notifications"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><em id="notifDot" hidden></em></button><button class="gear" data-tab="set" aria-label="Settings"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div>
+    <div class="hbtns"><button class="gear" data-tab="search" aria-label="Search"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button><button class="gear addhead" id="fabTab" aria-label="Quick add"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M12 5.5v13M5.5 12h13"/></svg></button><button class="gear bellbtn2" data-tab="notif" aria-label="Notifications"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><em id="notifDot" hidden></em></button><button class="gear" data-tab="set" aria-label="Settings"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button></div>
   </header>
 
-  <button class="searchbar" data-tab="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search homework, notes, exams…</span></button>
   <div class="tabwrap"><div class="tabs" role="tablist"><span class="tabind" id="tabInd"></span>
     <button data-tab="study" role="tab">Timetable <em id="leftTotal"></em></button>
     <button data-tab="todo" role="tab">Tasks <em id="todoCount" hidden></em></button>
@@ -45,17 +43,9 @@
   </div></div>
   <div id="pStudy">
   <div id="pWeek">
-    <div class="nextwrap" id="lStrip"></div>
-    <div class="seg vseg" role="tablist"><button data-tview="week" role="tab">Week</button><button data-tview="month" role="tab">Month</button></div>
+    <div class="ttbar" id="ttBar"></div>
     <section class="monthv" id="monthView" hidden></section>
     <div id="weekView">
-    <div class="wknav">
-      <button class="wkbtn" data-wk="-1" aria-label="Previous week">‹</button>
-      <div class="wkmid"><b id="wkLabel"></b><small id="wkDates"></small></div>
-      <button class="wkbtn" data-wk="1" aria-label="Next week">›</button>
-      <button class="lnk" data-wk="0" id="wkToday" hidden>Back to this week</button>
-      <div class="wkacts"><button class="lnk" data-review>📊 Week review</button><button class="lnk" data-plan>🪄 Plan my week</button></div>
-    </div>
     <nav class="strip" id="strip" aria-label="Days"></nav>
     <section class="days" id="days"></section>
     </div>
@@ -99,7 +89,7 @@
       <div id="subjList">
         <section class="subjects" id="subjects" aria-label="Your subjects"></section>
         <div id="gAvgs"></div>
-        <section class="stats"><div class="sthead"><h3 class="grp">Last 7 days</h3><span id="stTotal"></span></div><button class="lnk allstats" data-tab="stats">All stats ›</button><div class="bars" id="bars"></div><div class="stfocus" id="stFocus"></div></section>
+        <section class="stats"><div class="sthead"><h3 class="grp">Last 7 days</h3><span id="stTotal"></span></div><div class="bars" id="bars"></div><div class="stfocus" id="stFocus"></div><button class="lnk allstats" data-tab="stats">All stats ›</button></section>
         <p class="hint small">Tap a subject for its notes. Tap a number to edit it.</p>
       </div>
       <div id="subjDetail"></div>
@@ -176,6 +166,15 @@
       </div>
       <div class="setrow"><div><b>Start fresh</b><small>Clears everything except your subjects and settings.</small></div><button class="btn ghost danger" id="wipe">Clear</button></div>
     </section>
+    <section class="setgrp setpage sdays" data-page="school" hidden>
+      <div class="setrow"><div><b>Absence limit</b><small>How many days you're allowed to miss. Leave empty to turn off.</small></div>
+        <input class="pgin lim" id="absLim" type="number" min="0" step="1" inputmode="numeric" placeholder="–"></div>
+      <div class="setrow"><div><b>Count absences from</b><small>For example, the first day of this term.</small></div>
+        <input class="limdate" id="absFrom" type="date"></div>
+      <div class="setrow wide"><div><b>School days</b><small>Tap to switch days between school and weekend.</small></div>
+        <div class="seg" id="sdSeg"></div></div>
+      <div class="setrow wide"><div><b>Holidays</b><small>Days off don't count for attendance and don't break your streak.</small></div><div id="holBox"></div></div>
+    </section>
     <section class="setgrp setpage" data-page="trash" hidden><div id="trashBox"></div></section>
     <section class="setgrp setpage" data-page="about" hidden>
       <div class="setrow verrow"><div class="vleft"><b>Version</b><span id="ver"></span><small id="offst">Checking…</small></div>
@@ -194,15 +193,7 @@
       <div class="legend"><span><i class="lg p"></i>Present</span><span><i class="lg a"></i>Absent</span><span><i class="lg h"></i>No school</span><span><i class="lg w"></i>Weekend</span><span><i class="lg hol"></i>Holiday</span></div>
     </section>
     <p class="hint small">Tap a day to switch between ✓ present, ✗ absent, – no school and clear.</p>
-    <section class="setgrp sdays">
-      <div class="setrow"><div><b>Absence limit</b><small>How many days you're allowed to miss. Leave empty to turn off.</small></div>
-        <input class="pgin lim" id="absLim" type="number" min="0" step="1" inputmode="numeric" placeholder="–"></div>
-      <div class="setrow"><div><b>Count absences from</b><small>For example, the first day of this term.</small></div>
-        <input class="limdate" id="absFrom" type="date"></div>
-      <div class="setrow wide"><div><b>School days</b><small>Tap to switch days between school and weekend.</small></div>
-        <div class="seg" id="sdSeg"></div></div>
-      <div class="setrow wide"><div><b>Holidays</b><small>Days off don't count for attendance and don't break your streak.</small></div><div id="holBox"></div></div>
-    </section>
+    <button class="lnk attset" data-sp="school">Absence limit, school days &amp; holidays ›</button>
   </div>
   <footer hidden>
   </footer>
@@ -240,8 +231,8 @@
 <script>
 // Version and build live here in the page: the update check (and older installed versions) read them from index.html.
 // APP_BUILD goes up with every published change; bump the ?b= on styles.css and app.js to match.
-const APP_VERSION="3.3";const APP_BUILD=7;
+const APP_VERSION="3.4";const APP_BUILD=8;
 </script>
-<script src="app.js?b=7"></script>
+<script src="app.js?b=8"></script>
 </body>
 </html>

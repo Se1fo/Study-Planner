@@ -40,14 +40,14 @@ test("features: set 1", async ({ browser, baseURL }) => {
   ok("streak shows on today's card: "+(await q(()=>streakDays())),await q(()=>streakDays())===2&&(await p.textContent('.day.sel .dsum')).includes("2-day streak"));
   await q(()=>{const k=addDays(-2),x=dayData(state,k);x.done.z2=1;x.auto={z2:1};save()});ok("auto-ticked days don't count (streak stays 2)",await q(()=>streakDays())===2);
   // 8 holidays
-  await q(()=>{tab="school";render()});await p.fill('#holName','Test break');await p.fill('#holFrom',await q(()=>todayIso));await p.fill('#holTo',await q(()=>addDays(2)));await p.click('[data-holadd]');
+  await q(()=>{tab="set";setPage="school";render()});await p.fill('#holName','Test break');await p.fill('#holFrom',await q(()=>todayIso));await p.fill('#holTo',await q(()=>addDays(2)));await p.click('[data-holadd]');
   ok("holiday added and listed",(await p.textContent('#holBox')).includes("Test break"));
   ok("today is no longer a school day (no 'At school today?')",await q(()=>!isSchoolDay(todayIso))&&!(await p.isVisible('.attq')));
   await q(()=>{tab="study";week=0;selDay=today;render()});ok("day card shows the holiday",(await p.textContent('.day.sel')).includes("Test break"));
   await q(()=>{state.holidays=[];save()});
   // 7 weekly review
   await q(()=>{const wk=iso(weekStart(-1)),wd=new Date(wk+"T12:00:00").getDay();state.days[wd].tasks.push({id:"lw1",s:"eng",title:"Old"});save();week=-1;render()});
-  await p.click('[data-review]');ok("review sheet opens for last week",await p.isVisible('#sheet .rvstats'));
+  await p.click('[data-ttmenu]');await p.click('.ttmenu [data-review]');ok("review sheet opens for last week",await p.isVisible('#sheet .rvstats'));
   ok("slipped lesson listed",(await p.textContent('#sheet')).includes("English · Old"));
   await p.click('[data-rvmove]');ok("moved into this week",await q(()=>Object.entries(state.dates).some(([k,v])=>k>=todayIso&&v.extra.some(t=>t.s==="eng"&&t.title==="Old"))));
   // 13 accent + font

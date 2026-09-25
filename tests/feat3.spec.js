@@ -31,7 +31,7 @@ test("bin, reminders, notes, plan, stats", async ({ browser, baseURL }) => {
   await p.click('[data-noteclose]');ok("pinned note listed first",(await p.textContent('.nlist .ncard >> nth=0')).includes("📌"));
   // 2 plan my week
   await q(()=>{state.remaining.hist=6;state.remaining.eng=4;state.exams.push({id:"ep",title:"History final",s:"hist",date:addDays(5)});save();tab="study";week=0;render()});
-  await p.click('[data-plan]');await p.waitForTimeout(200);const has=await p.isVisible('[data-planapply]');ok("plan suggests lessons",has);
+  await p.click('[data-ttmenu]');await p.click('.ttmenu [data-plan]');await p.waitForTimeout(200);const has=await p.isVisible('[data-planapply]');ok("plan suggests lessons",has);
   const before=await q(()=>Object.values(state.dates).reduce((a,x)=>a+x.extra.filter(t=>t.label==="Planned").length,0));
   if(has)await p.click('[data-planapply]');const plan=await q(()=>Object.entries(state.dates).filter(([k,x])=>x.extra.some(t=>t.label==="Planned")).map(([k,x])=>[k,x.extra.filter(t=>t.label==="Planned").map(t=>t.s+"x"+t.amt)]));
   ok("plan applied: "+JSON.stringify(plan),plan.length>0);
