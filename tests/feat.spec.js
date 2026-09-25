@@ -23,7 +23,7 @@ test("features: set 1", async ({ browser, baseURL }) => {
   await p.check('[data-tptick^="prog:"] >> nth=0');ok("topics add + tick -> "+await p.textContent('.tphead span'),(await p.textContent('.tphead span')).includes("1 of 2"));
   await q(()=>{subjView=null;render()});ok("subject card shows topic progress",(await p.textContent('.subj[data-subj=prog] .tpmini')).includes("1/2 topics"));
   // 2 auto revision
-  await q(()=>{tab="todo";todoSub="ex";render()});await p.fill('#exText','Big test');await p.selectOption('#exSubj','hist');await p.fill('#exDate',await q(()=>addDays(10)));await p.click('#exAdd');await p.waitForTimeout(150);
+  await q(()=>{tab="todo";todoSub="ex";render()});await p.click('#fabTab');await p.fill('.qaform [name=text]','Big test');await p.selectOption('.qaform [name=s]','hist');await p.fill('.qaform [name=date]',await q(()=>addDays(10)));await p.click('.qaform [data-qsave]');await p.waitForTimeout(150);
   const rev=await q(()=>{const x=state.exams.find(e=>e.title==="Big test");return Object.entries(state.dates).filter(([k,v])=>v.extra.some(t=>t.rev===x.id)).map(([k])=>k).sort()});
   ok("exam 10 days out gets 4 spread revision sessions: "+rev.join(","),rev.length===4&&rev[3]===await q(()=>addDays(9))&&rev[0]===await q(()=>addDays(0)));
   await q(()=>{const x=state.exams.find(e=>e.title==="Big test");const li=document.querySelector('#exList li.tk[data-oid="'+x.id+'"]');openMenu="ex:"+x.id+":list";render()});await p.click('#exList li.tmenu [data-exdel]');

@@ -6,6 +6,10 @@ const CHANGES=[
   ["3.4","Cleaner Timetable: swipe the day strip to move between weeks; ⋯ (Plan my week, Week review) sits before the week and the Month button on the right",
         "The ＋ button now floats at the bottom right, so the top has just search, notifications and settings",
         "A lesson's ⋯ menu starts with Add title and Lessons & pages; Focus and Tomorrow were removed from it",
+        "Homework and Exams tabs use the same one-line items; add with the floating ＋, which also hides while you scroll down",
+        "Notifications: tap an alert to open it; homework alerts are combined into one",
+        "The focus timer asks what you're studying, so the time counts for that subject in Stats",
+        "Fixed: the pages-left box and grade form on a subject's page, focus time wrapping in Stats, and the empty attendance chart",
         "Today's card is shorter: tap a class for +1 lesson or homework, finished classes and ticked items fold into a small “done” row",
         "Lessons show their amount as a small pill; tap it to change lessons and pages",
         "Homework and exams in the day card are one line each; reminders and revision are in their ⋯ menu",
@@ -242,36 +246,33 @@ function notifItems(){
   remDue().forEach(r=>{
     if(!dis.has("rem:"+r.id))out.push({k:"rem:"+r.id,icon:"🔔",t:r.text,s:relDay(r.date)+", "+r.time,act:"Done",go:"remseen:"+r.id,canDismiss:true});
   });
-  const over=hwPending().filter(h=>h.due<todayIso);
-  if(over.length&&!dis.has("hwover")){
-    out.push({k:"hwover",icon:"⚠️",t:over.length===1?"1 homework task overdue":over.length+" homework tasks overdue",s:over.map(h=>h.text).slice(0,3).join(", "),act:"View tasks",go:"hw",cls:"n-crit",canDismiss:true});
-  }
-  const todayHw=hwPending().filter(h=>h.due===todayIso);
-  if(todayHw.length&&!dis.has("hwtoday")){
-    out.push({k:"hwtoday",icon:"📝",t:todayHw.length===1?"1 homework due today":todayHw.length+" homework due today",s:todayHw.map(h=>h.text).slice(0,3).join(", "),act:"View tasks",go:"hw",canDismiss:true});
+  const over=hwPending().filter(h=>h.due<todayIso),todayHw=hwPending().filter(h=>h.due===todayIso),hwAll=[...over,...todayHw];
+  const hwKey="hw:"+hwAll.map(h=>h.id).sort().join(",");
+  if(hwAll.length&&!dis.has(hwKey)){
+    out.push({k:hwKey,icon:over.length?"⚠️":"📝",t:hwAll.length+" homework to do",s:(over.length?over.length+" overdue · ":"")+hwAll.map(h=>h.text).slice(0,3).join(", "),go:"hw",cls:over.length?"n-crit":"",canDismiss:true});
   }
   // Today's study tasks remaining
   const studyTasks=tasksOn(today,todayIso).filter(k=>!k.skipped);
   const studyLeft=studyTasks.filter(k=>!k.done);
   if(studyTasks.length&&studyLeft.length&&!dis.has("studytoday")&&!holidayOn(todayIso)){
     const sNames=[...new Set(studyLeft.map(k=>subj(k.s).name))].slice(0,3).join(", ");
-    out.push({k:"studytoday",icon:"📚",t:studyLeft.length===1?"1 study task left today":studyLeft.length+" study tasks left today",s:sNames,act:"Timetable",go:"study",canDismiss:true});
+    out.push({k:"studytoday",icon:"📚",t:studyLeft.length===1?"1 lesson left today":studyLeft.length+" lessons left today",s:sNames,go:"study",canDismiss:true});
   }
   state.exams.filter(x=>x.date>=todayIso&&daysUntil(x.date)<=5).forEach(x=>{
     if(dis.has("ex:"+x.id))return;
     const du=daysUntil(x.date);
-    out.push({k:"ex:"+x.id,icon:"📅",t:x.title,s:subj(x.s).name+" · "+(du===0?"Exam is today":du===1?"Exam is tomorrow":"Exam in "+du+" days"),act:"Open",go:"ex",cls:du<=1?"n-crit":"",canDismiss:true});
+    out.push({k:"ex:"+x.id,icon:"📅",t:x.title,s:subj(x.s).name+" · "+(du===0?"Exam is today":du===1?"Exam is tomorrow":"Exam in "+du+" days"),go:"ex",cls:du<=1?"n-crit":"",canDismiss:true});
   });
   const L=state.settings.absLimit;
   if(L!=null&&L!==""&&!dis.has("abs")){
     const from=state.settings.absFrom||"",used=attCounts(k=>!from||k>=from).a,rem=L-used;
-    if(rem<=2)out.push({k:"abs",icon:"🚫",t:rem<0?"Over your absence limit":rem===0?"No absences left":"Only "+rem+" absence"+(rem===1?"":"s")+" left",s:used+" of "+L+" used",act:"Attendance",go:"school",cls:"n-crit",canDismiss:true});
+    if(rem<=2)out.push({k:"abs",icon:"🚫",t:rem<0?"Over your absence limit":rem===0?"No absences left":"Only "+rem+" absence"+(rem===1?"":"s")+" left",s:used+" of "+L+" used",go:"school",cls:"n-crit",canDismiss:true});
   }
   if(!isStandalone()&&(installPrompt||isIOS())&&!dis.has("install")&&(state.editedAt||0)>0)
     out.push({k:"install",icon:"📲",t:"Install Study Planner",s:"Add it to your home screen: full screen, offline, one tap away.",act:"Install",go:"install",canDismiss:true});
   const rd=reviewDue();if(rd!==null){const wk=iso(weekStart(rd));
     if(state.reviewSeen!==wk&&!dis.has("review:"+wk)&&DAY_ORDER.some(d=>tasksOn(d,iso(dateFor(rd,d))).length))
-      out.push({k:"review:"+wk,icon:"📊",t:rd===0?"Your week in review":"Last week in review",s:"See what you finished and move anything that slipped.",act:"Open",go:"review:"+rd,canDismiss:true})}
+      out.push({k:"review:"+wk,icon:"📊",t:rd===0?"Your week in review":"Last week in review",s:"See what you finished and move anything that slipped.",go:"review:"+rd,canDismiss:true})}
   const last=state.lastBackup||state.created||Date.now(),snooze=state.bkSnooze||0;
   if(Date.now()-last>7*864e5&&Date.now()>snooze&&(state.editedAt||0)>0&&!dis.has("bk")){
     out.push({k:"bk",icon:"🛟",t:"Back up your planner",s:"It's been a week. Keep your data safe with a quick file backup.",act:"Back up",go:"backup",extra:"Later|bklater",canDismiss:true});
@@ -288,12 +289,12 @@ function renderBanner(){
   }
   const dismissableCount=items.filter(i=>i.canDismiss).length;
   const headerHtml=dismissableCount>1?`<div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="lnk dim" data-ndismissall style="font-size:.82rem">Clear all alerts</button></div>`:""
-  el.innerHTML=headerHtml+items.map(i=>`<div class="ncell ${i.cls||""}" data-nid="${i.k}">
-    <span class="nico">${i.icon}</span>
-    <div class="bt"><b>${esc(i.t)}</b><small>${esc(i.s)}</small></div>
+  el.innerHTML=headerHtml+items.map(i=>`<div class="ncell ${i.cls||""} ${i.act?"":"ntap"}" data-nid="${i.k}" ${i.act?"":`data-ngo="${i.go}"`}>
+    <span class="nico" aria-hidden="true">${i.icon}</span>
+    ${i.act?`<div class="bt"><b>${esc(i.t)}</b><small>${esc(i.s)}</small></div>`:`<button class="bt" data-ngo="${i.go}"><b>${esc(i.t)}</b><small>${esc(i.s)}</small></button>`}
     <div class="nacts2">
       ${i.extra?`<button class="lnk ghostlnk" data-ngo="${i.extra.split("|")[1]}">${esc(i.extra.split("|")[0])}</button>`:""}
-      <button class="lnk ${i.btnCls||""}" data-ngo="${i.go}">${esc(i.act)}</button>
+      ${i.act?`<button class="lnk ${i.btnCls||""}" data-ngo="${i.go}">${esc(i.act)}</button>`:`<span class="chev" aria-hidden="true">›</span>`}
       ${i.canDismiss?`<button class="ndismiss-btn" data-ndismiss="${i.k}" aria-label="Dismiss">×</button>`:""}
     </div>
   </div>`).join("");
@@ -305,7 +306,7 @@ let editItem=null;
 function tMenuKey(kind,id,ctx){return kind+":"+id+":"+(ctx||"list")}
 function tMenuBtn(kind,id,ctx){const mk=tMenuKey(kind,id,ctx);return `<button class="dots-btn ${openMenu===mk?"on":""}" data-menu="${mk}" aria-label="More options" aria-expanded="${openMenu===mk}">⋯</button>`}
 function tMenu(kind,id,ctx,i,n,extra){if(openMenu!==tMenuKey(kind,id,ctx))return "";
-  if(ctx&&kind!=="rem"){const r=remFor(id),it=kind==="hw"?state.homework.find(h=>h.id===id):state.exams.find(x=>x.id===id);
+  if(kind!=="rem"){const r=remFor(id),it=kind==="hw"?state.homework.find(h=>h.id===id):state.exams.find(x=>x.id===id);
     if(it&&!(kind==="hw"&&it.done))extra=(extra||"")+(r?`<button data-remedit="${r.id}">🔔 Reminder: ${relDay(r.date)} ${t12(r.time)}</button>`:`<button data-addrem="${kind}:${id}">🔔 Add reminder</button>`);
     if(kind==="ex"&&it&&daysUntil(it.date)>=1)extra=(extra||"")+`<button data-revplan="${id}">📚 ${revCount(it)?revCount(it)+" revision days":"Plan revision"}</button>`}
   return `<li class="tmenu">${ctx&&i>0?`<button data-tmove="up">↑ Move up</button>`:""}${ctx&&i<n-1?`<button data-tmove="down">↓ Move down</button>`:""}<button data-edit="${kind}:${id}">✎ Edit</button>${extra||""}<button class="danger" data-${{hw:"hwdel",ex:"exdel",rem:"remdel"}[kind]}="${id}">Delete</button></li>`}
@@ -321,12 +322,12 @@ function estOpts(v){return `<option value="">⏱ Time needed</option>`+EST_OPTS.
 function hwTicket(h,ctx="",i=0,n=1){if(editItem==="hw:"+h.id)return editTicket("hw",h);
   const sj=subj(h.s),over=h.due<todayIso&&!h.done;return `<li class="task tk hw ${h.done?"done":""}" style="--c:${col(sj)}" data-oid="${h.id}">
     <input type="checkbox" class="chk" data-hwtick="${h.id}" ${h.done?"checked":""} aria-label="Done: ${esc(h.text)}">
-    <div class="tt"><b data-edit="hw:${h.id}">${h.pri&&!h.done?`<span class="pflag" title="High priority">⚑</span>`:""}${esc(h.text)}</b><small class="tsub">${esc(sj.name)} · ${over?`<span class="red">overdue</span>`:"due "+relDay(h.due).toLowerCase()}${h.est?" · "+fmtMin(h.est):""}${ctx&&!h.done&&remFor(h.id)?" · 🔔":""}</small>${h.done?"":`<div class="itrow">${remChip(h,"hw")}${h.due<=todayIso?`<button class="lnk postpone" data-hwpost="${h.id}">+1 day</button>`:""}</div>`}</div>
+    <div class="tt"><b data-edit="hw:${h.id}">${h.pri&&!h.done?`<span class="pflag" title="High priority">⚑</span>`:""}${esc(h.text)}</b><small class="tsub">${esc(sj.name)} · ${over?`<span class="red">overdue</span>`:"due "+relDay(h.due).toLowerCase()}${h.est?" · "+fmtMin(h.est):""}${!h.done&&remFor(h.id)?" · 🔔":""}</small>${h.done?"":`<div class="itrow">${remChip(h,"hw")}${h.due<=todayIso?`<button class="lnk postpone" data-hwpost="${h.id}">+1 day</button>`:""}</div>`}</div>
     ${tMenuBtn("hw",h.id,ctx)}</li>${tMenu("hw",h.id,ctx,i,n,h.done?"":`<button data-hwpost="${h.id}">→ Next day</button>`)}`}
 function examTicket(x,ctx="",i=0,n=1){if(editItem==="ex:"+x.id)return editTicket("ex",x);
   const sj=subj(x.s),n2=daysUntil(x.date);return `<li class="task tk exam" style="--c:${col(sj)}" data-oid="${x.id}">
     <span class="tico ${n2<=3?"soon":""}" title="${n2===0?"Today":n2+" days"}">${n2===0?"!":n2}</span>
-    <div class="tt"><b data-edit="ex:${x.id}">${esc(x.title)}</b><small class="tsub">${esc(sj.name)} · ${n2===0?"today":n2===1?"tomorrow":"in "+n2+" days"}${ctx&&remFor(x.id)?" · 🔔":""}</small><div class="itrow">${remChip(x,"ex")}${n2>=1?`<button class="lnk postpone" data-revplan="${x.id}">${revCount(x)?"📚 "+revCount(x)+" revision days":"📚 Plan revision"}</button>`:""}</div></div>
+    <div class="tt"><b data-edit="ex:${x.id}">${esc(x.title)}</b><small class="tsub">${esc(sj.name)} · ${n2===0?"today":n2===1?"tomorrow":"in "+n2+" days"}${remFor(x.id)?" · 🔔":""}</small><div class="itrow">${remChip(x,"ex")}${n2>=1?`<button class="lnk postpone" data-revplan="${x.id}">${revCount(x)?"📚 "+revCount(x)+" revision days":"📚 Plan revision"}</button>`:""}</div></div>
     ${tMenuBtn("ex",x.id,ctx)}</li>${tMenu("ex",x.id,ctx,i,n)}`}
 function remTicket(r,ctx="",i=0,n=1){if(editItem==="rem:"+r.id)return editTicket("rem",r);
   const past=(r.date+"T"+r.time)<=nowStamp();return `<li class="task tk rem ${past?"done":""}" style="--c:var(--prog)" data-oid="${r.id}">
@@ -428,7 +429,7 @@ function renderHomework(){
   const item=h=>hwTicket(h);
   let html="";
   groups.forEach(([name,f])=>{const g=pend.filter(f);if(g.length)html+=`<h3 class="grp ${name==="Overdue"?"red":""}">${name}</h3>${tickets(g.map(item))}`});
-  if(!pend.length)html+=`<div class="estate"><span>🎉</span><b>No homework left</b><small>Nothing due. Enjoy it.</small><button class="btn" data-focusfield="hwText">Add homework</button></div>`;
+  if(!pend.length)html+=`<div class="estate"><span>🎉</span><b>No homework left</b><small>Nothing due. Enjoy it.</small><button class="btn" data-qa-open>Add homework</button></div>`;
   if(done.length)html+=`<button class="lnk more" data-hwshow>${hwShowDone?"Hide":"Show"} finished (${done.length})</button>`+(hwShowDone?`${tickets(done.map(item))}<button class="lnk" data-hwclear>Delete finished homework</button>`:"");
   document.getElementById("hwList").innerHTML=html;
   bindSwipeRows(document.getElementById("hwList"));bindSwipeRows(document.getElementById("remLegacy"));
@@ -457,7 +458,7 @@ function gradesHtml(sid){const gs=(state.grades||[]).filter(g=>g.s===sid).sort((
     <div class="gform2"><input id="gName" placeholder="Test or quiz" maxlength="40"><input id="gScore" type="number" step="any" min="0" inputmode="decimal" placeholder="Score"><span>/</span><input id="gMax" type="number" step="any" min="0" inputmode="decimal" placeholder="Out of" value="${last?fmt(last.max):""}"><button class="btn ghost" data-gadd>Add</button></div></section>`}
 function renderExams(){
   const up=state.exams.filter(x=>x.date>=todayIso).sort((a,b)=>a.date<b.date?-1:1);
-  document.getElementById("exList").innerHTML=up.length?tickets(up.map(x=>examTicket(x))):`<div class="estate"><span>📅</span><b>No exams coming up</b><small>Add one so you get a countdown and revision days.</small><button class="btn" data-focusfield="exText">Add exam</button></div>`;
+  document.getElementById("exList").innerHTML=up.length?tickets(up.map(x=>examTicket(x))):`<div class="estate"><span>📅</span><b>No exams coming up</b><small>Add one so you get a countdown and revision days.</small><button class="btn" data-qa-open>Add exam</button></div>`;
   const sel=document.getElementById("exSubj");if(!sel.dataset.ready){sel.innerHTML=subjOptions();sel.dataset.ready=1}
   bindSwipeRows(document.getElementById("exList"));
   const exd=document.getElementById("exDate");if(!exd.value)exd.value=addDays(7);
@@ -899,6 +900,7 @@ function statBuckets(){const out=[];
   return out}
 function inB(k,bk){return k>=bk.a&&k<=bk.b}
 function barChart(title,unit,rows,fmtV,max){const mx=max||Math.max(1,...rows.map(r=>r.v)),last=rows[rows.length-1];
+  if(rows.every(r=>r.none))return `<section class="stcard"><div class="sthead"><h3 class="grp">${title}</h3></div><p class="stempty">${unit==="Attendance"?"Mark days on the Attendance tab to see this.":"Nothing yet."}</p></section>`;
   return `<section class="stcard"><div class="sthead"><h3 class="grp">${title}</h3><span>${last?`This ${statRange==="8w"?"week":"month"}: <b>${last.none?"–":fmtV(last.v)}</b>`:""}</span></div>
     <div class="sbars" role="img" aria-label="${esc(title)}: ${rows.map(r=>r.label+" "+fmtV(r.v)).join(", ")}">${rows.map(r=>`<div class="stbar" title="${esc(r.label)}: ${r.none?"no data":fmtV(r.v)}"><div class="stbw">${r.none?"":`<i style="height:${r.v/mx*100}%"></i>`}</div><small>${r.short}</small></div>`).join("")}</div>
     <details class="stable"><summary>Show as table</summary><table><tr><th>${statRange==="8w"?"Week of":"Month"}</th><th>${unit}</th></tr>${rows.map(r=>`<tr><td>${esc(r.label)}</td><td>${r.none?"–":fmtV(r.v)}</td></tr>`).join("")}</table></details></section>`}
@@ -1284,6 +1286,9 @@ addEventListener("scroll",()=>{
   if(pendingCompact!==c){pendingCompact=c;clearTimeout(compactT);
     compactT=setTimeout(()=>{if(pendingCompact===c){lastCompact=c;document.body.classList.toggle("compact",c)}pendingCompact=null},120)}
 },{passive:true});
+let fabY=0;
+addEventListener("scroll",()=>{const y=Math.max(0,scrollY),d=y-fabY;if(Math.abs(d)<8)return;
+  document.body.classList.toggle("fabhide",d>0&&y>80&&y+innerHeight<document.documentElement.scrollHeight-40);fabY=y},{passive:true});
 function normTab(){
   if(tab==="hw"||tab==="rem"||tab==="ex"){todoSub=tab==="rem"?"hw":tab;tab="todo"}
   if(todoSub==="rem")todoSub="hw";
@@ -1742,6 +1747,7 @@ function showFocus(){
         ${focus.phase==="done"?`<button class="btn ghost" data-fx="break">5 min break</button>`:`<button class="btn" data-fx="again">Focus again</button>`}
         <button class="btn ghost" data-fx="close">Close</button></div>`
       :`<div class="fchips">${focus.phase==="break"?"":[15,25,45,60].map(n=>`<button data-fx="len${n}" class="${focus.dur===n*60000?"on":""}">${n}</button>`).join("")+"<span>min</span>"}<button data-fx="set" class="fsetbtn ${focus.set?"on":""}" title="4 sessions with breaks">${focus.set?"Set of 4 ✓":"Set of 4"}</button></div>
+        ${focus.phase==="study"&&!focus.task?(ls=>ls.length?`<div class="fpick"><small>What are you studying?</small><div>${ls.map(k=>`<button data-fx="pick:${k.id}" style="--c:${col(subj(k.s))}"><i></i>${esc(subj(k.s).name)}${k.title?" · "+esc(k.title):""}</button>`).join("")}</div></div>`:"")(tasksOn(today,todayIso).filter(k=>!k.skipped&&!k.done)):""}
         <div class="facts"><button class="btn" data-fx="${focus.left!=null?"resume":"pause"}">${focus.left!=null?"Resume":"Pause"}</button>
         <button class="btn ghost" data-fx="plus5">+5 min</button><button class="btn ghost" data-fx="close">Stop</button></div>`}`;
   };
@@ -1753,6 +1759,7 @@ function focusAction(a){
   else if(a==="resume"){focus.end=Date.now()+focus.left;focus.left=null}
   else if(a==="plus5"){if(focus.left!=null)focus.left+=300000;else focus.end+=300000;focus.dur+=300000}
   else if(a.startsWith("len")){const n=+a.slice(3)*60000;focus.dur=n;focus.end=Date.now()+n;focus.left=null;if(focus.set)focus.set.len=n}
+  else if(a.startsWith("pick:")){const k=tasksOn(today,todayIso).find(t=>t.id===a.slice(5));if(k)focus.task={key:todayIso,id:k.id,s:k.s,amt:k.amt};buzz(4)}
   else if(a==="set"){focus.set=focus.set?null:{n:1,len:focus.phase==="study"?focus.dur:(state.settings.focusMin||25)*60000}}
   else if(a==="break"){focus={task:focus.task,dur:300000,end:Date.now()+300000,left:null,phase:"break",taskDone:focus.taskDone}}
   else if(a==="again"){startFocus(focus.taskDone?null:focus.task);return}
@@ -2385,8 +2392,7 @@ function quickAddHtml(){const k=qaKind,sel=subjOptions(),d=new Date();d.setHours
   return `<div class="shh"><b>Add</b><button class="lnk" data-qa="close">Cancel</button></div>
     <div class="seg qakinds">${QA_KINDS.map(([x,l,ic])=>`<button data-qak="${x}" class="${x===k?"on":""}"><span>${ic}</span>${l}</button>`).join("")}</div>
     ${k==="note"?`<div class="qgrid">${SUBJECTS.filter(x=>x.id!=="other").map(x=>`<button data-qanote="${x.id}" style="--c:${col(x)}"><i></i>${esc(x.name)}</button>`).join("")}</div>`
-      :`<div class="form qaform">${f}<div class="acts"><button class="btn full" data-qsave>Add ${QA_KINDS.find(x=>x[0]===k)[1].toLowerCase()}</button></div></div>`}
-    <button class="lnk qafocus" data-qa="focus">⏱ Start the focus timer instead</button>`}
+      :`<div class="form qaform">${f}<div class="acts"><button class="btn full" data-qsave>Add ${QA_KINDS.find(x=>x[0]===k)[1].toLowerCase()}</button></div></div>`}`}
 function quickSave(){const f=document.querySelector(".qaform");if(!f)return;const v=n=>f.querySelector(`[name=${n}]`)?.value?.trim()||"",k=qaKind;
   if(k!=="les"&&!v("text")){f.querySelector("[name=text]").focus();return}
   const date=v("date")||todayIso,sj=v("s");let msg="";

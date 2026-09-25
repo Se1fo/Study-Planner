@@ -1246,3 +1246,35 @@ body:not([data-tabpos="bottom"]) .wrap{padding-bottom:calc(92px + env(safe-area-
 body[data-view="set"] .fab,body[data-view="search"] .fab,body[data-view="notif"] .fab,body[data-view="stats"] .fab{display:none}
 :root[data-style="luxe"] .fab{background:linear-gradient(160deg,var(--gold2),var(--gold));color:var(--goldink)}
 :root[data-accent] .fab{background:var(--accent);color:var(--accent-ink)}
+
+/* ==== v3.4.2: finishing the clean-up ==== */
+/* one-line tickets everywhere; their extra actions are in ⋯ */
+ul.tickets>li.tk .itrow:not(.amtrow):not(:has(.remedit)){display:none}
+/* Homework and Exams add through the floating + */
+#sHw>.addbar,#exForm{display:none!important}
+/* notifications: the whole alert is the button */
+.ncell.ntap{cursor:pointer}
+.ncell .chev{color:var(--muted);font-weight:700;font-size:1.1rem;padding:0 2px}
+.ncell.ntap:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+/* subject page: number on top, label under it, in every box */
+.sdsum>span,.sdsum>.sdpg{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;min-width:0;padding:8px 12px;line-height:1.2}
+.sdsum b{margin:0}
+.sdpg .pgin{width:3.6em;padding:2px 6px;font-size:1rem}
+.sdpg span{font-size:.85rem}
+/* grade form: name on its own row on phones */
+@media(max-width:520px){.gform2{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto}.gform2 #gName{grid-column:1/-1}}
+/* stats */
+.sttiles b{white-space:nowrap;font-size:clamp(.95rem,4.3vw,1.2rem)}
+.stempty{margin:10px 0 4px;color:var(--muted);font-size:.86rem}
+/* floating + gets out of the way while you scroll down */
+body.fabhide .fab{transform:translateY(140%);opacity:0;pointer-events:none}
+/* focus: pick what you're studying */
+.fpick{display:grid;gap:8px;justify-items:center;margin:4px 0 14px;max-width:420px}
+.fpick small{color:var(--muted);font-size:.82rem}
+.fpick>div{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.fpick button{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;font-size:.84rem;font-weight:600;border-radius:20px;padding:6px 12px;cursor:pointer}
+.fpick button i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.sdsum .sdpg span{background:none;border:0;padding:0;border-radius:0;color:var(--muted)}
+.sdsum>.sdpg{background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.ncell button.bt{border:0;background:none;padding:0;margin:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.ncell button.bt:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:6px}
