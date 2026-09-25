@@ -16,7 +16,13 @@ test("clean layout and smart search", async ({ browser, baseURL }) => {
 
   // timetable bar
   ok("bar says This week",(await p.textContent(".ttlabel b"))==="This week");
-  await p.click('.ttbar [data-wk="1"]');ok("next arrow -> Next week",(await p.textContent(".ttlabel b"))==="Next week");
+  ok("header has 3 buttons, + floats",(await p.locator("header .hbtns button").count())===3&&await p.isVisible("#fabTab"));
+  await p.click("#fabTab");ok("floating + opens quick add",await p.isVisible("#sheet"));await q(()=>closeSheet());await p.waitForTimeout(300);
+  ok("⋯ sits before the week, no arrows on phones",await q(()=>document.querySelector(".ttbar").firstElementChild.matches("[data-ttmenu]"))&&!(await p.isVisible('.ttbar [data-wk="1"]')));
+  ok("strip shows exactly this week",await q(()=>{const s=document.getElementById("strip");return [...s.querySelectorAll("button")].filter(b=>{const r=b.getBoundingClientRect(),o=s.getBoundingClientRect();return r.left>=o.left-1&&r.right<=o.right+1}).map(b=>b.dataset.selk).join()===DAY_ORDER.map(d=>iso(dateFor(0,d))).join()}));
+  await q(()=>{const s=document.getElementById("strip");s.scrollTo({left:s.scrollLeft+s.clientWidth+6})});await p.waitForTimeout(600);
+  ok("swiping the strip -> Next week",(await p.textContent(".ttlabel b"))==="Next week"&&await q(()=>week===1));
+  const k2=await q(()=>iso(dateFor(1,DAY_ORDER[2])));await p.click('#strip [data-selk="'+k2+'"]');ok("tap a day in that week",await q(k=>iso(dateFor(week,selDay))===k,k2));
   await p.click(".ttlabel");ok("tapping the label goes back to this week",await q(()=>week===0));
   await p.click('.ttbar [data-tview=month]');ok("month view from the bar",await p.isVisible("#monthView .mgrid")&&!(await p.isVisible("#weekView")));
   const m0=await p.textContent(".ttlabel b");await p.click('.ttbar [data-mnav="1"]');ok("month arrows change month",(await p.textContent(".ttlabel b"))!==m0);
@@ -24,6 +30,11 @@ test("clean layout and smart search", async ({ browser, baseURL }) => {
   await p.click("[data-ttmenu]");ok("menu has plan and review",await p.isVisible(".ttmenu [data-plan]")&&await p.isVisible(".ttmenu [data-review]"));
   await p.click(".day.sel .dayhead h2");await p.waitForTimeout(100);ok("menu closes on an outside tap",!(await p.isVisible(".ttmenu")));
 
+  // lesson menu: title first, then lessons & pages; no focus or tomorrow
+  await p.click('.day.sel li.tk.les[data-oid=t2] [data-menu]');
+  ok("lesson menu order",await q(()=>[...document.querySelectorAll(".day.sel li.tmenu button")].slice(0,2).map(b=>b.textContent.trim()).join("|")==="✎ Add title|✎ Lessons & pages"));
+  ok("no focus or tomorrow in the lesson menu",(await p.locator(".day.sel li.tmenu [data-focus],.day.sel li.tmenu [data-move]").count())===0);
+  await q(()=>{openMenu=null;render()});
   // day card
   ok("no shortcut row or next-up card",(await p.locator(".newl,#lStrip").count())===0);
   await p.click('.day.sel li.cls:has-text("English")');ok("tap a class -> its menu",await p.isVisible('.day.sel .clist [data-newl=eng]')&&await p.isVisible('.day.sel .clist [data-hwfor=eng]')&&await p.isVisible('.day.sel .clist [data-cledit]'));

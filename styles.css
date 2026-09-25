@@ -1223,3 +1223,26 @@ h3.grp,.grp,.dsec h3,.clsec h3,.sthead .grp,.tphead .grp{font-size:.74rem;font-w
 .todoseg button{flex:1 1 auto!important}
 :root[data-style="luxe"] header h1{font-size:clamp(1.2rem,5.6vw,1.75rem)}
 .sthead span b{color:color-mix(in srgb,var(--arab),var(--ink) calc(var(--tmix)*1.7))}
+
+/* ==== v3.4.1 ==== */
+/* Week bar: ⋯ first, then the week; only the view switch on the right (arrows for months and big screens) */
+.ttmore{flex:none}
+.ttmenu{left:0;right:auto}
+.ttctl .ttarrow{display:none}
+.ttctl.month .ttarrow{display:grid}
+@media(min-width:900px){.ttctl .ttarrow{display:grid}}
+/* Day strip: one week per screen, swipe between weeks */
+.strip{scroll-snap-type:x mandatory;overscroll-behavior-x:contain;column-gap:6px;gap:6px;padding:2px 0 6px}
+.strip button{flex:0 0 calc((100% - 36px)/7);min-width:0}
+.strip button.wks{scroll-snap-align:start;scroll-snap-stop:always}
+.strip button.past:not(.sel){opacity:.72}
+/* Floating + button */
+.fab{position:fixed;right:max(16px,calc((100vw - 1100px)/2));bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:15;width:56px;height:56px;border-radius:50%;border:0;display:grid;place-items:center;
+  background:var(--ink);color:var(--bg);box-shadow:0 8px 22px rgba(0,0,0,.25);cursor:pointer;transition:transform .14s cubic-bezier(.2,.8,.2,1),opacity .2s}
+.fab:active{transform:scale(.92)}
+body[data-tabpos="bottom"] .fab{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+body[data-tabpos="bottom"] .wrap{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+body:not([data-tabpos="bottom"]) .wrap{padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+body[data-view="set"] .fab,body[data-view="search"] .fab,body[data-view="notif"] .fab,body[data-view="stats"] .fab{display:none}
+:root[data-style="luxe"] .fab{background:linear-gradient(160deg,var(--gold2),var(--gold));color:var(--goldink)}
+:root[data-accent] .fab{background:var(--accent);color:var(--accent-ink)}
